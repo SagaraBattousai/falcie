@@ -1,0 +1,1 @@
+go build runtime/cgo: c:\go\pkg\tool\windows_amd64\cgo.exe: exit status 2
