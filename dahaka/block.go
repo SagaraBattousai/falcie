@@ -6,11 +6,12 @@ type Block interface {
 	Data() []byte     //But keep this to show additional data
 	Hash() []byte
 	Prevhash() []byte
-	//VV ??? ;)
-	GenerateHash(prevhash []byte) Block
+	//Or no args??
+	GenerateHash(prevhash []byte) []byte
 }
 
 type GenisisFactory[T Block] func() T
+type BlockFactory[T Block] func(block T, id uint32, prevhash []byte) T
 
 //Default Encoding's and Decodings's
 //Use Little endian encoding (Doesn't matter as long as encoded and decoded

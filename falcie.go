@@ -25,11 +25,13 @@ func main() {
 
 	//fmt.Printf("%+v\n", node)
 
-	a := dahaka.NewBlockchain(dahaka.CreateBasicBlockGenisis)
-	b := a.GetBlock(0)
-	fmt.Println(b)
-	a.AddBlock(b)
-	fmt.Println(a.GetBlock(1))
-	fmt.Printf("\n\n\n%+v\n\n", a.Head)
+	a := dahaka.NewBlockchain(dahaka.CreateBasicBlockGenisis, dahaka.BBFactory)
+	//b := a.GetBlock(0)
+	a.AddBlock(dahaka.NewBasicBlock([]byte{0xAB}))
+	a.AddBlock(dahaka.NewBasicBlock([]byte{0xAB, 0xCD}))
+
+	fmt.Println(a.Validate())
+	var f = func(b dahaka.BasicBlock) { fmt.Println(b) }
+	a.ForEach(f)
 
 }
