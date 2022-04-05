@@ -15,19 +15,24 @@ const (
 
 //Unrolled Linked List
 type Blockchain[T Block] struct {
-	Head *Chain[T]
-	Tail *Chain[T]
+	head *Chain[T]
+	tail *Chain[T]
 	//Latest ? i.e. reference to the latest
 	factory BlockFactory[T]
 }
 
-//Do make slice so range works, then no need for element count but ...
-//I like arrays more
 //Unrolled Linked List Node
 type Chain[T Block] struct {
 	next         *Chain[T]
 	elementCount int
 	elements     [CHAIN_MAX_ELEMENTS]T
+}
+
+func (bc *Blockchain[T]) Head() *Chain[T] {
+	return bc.head
+}
+func (bc *Blockchain[T]) Tail() *Chain[T] {
+	return bc.tail
 }
 
 func NewBlockchain[T Block](genisis GenisisFactory[T],
@@ -36,26 +41,26 @@ func NewBlockchain[T Block](genisis GenisisFactory[T],
 	chain := new(Chain[T])
 	chain.elements[0] = genisis()
 	chain.elementCount = 1
-	return &Blockchain[T]{Head: chain, Tail: chain, factory: factory}
+	return &Blockchain[T]{head: chain, tail: chain, factory: factory}
 }
 
 func (bc *Blockchain[T]) addNewChain() *Chain[T] {
 	newChain := new(Chain[T])
 
 	//Set last chain's next (must currently be nil) to point to newChain
-	prevChain := bc.Tail
+	prevChain := bc.tail
 	prevChain.next = newChain
 
-	//Set Blockchain's Tail to be newChain
-	bc.Tail = newChain
+	//Set Blockchain's tail to be newChain
+	bc.tail = newChain
 
-	//assert: returned value == bc.Tail
+	//assert: returned value == bc.tail
 	return newChain
 }
 
 //TODO: Stick on mutex's?
 func (bc *Blockchain[T]) AddBlock(block T) {
-	chain := bc.Tail
+	chain := bc.tail
 	prevBlock := chain.elements[chain.elementCount-1]
 	prevhash := prevBlock.Hash()
 	nextId := prevBlock.Id() + 1
@@ -78,7 +83,7 @@ func (bc *Blockchain[T]) AddBlock(block T) {
 func (bc *Blockchain[T]) GetBlock(index int) T {
 	nodeCount := index / CHAIN_MAX_ELEMENTS
 	elemIndex := index % CHAIN_MAX_ELEMENTS
-	node := bc.Head
+	node := bc.head
 	for i := 0; i < nodeCount; i++ {
 		node = node.next
 	}
@@ -88,7 +93,7 @@ func (bc *Blockchain[T]) GetBlock(index int) T {
 func (bc *Blockchain[T]) Walk(ch chan T) {
 	//could make chain but would then would use recursion
 	var walk = func(bc *Blockchain[T], ch chan T) {
-		chain := bc.Head
+		chain := bc.head
 		for chain != nil {
 			//_, block := range chain.elements {
 			for i := 0; i < chain.elementCount; i++ {
@@ -111,7 +116,7 @@ func (bc *Blockchain[T]) ForEach(f func(T)) {
 }
 
 func (bc *Blockchain[T]) Validate() bool {
-	chain := bc.Head
+	chain := bc.head
 	//var i int = 0
 	var prevBlock, currBlock T
 
