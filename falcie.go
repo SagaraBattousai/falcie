@@ -33,5 +33,9 @@ func main() {
 	fmt.Println(a.Validate())
 	var f = func(b dahaka.BasicBlock) { fmt.Println(b) }
 	a.ForEach(f)
+	var x float32 = 0.1234565432
+	b := dahaka.EncodeFloat32(x)
+	y := dahaka.DecodeFloat32[float32](b)
+	fmt.Printf("%f\n%b\n%f\n\n", x, b, y)
 
 }

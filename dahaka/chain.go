@@ -2,12 +2,6 @@ package dahaka
 
 import "bytes"
 
-/*
- * Must use generics so that oen cannot mix block concrete types on the chain
- * if it were just Blocks than a SimpleBlock and RandomBlock type could coexist
- * on the same Blockchain.
- */
-
 const (
 	//For now; rather arbitary, may make 16. Keep y = 2^x
 	CHAIN_MAX_ELEMENTS = 32
@@ -18,7 +12,8 @@ type Blockchain[T Block] struct {
 	head *Chain[T]
 	tail *Chain[T]
 	//Latest ? i.e. reference to the latest
-	factory BlockFactory[T]
+	factory    BlockFactory[T]
+	difficulty uint32
 }
 
 //Unrolled Linked List Node
@@ -41,7 +36,8 @@ func NewBlockchain[T Block](genisis GenisisFactory[T],
 	chain := new(Chain[T])
 	chain.elements[0] = genisis()
 	chain.elementCount = 1
-	return &Blockchain[T]{head: chain, tail: chain, factory: factory}
+	return &Blockchain[T]{head: chain, tail: chain,
+		factory: factory, difficulty: 1}
 }
 
 func (bc *Blockchain[T]) addNewChain() *Chain[T] {
@@ -64,14 +60,12 @@ func (bc *Blockchain[T]) AddBlock(block T) {
 	prevBlock := chain.elements[chain.elementCount-1]
 	prevhash := prevBlock.Hash()
 	nextId := prevBlock.Id() + 1
-	//block = (block.GenerateHash(prevhash)).(T) //Why type assert with generics?
-	block = bc.factory(block, nextId, prevhash)
 
-	//index := chain.elementCount
+	block = bc.factory(block, nextId, prevhash)
+	block = (block.Mine(bc.difficulty)).(T)
 
 	if chain.elementCount == CHAIN_MAX_ELEMENTS {
 		chain = bc.addNewChain()
-		//index := 0
 	}
 
 	chain.elements[chain.elementCount] = block
@@ -126,9 +120,9 @@ func (bc *Blockchain[T]) Validate() bool {
 			currBlock = chain.elements[i+1]
 			//Get the prevhash stored in current here to avoid calling twice
 			currPrevHash := currBlock.Prevhash()
-			if !(bytes.Compare(currBlock.Hash(),
-				currBlock.GenerateHash(currPrevHash)) == 0 &&
-				bytes.Compare(prevBlock.Hash(), currPrevHash) == 0) {
+			if !(bytes.Equal(currBlock.Hash(),
+				currBlock.GenerateHash(currPrevHash)) &&
+				bytes.Equal(prevBlock.Hash(), currPrevHash)) {
 				return false
 			}
 

@@ -1,18 +1,22 @@
 package dahaka
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"time"
+
+	"github.com/sagarabattousai/falcie/cactuar"
 )
 
 const (
 	BASIC_BLOCK_PRINTF = "{\n" +
 		"\tID: #%d\n" +
-		"\tTimestamp: %d/%d/%d__%d:%d:%d\n" +
-		"\tData: %s\n" +
+		"\tTimestamp: %d/%d/%d__%d:%d:%d-%d\n" +
+		"\tData:  %s\n" +
 		"\tHash:  %X\n" +
 		"\tPHash: %X\n" +
+		"\tNonce: %d\n" +
 		"}"
 )
 
@@ -23,15 +27,25 @@ type BasicBlock struct {
 	data      []byte //Ummm, isnt this already here?
 	hash      []byte //I think I want these to be sized
 	prevhash  []byte
+	nonce     uint64 //Might be too big etc Also may not want like this ?
+}
+
+func (b BasicBlock) Mine(difficulty uint32) Block {
+	zeros := make([]byte, difficulty) // auto zero'd :D
+	for !(bytes.HasPrefix(b.hash, zeros)) {
+		b.nonce += 1
+		b.hash = b.GenerateHash(b.prevhash)
+	}
+	return b
 }
 
 func NewBasicBlock(data []byte) BasicBlock {
-	return BasicBlock{timestamp: time.Now().Unix(), data: data}
+	return BasicBlock{timestamp: time.Now().UnixMilli(), data: data}
 }
 
 func CreateBasicBlockGenisis() BasicBlock {
 	genisis := BasicBlock{id: 0,
-		timestamp: time.Now().Unix(),
+		timestamp: time.Now().UnixMilli(),
 		data:      []byte{},
 		prevhash:  []byte{},
 	}
@@ -48,22 +62,25 @@ func BBFactory(block BasicBlock, id uint32, prevhash []byte) BasicBlock {
 }
 
 func (b BasicBlock) String() string {
-	t := time.Unix(b.timestamp, 0)
+	t := time.UnixMilli(b.timestamp)
 	year, month, day := t.Date()
 	hour, minute, second := t.Clock()
+	milli := t.Nanosecond() / 1e6
 	return fmt.Sprintf(BASIC_BLOCK_PRINTF+"\n",
 		b.id,
 		day, month, year,
-		hour, minute, second,
-		b.data, b.hash, b.prevhash)
+		hour, minute, second, milli,
+		b.data, b.hash, b.prevhash,
+		b.nonce)
 }
 
 func (b BasicBlock) GenerateHash(prevhash []byte) []byte {
 	//b.prevhash = prevhash
 	hash := sha256.New()
 
-	encodedId := EncodeId(b.id)
-	encodedTimestamp := EncodeTimestamp(b.timestamp)
+	encodedId := cactuar.Encode32(b.id)
+	encodedTimestamp := cactuar.Encode64(b.timestamp)
+	encodedNonce := cactuar.Encode64(b.nonce)
 
 	hash.Write(encodedId[:])
 	hash.Write(encodedTimestamp[:])
@@ -71,6 +88,7 @@ func (b BasicBlock) GenerateHash(prevhash []byte) []byte {
 	// hash.Write(b.prevhash)
 	hash.Write(prevhash)
 	// b.hash = hash.Sum(nil)
+	hash.Write(encodedNonce[:])
 	return hash.Sum(nil)
 	//return b
 }
