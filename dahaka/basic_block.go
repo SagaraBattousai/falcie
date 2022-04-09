@@ -30,12 +30,20 @@ type BasicBlock struct {
 	nonce     uint64 //Might be too big etc Also may not want like this ?
 }
 
-func (b BasicBlock) Mine(difficulty uint32) Block {
-	zeros := make([]byte, difficulty) // auto zero'd :D
-	for !(bytes.HasPrefix(b.hash, zeros)) {
+func (b BasicBlock) Mine(difficulty cactuar.Cactuar) Block {
+	difficultyArray := difficulty.As256Bit()
+	//Debug:
+	var i int = 0
+	fmt.Println()
+
+	for bytes.Compare(b.hash, difficultyArray[:]) != -1 {
 		b.nonce += 1
 		b.hash = b.GenerateHash(b.prevhash)
+		//Debug:
+		i++
+		fmt.Printf("%X,\t %x,\t %d\r", b.hash, difficultyArray, i)
 	}
+	fmt.Println()
 	return b
 }
 

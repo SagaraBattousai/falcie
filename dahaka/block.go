@@ -1,5 +1,7 @@
 package dahaka
 
+import "github.com/sagarabattousai/falcie/cactuar"
+
 type Block interface {
 	Id() uint32
 	Timestamp() int64 //aka the result of -> time.Time.Unix
@@ -9,7 +11,8 @@ type Block interface {
 	//Or no args??
 	GenerateHash(prevhash []byte) []byte
 	//PoW Branch
-	Mine(difficulty uint32) Block //I hate interface func that returns itself
+	//I hate interface func that returns itself
+	Mine(difficulty cactuar.Cactuar) Block
 }
 
 type GenisisFactory[T Block] func() T

@@ -1,10 +1,17 @@
 package dahaka
 
-import "bytes"
+import (
+	"bytes"
+
+	"github.com/sagarabattousai/falcie/cactuar"
+)
 
 const (
-	//For now; rather arbitary, may make 16. Keep y = 2^x
-	CHAIN_MAX_ELEMENTS = 32
+	//For now; rather arbitary, may make 16. Keep y = 2^x ?
+	//To simplify things chain elems is also number of block before
+	//difficulty is recalculated.
+	CHAIN_MAX_ELEMENTS = 32 //may make 1024
+	//32 = 48 minutes, 1024 = 25.6
 )
 
 //Unrolled Linked List
@@ -13,7 +20,7 @@ type Blockchain[T Block] struct {
 	tail *Chain[T]
 	//Latest ? i.e. reference to the latest
 	factory    BlockFactory[T]
-	difficulty uint32
+	difficulty cactuar.Cactuar
 }
 
 //Unrolled Linked List Node
@@ -37,7 +44,7 @@ func NewBlockchain[T Block](genisis GenisisFactory[T],
 	chain.elements[0] = genisis()
 	chain.elementCount = 1
 	return &Blockchain[T]{head: chain, tail: chain,
-		factory: factory, difficulty: 1}
+		factory: factory, difficulty: cactuar.BaseDifficulty}
 }
 
 func (bc *Blockchain[T]) addNewChain() *Chain[T] {
@@ -55,11 +62,20 @@ func (bc *Blockchain[T]) addNewChain() *Chain[T] {
 }
 
 //TODO: Stick on mutex's?
+//I think this code was wrong!
 func (bc *Blockchain[T]) AddBlock(block T) {
 	chain := bc.tail
 	prevBlock := chain.elements[chain.elementCount-1]
 	prevhash := prevBlock.Hash()
 	nextId := prevBlock.Id() + 1
+
+	if (nextId % CHAIN_MAX_ELEMENTS) == 0 {
+		//Add new chain
+		chain = bc.addNewChain()
+
+		//Update Difficulty
+
+	}
 
 	block = bc.factory(block, nextId, prevhash)
 	block = (block.Mine(bc.difficulty)).(T)
@@ -70,6 +86,7 @@ func (bc *Blockchain[T]) AddBlock(block T) {
 
 	chain.elements[chain.elementCount] = block
 	chain.elementCount++
+
 }
 
 //Also slow af if used many times
