@@ -3,16 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/sagarabattousai/falcie/dahaka"
+	"github.com/sagarabattousai/falcie/pulse/dahaka"
 )
-
-/*"io"
-"os"
-"strings"
-
-"github.com/sagarabattousai/falcie/menrva"*/
-
-//"github.com/sagarabattousai/bits/bitstring"
 
 func main() {
 	a := dahaka.NewBlockchain(dahaka.CreateBasicBlockGenisis, dahaka.BBFactory)

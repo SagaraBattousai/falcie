@@ -3,7 +3,7 @@ package dahaka
 import (
 	"bytes"
 
-	"github.com/sagarabattousai/falcie/cactuar"
+	"github.com/sagarabattousai/falcie/pulse/cactuar"
 )
 
 const (

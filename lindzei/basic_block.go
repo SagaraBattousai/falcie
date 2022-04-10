@@ -1,16 +1,15 @@
-package dahaka
+package lindzei
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"time"
 
-	"github.com/sagarabattousai/falcie/cactuar"
+	"github.com/sagarabattousai/falcie/pulse/cactuar"
 )
 
 const (
-	BASIC_BLOCK_PRINTF = "{\n" +
+	basicBlockPrintf = "{\n" +
 		"\tID: #%d\n" +
 		"\tTimestamp: %d/%d/%d__%d:%d:%d-%d\n" +
 		"\tData:  %s\n" +
@@ -23,28 +22,11 @@ const (
 //May not need to export (if so chain can be made non generic)
 type BasicBlock struct {
 	id        uint32
-	timestamp int64  //may need to breakdown even smaller
+	timestamp int64
 	data      []byte //Ummm, isnt this already here?
 	hash      []byte //I think I want these to be sized
 	prevhash  []byte
 	nonce     uint64 //Might be too big etc Also may not want like this ?
-}
-
-func (b BasicBlock) Mine(difficulty cactuar.Cactuar) Block {
-	difficultyArray := difficulty.As256Bit()
-	//Debug:
-	var i int = 0
-	fmt.Println()
-
-	for bytes.Compare(b.hash, difficultyArray[:]) != -1 {
-		b.nonce += 1
-		b.hash = b.GenerateHash(b.prevhash)
-		//Debug:
-		i++
-		fmt.Printf("%X,\t %x,\t %d\r", b.hash, difficultyArray, i)
-	}
-	fmt.Println()
-	return b
 }
 
 func NewBasicBlock(data []byte) BasicBlock {
@@ -74,7 +56,7 @@ func (b BasicBlock) String() string {
 	year, month, day := t.Date()
 	hour, minute, second := t.Clock()
 	milli := t.Nanosecond() / 1e6
-	return fmt.Sprintf(BASIC_BLOCK_PRINTF+"\n",
+	return fmt.Sprintf(basicBlockPrintf+"\n",
 		b.id,
 		day, month, year,
 		hour, minute, second, milli,
