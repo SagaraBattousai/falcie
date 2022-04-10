@@ -2,8 +2,6 @@ package dahaka
 
 import (
 	"bytes"
-
-	"github.com/sagarabattousai/falcie/pulse/cactuar"
 )
 
 const (
@@ -15,40 +13,35 @@ const (
 )
 
 //Unrolled Linked List
-type Blockchain[T Block] struct {
-	head *Chain[T]
-	tail *Chain[T]
-	//Latest ? i.e. reference to the latest
-	factory    BlockFactory[T]
-	difficulty cactuar.Cactuar
+type Blockchain struct {
+	head *Chain
+	tail *Chain
 }
 
 //Unrolled Linked List Node
-type Chain[T Block] struct {
-	next         *Chain[T]
+type Chain struct {
+	next         *Chain
 	elementCount int
-	elements     [CHAIN_MAX_ELEMENTS]T
+	elements     [CHAIN_MAX_ELEMENTS]*FederatedBlock
 }
 
-func (bc *Blockchain[T]) Head() *Chain[T] {
+func (bc *Blockchain) Head() *Chain {
 	return bc.head
 }
-func (bc *Blockchain[T]) Tail() *Chain[T] {
+func (bc *Blockchain) Tail() *Chain {
 	return bc.tail
 }
 
-func NewBlockchain[T Block](genisis GenisisFactory[T],
-	factory BlockFactory[T]) *Blockchain[T] {
+func NewBlockchain(genisis *FederatedBlock) *Blockchain {
 
-	chain := new(Chain[T])
-	chain.elements[0] = genisis()
+	chain := new(Chain)
+	chain.elements[0] = genisis
 	chain.elementCount = 1
-	return &Blockchain[T]{head: chain, tail: chain,
-		factory: factory, difficulty: cactuar.BaseDifficulty}
+	return &Blockchain{head: chain, tail: chain}
 }
 
-func (bc *Blockchain[T]) addNewChain() *Chain[T] {
-	newChain := new(Chain[T])
+func (bc *Blockchain) addNewChain() *Chain {
+	newChain := new(Chain)
 
 	//Set last chain's next (must currently be nil) to point to newChain
 	prevChain := bc.tail
@@ -63,13 +56,11 @@ func (bc *Blockchain[T]) addNewChain() *Chain[T] {
 
 //TODO: Stick on mutex's?
 //I think this code was wrong!
-func (bc *Blockchain[T]) AddBlock(block T) {
+func (bc *Blockchain) AddBlock(block *FederatedBlock) {
 	chain := bc.tail
-	prevBlock := chain.elements[chain.elementCount-1]
-	prevhash := prevBlock.Hash()
-	nextId := prevBlock.Id() + 1
+	//	prevHeader := chain.elements[chain.elementCount-1].Header()
 
-	if (nextId % CHAIN_MAX_ELEMENTS) == 0 {
+	if (chain.elementCount % CHAIN_MAX_ELEMENTS) == 0 {
 		//Add new chain
 		chain = bc.addNewChain()
 
@@ -77,21 +68,18 @@ func (bc *Blockchain[T]) AddBlock(block T) {
 
 	}
 
-	block = bc.factory(block, nextId, prevhash)
-	block = (block.Mine(bc.difficulty)).(T)
+	block.Mine()
 
 	if chain.elementCount == CHAIN_MAX_ELEMENTS {
 		chain = bc.addNewChain()
 	}
-
 	chain.elements[chain.elementCount] = block
 	chain.elementCount++
-
 }
 
 //Also slow af if used many times
 //Are we alowed to get arbitary Block? thought we usually only need to rec/iter?
-func (bc *Blockchain[T]) GetBlock(index int) T {
+func (bc *Blockchain) GetBlock(index int) *FederatedBlock {
 	nodeCount := index / CHAIN_MAX_ELEMENTS
 	elemIndex := index % CHAIN_MAX_ELEMENTS
 	node := bc.head
@@ -101,9 +89,9 @@ func (bc *Blockchain[T]) GetBlock(index int) T {
 	return node.elements[elemIndex]
 }
 
-func (bc *Blockchain[T]) Walk(ch chan T) {
+func (bc *Blockchain) Walk(ch chan *FederatedBlock) {
 	//could make chain but would then would use recursion
-	var walk = func(bc *Blockchain[T], ch chan T) {
+	var walk = func(bc *Blockchain, ch chan *FederatedBlock) {
 		chain := bc.head
 		for chain != nil {
 			//_, block := range chain.elements {
@@ -117,8 +105,8 @@ func (bc *Blockchain[T]) Walk(ch chan T) {
 	close(ch)
 }
 
-func (bc *Blockchain[T]) ForEach(f func(T)) {
-	ch := make(chan T, 32)
+func (bc *Blockchain) ForEach(f func(*FederatedBlock)) {
+	ch := make(chan *FederatedBlock, 32)
 	go bc.Walk(ch)
 
 	for x := range ch {
@@ -126,24 +114,26 @@ func (bc *Blockchain[T]) ForEach(f func(T)) {
 	}
 }
 
-func (bc *Blockchain[T]) Validate() bool {
+func (bc *Blockchain) Validate() bool {
 	chain := bc.head
-	//var i int = 0
-	var prevBlock, currBlock T
+	var prevBlock, currBlock *FederatedBlock
+
+	var i int = 1 //In order to skip genisis in first chain
 
 	for chain != nil {
-		for i := 0; i < chain.elementCount-1; i++ {
+		for i < chain.elementCount-1 {
 			prevBlock = chain.elements[i]
 			currBlock = chain.elements[i+1]
-			//Get the prevhash stored in current here to avoid calling twice
-			currPrevHash := currBlock.Prevhash()
-			if !(bytes.Equal(currBlock.Hash(),
-				currBlock.GenerateHash(currPrevHash)) &&
-				bytes.Equal(prevBlock.Hash(), currPrevHash)) {
+
+			if !(bytes.Equal(prevBlock.Hash()[:],
+				currBlock.BlockHeader.Prevhash[:]) &&
+				bytes.Compare(currBlock.Hash()[:],
+					currBlock.BlockHeader.Target.As256Bit()[:]) == -1) {
 				return false
 			}
-
+			i++
 		}
+		i = 0
 		chain = chain.next
 	}
 	return true

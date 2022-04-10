@@ -1,47 +1,77 @@
 package dahaka
 
-type Block interface {
-	Header() BlockHeader
-}
+import (
+	"bytes"
+	"crypto/sha256"
+	"fmt"
+	"time"
 
-type BlockHeader interface {
-	//The Id of the block on the Blockchain (Also called height)
-	Id() uint32
+	"github.com/sagarabattousai/falcie/pulse/cactuar"
+)
 
+const (
+	blockHeaderPrintf = "{\n" +
+		"\tVersion: %X\n" +
+		"\tTimestamp: %d/%d/%d__%d:%d:%d-%d\n" +
+		"\tPrevious Hash:       %X\n" +
+		"\tTransactional Hash:  %X\n" +
+		"\tTarget:              %X\n" +
+		"\tNonce:               %d\n" +
+		"}"
+)
+
+type BlockHeader struct {
+	//Potentially useful to identify issues in previous software
+	Version uint32
 	//The timestamp in milliseconds since the Unix Epoch
 	//(good for ~ 292 Million years)
-	Timestamp() int64
-
-	//Version uint32 //Unused for now
-
-	Prevhash() [32]byte
-
-	Transhash() [32]byte
-
-	Target() uint32
-
-	Nonce() uint32 //Could go back to uint64 but since time etc can change no need
-
-	//Or no args??
-	//GenerateHash(prevhash []byte) []byte
+	Timestamp int64
+	Prevhash  [32]byte
+	Transhash [32]byte
+	Target    cactuar.Cactuar
+	//Could go back to uint64 but since time etc can change no need
+	Nonce uint32
 }
 
-/*
-func Mine[T Block](block T, difficulty cactuar.Cactuar) T {
-	difficultyArray := difficulty.As256Bit()
-	//Debug:
-	var i int = 0
-	fmt.Println()
+func (blockHeader *BlockHeader) Mine() {
 
-	for bytes.Compare(b.hash, difficultyArray[:]) != -1 {
-		b.nonce += 1
-		b.hash = b.GenerateHash(b.prevhash)
-		//Debug:
-		i++
-		fmt.Printf("%X,\t %x,\t %d\r", b.hash, difficultyArray, i)
+	//TODO: add error for invalid cactaur values
+	difficultyArray := blockHeader.Target.As256Bit()
+
+	headerHash := blockHeader.Hash()
+
+	for bytes.Compare(headerHash, difficultyArray[:]) != -1 {
+		blockHeader.Nonce += 1
+		headerHash = blockHeader.Hash()
 	}
-	fmt.Println()
-
-	return b
 }
-*/
+
+func (blockHeader *BlockHeader) Hash() []byte {
+	hash := sha256.New()
+	versionBytes := cactuar.Encode32(blockHeader.Version)
+	timestampBytes := cactuar.Encode64(blockHeader.Timestamp)
+	targetBytes := cactuar.Encode32(blockHeader.Target)
+	nonceBytes := cactuar.Encode32(blockHeader.Nonce)
+
+	hash.Write(versionBytes[:])
+	hash.Write(timestampBytes[:])
+	hash.Write(blockHeader.Prevhash[:])
+	hash.Write(blockHeader.Transhash[:])
+	hash.Write(targetBytes[:])
+	hash.Write(nonceBytes[:])
+
+	return hash.Sum(nil)
+}
+
+func (blockHeader *BlockHeader) String() string {
+	t := time.UnixMilli(blockHeader.Timestamp)
+	year, month, day := t.Date()
+	hour, minute, second := t.Clock()
+	milli := t.Nanosecond() / 1e6
+	return fmt.Sprintf(blockHeaderPrintf+"\n",
+		blockHeader.Version,
+		day, month, year,
+		hour, minute, second, milli,
+		blockHeader.Prevhash, blockHeader.Transhash, blockHeader.Target,
+		blockHeader.Nonce)
+}
