@@ -15,4 +15,6 @@ func main() {
 
 	a.ForEach(func(f *dahaka.FederatedBlock) { fmt.Println(*f) })
 
+	fmt.Println(a.Validate())
+
 }

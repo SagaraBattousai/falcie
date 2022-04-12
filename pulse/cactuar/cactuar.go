@@ -23,15 +23,6 @@ const (
 	//count to the length of the unrolled chain list which is of power 2
 )
 
-type Pair[A, B any] struct {
-	Fst A
-	Snd B
-}
-
-func (p Pair[A, B]) Split() (A, B) {
-	return p.Fst, p.Snd
-}
-
 type Cactuar uint32
 type Log2Cactuar float32
 

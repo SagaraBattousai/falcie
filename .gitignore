@@ -1,5 +1,6 @@
 # Vim Ignore
 *.swp
+vim_sessions/
 
 # visualStudios
 *.vs

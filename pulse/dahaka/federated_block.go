@@ -2,11 +2,13 @@ package dahaka
 
 import (
 	"time"
+
 	"github.com/sagarabattousai/falcie/pulse/cactuar"
 )
 
 const (
-	FederatedBlockId uint32 = 0x43616C6F
+	FederatedBlockId        uint32 = 0x43616C6F
+	FederatedBlockChainSize        = 32
 )
 
 type FederatedBlock struct {
@@ -23,9 +25,9 @@ func (_ *FederatedBlock) BlockTypeId() uint32 {
 func NewFederatedBlock(version uint32) *FederatedBlock {
 	timestamp := time.Now().UnixMilli()
 	blockHeader := &BlockHeader{Version: version,
-	Timestamp: timestamp,
-	Target: cactuar.BaseDifficulty,
-	Nonce: 0,
+		Timestamp: timestamp,
+		Target:    cactuar.BaseDifficulty,
+		Nonce:     0,
 	}
 	return &FederatedBlock{BlockHeader: blockHeader}
 }

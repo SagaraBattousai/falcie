@@ -26,8 +26,8 @@ type BlockHeader struct {
 	//The timestamp in milliseconds since the Unix Epoch
 	//(good for ~ 292 Million years)
 	Timestamp int64
-	Prevhash  [32]byte
-	Transhash [32]byte
+	Prevhash  [sha256.Size]byte
+	Transhash [sha256.Size]byte
 	Target    cactuar.Cactuar
 	//Could go back to uint64 but since time etc can change no need
 	Nonce uint32
@@ -40,14 +40,18 @@ func (blockHeader *BlockHeader) Mine() {
 
 	headerHash := blockHeader.Hash()
 
-	for bytes.Compare(headerHash, difficultyArray[:]) != -1 {
+	for bytes.Compare(headerHash[:], difficultyArray[:]) != -1 {
 		blockHeader.Nonce += 1
 		headerHash = blockHeader.Hash()
 	}
+
 }
 
-func (blockHeader *BlockHeader) Hash() []byte {
+//Double 256Hash
+func (blockHeader *BlockHeader) Hash() [sha256.Size]byte {
 	hash := sha256.New()
+
+	//Encode not casting using unsafe ptr as MUST be little endian
 	versionBytes := cactuar.Encode32(blockHeader.Version)
 	timestampBytes := cactuar.Encode64(blockHeader.Timestamp)
 	targetBytes := cactuar.Encode32(blockHeader.Target)
@@ -60,7 +64,7 @@ func (blockHeader *BlockHeader) Hash() []byte {
 	hash.Write(targetBytes[:])
 	hash.Write(nonceBytes[:])
 
-	return hash.Sum(nil)
+	return sha256.Sum256(hash.Sum(nil))
 }
 
 func (blockHeader *BlockHeader) String() string {
