@@ -7,19 +7,19 @@ import (
 type TransactionPool struct {
 	*OrderedLinkedList[*PooledTransaction]
 	//Could go up to 64 or store as varInt which we'll convert to anyway
-	transactionCount uint32
+	TransactionCount uint32
 }
 
 func NewTransactionPool() *TransactionPool {
 	oll := new(OrderedLinkedList[*PooledTransaction])
-	return &TransactionPool{OrderedLinkedList: oll, transactionCount: 0}
+	return &TransactionPool{OrderedLinkedList: oll, TransactionCount: 0}
 }
 
 func (transactionPool *TransactionPool) AddTransaction(t *Transaction) {
 	hash := t.Hash()
 	pooledTransaction := &PooledTransaction{hash: hash, transaction: t}
 	transactionPool.OrderedLinkedList.Add(pooledTransaction)
-	transactionPool.transactionCount++
+	transactionPool.TransactionCount++
 }
 
 func (transactionPool *TransactionPool) MerkelHash() [sha256.Size]byte {
@@ -28,7 +28,8 @@ func (transactionPool *TransactionPool) MerkelHash() [sha256.Size]byte {
 		return [sha256.Size]byte{}
 	}
 
-	hashCount := transactionPool.transactionCount
+	hashCount := transactionPool.TransactionCount
+
 	//+1 incase hashcount is odd
 	merkelPool := make([][sha256.Size]byte, hashCount, hashCount+1)
 
@@ -45,7 +46,7 @@ func (transactionPool *TransactionPool) MerkelHash() [sha256.Size]byte {
 	var inIndex uint32
 	var outIndex uint32
 
-	//Will always be non-zero even
+	//This first assignment will always be non-zero even
 	var lastRowCount uint32 = uint32(len(merkelPool))
 	var rowCount uint32 = lastRowCount >> 1
 

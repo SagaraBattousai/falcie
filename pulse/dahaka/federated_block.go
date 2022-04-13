@@ -6,16 +6,22 @@ import (
 	"github.com/sagarabattousai/falcie/pulse/cactuar"
 )
 
+//TODO: Stop using secp256r1 and use the k1 version bitcoin uses
+//when you A) Understand it, eliptical curves and why bitcoin chose it
+//and B) how to implement it myself
+
 const (
 	FederatedBlockId        uint32 = 0x43616C6F
 	FederatedBlockChainSize        = 32
+	//TODO: This is temp
+	FederatedBlockMiningReward int32 = 37
 )
 
 type FederatedBlock struct {
 	//Blocksize uint32
 	*BlockHeader
 	//transactionCounter varint
-	//transactions collection_of_transaction
+	*TransactionPool
 }
 
 func (_ *FederatedBlock) BlockTypeId() uint32 {
@@ -29,7 +35,8 @@ func NewFederatedBlock(version uint32) *FederatedBlock {
 		Target:    cactuar.BaseDifficulty,
 		Nonce:     0,
 	}
-	return &FederatedBlock{BlockHeader: blockHeader}
+	return &FederatedBlock{BlockHeader: blockHeader,
+		TransactionPool: NewTransactionPool()}
 }
 
 func GenisisFederatedBlock() *FederatedBlock {

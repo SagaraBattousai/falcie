@@ -17,18 +17,45 @@ const (
 )
 
 type Transaction struct {
-	from   [ripemd160.Size]byte
-	to     [ripemd160.Size]byte
-	amount int32
+	from      [ripemd160.Size]byte
+	to        [ripemd160.Size]byte
+	amount    int32
+	signature []byte
 }
 
 func NewTransaction(from, to [ripemd160.Size]byte, amount int32) *Transaction {
 	return &Transaction{from: from, to: to, amount: amount}
 }
 
+//privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+/*
+func (transaction *Transaction) Sign(privateKey *PrivateKey) {
+	if privateKey
+	sig, err := ecdsa.SignASN1(rand.Reader, privateKey, hash[:])
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("signature: %x\n", sig)
+}
+*/
 //RIPEMD160 of SHA256 Hash
 //SHA256 of SHA256 Hash
 func (transaction *Transaction) Hash() [sha256.Size]byte {
+	hash := sha256.New()
+
+	//Encode not casting using unsafe ptr as MUST be little endian
+	amountBytes := cactuar.Encode32(transaction.amount)
+
+	hash.Write(transaction.from[:])
+	hash.Write(transaction.to[:])
+	hash.Write(amountBytes[:])
+	hash.Write(transaction.signature)
+
+	return sha256.Sum256(hash.Sum(nil))
+
+}
+
+func (transaction *Transaction) subHashToSign() [sha256.Size]byte {
 	hash := sha256.New()
 
 	//Encode not casting using unsafe ptr as MUST be little endian
