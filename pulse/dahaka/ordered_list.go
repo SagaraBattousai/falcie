@@ -3,6 +3,7 @@ package dahaka
 //Wish It could be Generic so I could assert that both
 //orderables have the same base type
 //Fortunatly I can do just that in the datastructure that uses this!
+//But each implementation still has to do the checks :(
 type Orderable interface {
 	Equal(other Orderable) bool
 	LessThan(other Orderable) bool

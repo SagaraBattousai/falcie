@@ -2,15 +2,28 @@ package dahaka
 
 import (
 	"crypto/sha256"
+	"fmt"
 
 	"github.com/sagarabattousai/falcie/pulse/cactuar"
 	"golang.org/x/crypto/ripemd160"
+)
+
+const (
+	transactionPrintf = "{\n" +
+		"\tFrom Address: %X\n" +
+		"\tTo Address:   %X\n" +
+		"\tAmount:       %d\n" +
+		"}"
 )
 
 type Transaction struct {
 	from   [ripemd160.Size]byte
 	to     [ripemd160.Size]byte
 	amount int32
+}
+
+func NewTransaction(from, to [ripemd160.Size]byte, amount int32) *Transaction {
+	return &Transaction{from: from, to: to, amount: amount}
 }
 
 //RIPEMD160 of SHA256 Hash
@@ -39,4 +52,11 @@ func (t *Transaction) To() [20]byte {
 
 func (t *Transaction) Amount() int32 {
 	return t.amount
+}
+
+func (transaction *Transaction) String() string {
+	return fmt.Sprintf(transactionPrintf+"\n",
+		transaction.from,
+		transaction.to,
+		transaction.amount)
 }
