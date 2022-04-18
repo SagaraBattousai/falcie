@@ -1,4 +1,4 @@
-
+find_package(OpenSSL 3)
 set(src_files "matrix.c")
 file(GLOB public_headder_files "${INCLUDE_ROOT}/etro/*.h")
 file(GLOB private_headder_files *.h)
@@ -15,4 +15,7 @@ endif()
 
 target_include_directories(etro PUBLIC ${INCLUDE_ROOT})
 
+add_executable(buh main.c "list.cpp" ${public_headder_files})
+target_include_directories(buh PUBLIC ${INCLUDE_ROOT})
 
+#target_link_libraries(buh etro)
