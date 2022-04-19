@@ -9,6 +9,26 @@ type Blockchain struct {
 	pool *TransactionPool
 }
 
+func calculateGlobalUpdate(block *FederatedBlock) {
+	acc := 0
+	variableCount := len(block.LocalUpdates[0].Fst)
+	gu := make([]float32, variableCount)
+	var lu []float32
+	for _, v := range block.LocalUpdates {
+		acc += v.Snd
+		lu = v.Fst
+		for j, _ := range gu {
+			gu[j] += float32(v.Snd) * lu[j]
+		}
+	}
+
+	for j, _ := range gu {
+		gu[j] /= float32(acc)
+	}
+
+	block.GlobalUpdate = gu
+}
+
 func NewBlockchain(genisis *FederatedBlock) *Blockchain {
 	chain := NewChain[*FederatedBlock](FederatedBlockChainSize)
 	chain.Add(genisis)
@@ -22,6 +42,7 @@ func (blockchain *Blockchain) AddBlock(block *FederatedBlock) {
 
 	//TODO:Update Difficulty
 
+	calculateGlobalUpdate(block)
 	block.Mine()
 
 	//TODO:Set everything else required on block

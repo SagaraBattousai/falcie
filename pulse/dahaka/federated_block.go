@@ -21,7 +21,10 @@ type FederatedBlock struct {
 	//Blocksize uint32
 	*BlockHeader
 	//transactionCounter varint
-	*TransactionPool
+	//*TransactionPool
+	//TODO: Just for now VV
+	LocalUpdates []cactuar.Pair[[]float32, int]
+	GlobalUpdate []float32
 }
 
 func (_ *FederatedBlock) BlockTypeId() uint32 {
@@ -35,12 +38,20 @@ func NewFederatedBlock(version uint32) *FederatedBlock {
 		Target:    cactuar.BaseDifficulty,
 		Nonce:     0,
 	}
-	return &FederatedBlock{BlockHeader: blockHeader,
-		TransactionPool: NewTransactionPool()}
+	return &FederatedBlock{BlockHeader: blockHeader} //,
+	//TransactionPool: NewTransactionPool()}
 }
 
 func GenisisFederatedBlock() *FederatedBlock {
 	genisis := NewFederatedBlock(0x00000000)
 	genisis.Target = 0
 	return genisis
+}
+
+func (fb *FederatedBlock) AddLocalUpdate(update []float32, dataCount int) {
+	if fb.LocalUpdates == nil {
+		fb.LocalUpdates = make([]cactuar.Pair[[]float32, int], 0, 512)
+	}
+	fb.LocalUpdates = append(fb.LocalUpdates,
+		cactuar.Pair[[]float32, int]{update, dataCount})
 }

@@ -89,3 +89,8 @@ func (chain *Chain[T]) ForEach(f func(T)) {
 		f(x)
 	}
 }
+
+func (chain *Chain[T]) GetLast() T {
+	lastElems := chain.tail.elements
+	return lastElems[len(lastElems)-1]
+}
