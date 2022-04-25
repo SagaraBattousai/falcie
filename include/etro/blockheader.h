@@ -5,7 +5,7 @@
 #include <etro/types.h>
 /**
 * The header for  block on the chain which is hashed to provide PoW
-* 
+*
 */
 typedef struct block_header
 {
