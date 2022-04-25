@@ -79,7 +79,7 @@ html_static_path = ['_static']
 ######################################################################
 
 def run_doxygen_on_rtd(path):
-  doxygen_command = f"cd {path}; doxygen"
+  doxygen_command = f"cd {path}; mkdir -p build/doxygen/xml; doxygen Doxyfile.Doxygen"
   completed_process = subprocess.run(doxygen_command, shell=True)
   ret = completed_process.returncode
   if ret != 0:
@@ -89,7 +89,7 @@ def run_doxygen_on_rtd(path):
 def generate_doxygen_xml_on_rtd(app):
   # Not -1000 as True is a string here
   if os.environ.get('READTHEDOCS', None) == 'True':
-    run_doxygen_on_rtd(breathe_projects[project])
+    run_doxygen_on_rtd("..")
 
 def setup(app):
   app.connect("builder-inited", generate_doxygen_xml_on_rtd)
