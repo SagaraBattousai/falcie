@@ -1,8 +1,12 @@
 find_package(Doxygen REQUIRED)
 
-file(GLOB_RECURSE HEADER_FILES ${INCLUDE_ROOT}/*.h)
+set(DOXYFILE_ROOT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doxygen")
 
-# string(JOIN " " DOXYGEN_INPUT_FILES ${HEADER_FILES})
+file(GLOB_RECURSE HEADER_FILES
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  ${INCLUDE_ROOT}/*.h )
+
+string(JOIN " " DOXYGEN_INPUT_FILES ${HEADER_FILES})
 set(DOXYGEN_OUTPUT_DIRECTORY "build")
 set(DOXYGEN_GENERATE_XML YES)
 set(DOXYGEN_GENERATE_HTML NO)
@@ -10,8 +14,8 @@ set(DOXYGEN_GENERATE_LATEX NO)
 set(DOXYGEN_JAVADOC_BANNER YES)
 set(DOXYGEN_TAB_SIZE 2) #Default is 4
 
-set(DOXYFILE_IN "${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile.in")
-set(DOXYFILE_OUT "${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile") #Change to c if d
+set(DOXYFILE_IN "${DOXYFILE_ROOT_DIRECTORY}/Doxyfile.in")
+set(DOXYFILE_OUT "${DOXYFILE_ROOT_DIRECTORY}/Doxyfile")
 
 #Can't use doxygen_add_docs as we need doxyfile to be usable for read-the-docs.
 
@@ -38,7 +42,7 @@ add_custom_target(Sphinx ALL
   ${SPHINX_EXECUTABLE} 
   -b html
   -j auto
-  -Dbreathe_projects.falcie="${DOXYGEN_OUTPUT_DIRECTORY}/xml/"
+  -Dbreathe_projects.falcie="../${DOXYGEN_OUTPUT_DIRECTORY}/xml/"
   -Dbreathe_default_project="falcie"
   ${SPHINX_SOURCE} ${SPHINX_BUILD}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

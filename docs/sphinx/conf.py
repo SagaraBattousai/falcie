@@ -45,10 +45,12 @@ extensions = [ "breathe"
 # CMake these variables will be set from within CMake using the 
 # Sphinx target 
 #--------------------------------------------------------------------#
-# read-the-docs_doxygen = 
-breathe_projects = { project : "../build/doxygen/xml/" }
-breathe_default_project = project
+#read-the-docs_doxygen = 
+# breathe_projects = { project : "../build/xml/" }
+# breathe_default_project = project
 
+breathe_projects = { "falcie" : "../build/xml/" }
+breathe_default_project = "falcie"
 
 
 
@@ -92,6 +94,7 @@ def run_doxygen_on_rtd(path):
 def generate_doxygen_xml_on_rtd(app):
   # Not -1000 as True is a string here
   if os.environ.get('READTHEDOCS', None) == 'True':
+    print(f"{os.listdir('..')}")
     run_doxygen_on_rtd("..")
 
 def setup(app):
