@@ -24,7 +24,17 @@ file(GLOB_RECURSE HEADER_FILES
   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
   ${INCLUDE_ROOT}/*.h )
 
-string(JOIN " " DOXYGEN_INPUT_FILES ${HEADER_FILES})
+## -> Im wondering if i need to include my source (.c and .cpp) files too
+## as some documentation may live in there ....
+## For now its just etro, add  more later iff required
+file(GLOB SOURCE_FILES
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR}/etro/*.c ${PROJECT_SOURCE_DIR}/etro/*.cpp)
+
+
+##VV Save poor doxygen from having to recusivly look in directories.
+# String better as it saves appending etc (plus dont want ;)
+string(JOIN " " DOXYGEN_INPUT_FILES ${HEADER_FILES} ${SOURCE_FILES})
 set(DOXYGEN_OUTPUT_DIRECTORY "build")
 set(DOXYGEN_GENERATE_XML YES)
 set(DOXYGEN_GENERATE_HTML NO)
