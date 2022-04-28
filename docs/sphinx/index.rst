@@ -5,10 +5,20 @@
 
 Welcome to falcie's documentation!
 ==================================
+**Fal'cie** (/fæl'siː/) is a Federated Ai Learning (Cie?).
+
+.. note::
+   This project is under active development
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :glob:
+
+   etro/*
+
+.. etro/blocks
+   etro/encoding
 
 
 
@@ -16,11 +26,6 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+  * :ref:`modindex`
+    * :ref:`search`
 
-
-DOCS
-=====
-.. doxygenstruct:: block_header
-  :members:

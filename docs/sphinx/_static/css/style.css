@@ -1,0 +1,17 @@
+/*
+:root {
+        --body-color: rgba(255, 255, 255, 0.85);
+        --content-wrap-background-color: #202326;
+        --content-background-color: #2e3236;
+
+}
+
+body {
+  color: var(--body-color);
+}
+
+.wy-body-for-nav .search__outer {
+    background-color: var(--content-background-color);
+    border: 2px solid var(--content-background-color);
+}
+*/

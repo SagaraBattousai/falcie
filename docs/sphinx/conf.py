@@ -51,8 +51,18 @@ extensions = [ "breathe"
 
 breathe_projects = { "falcie" : "../build/xml" }
 breathe_default_project = "falcie"
+breathe_show_include = True
+breathe_default_members = ('members', 'undoc-members')
 
+breathe_domain_by_extension = {
+    "h" : "c",
+    }
 
+breathe_domain_by_file_pattern = {
+    "../include/etro/chain.h" : "cpp",
+   "../include/etro/lish.h" : "cpp",
+   "../include/etro/blockchain.h" : "cpp",
+    }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -70,10 +80,32 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'sphinx_rtd_theme'
 
+# Theme options
+html_theme_options = {
+    # If we have a html_logo below, this shows only the logo with no title text
+    #"logo_only": True,
+    # Collapse navigation (False makes it tree-like)
+    "collapse_navigation": False,
+}
+
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+#Relative to html_static_path
+html_css_files = [
+    "css/style.css",
+]
+
+#if not on_rtd:
+#    html_css_files.append("css/dev.css")
+
+html_js_files = [
+    
+]
+
 
 
 ######################################################################

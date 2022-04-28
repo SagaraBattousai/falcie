@@ -1,7 +1,8 @@
 find_package(OpenSSL 3 REQUIRED)
 set(src_files "matrix.c" 
   "blockchain.cpp" "blockheader.c" "federatedblock.c"
-  "crypto.c" "encoding.c" "endianness_check.cpp")
+  "crypto.c" "encoding.c" "endianness_check.cpp"
+  "cactuar.c" "math.c")
 file(GLOB public_headder_files "${INCLUDE_ROOT}/etro/*.h")
 file(GLOB private_headder_files *.h)
 

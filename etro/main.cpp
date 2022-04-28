@@ -8,8 +8,10 @@ extern "C" {
 #include <etro/crypto.h>
 #include <openssl/evp.h>
 #include <etro/blockheader.h>
+#include <etro/math.h>
 }
 
+/*
 void encode_number(void* number, unsigned char* encoded, size_t size)
 {
 	unsigned char* src = (unsigned char*)number;
@@ -40,7 +42,7 @@ unsigned char* convert_number(void* number, size_t size)
 	return encoded;
 }
 
-
+*/
 
 int main()
 {
@@ -67,7 +69,7 @@ int main()
 		std::cout << std::hex << (int)o2[i];
 	}
 	std::cout << std::endl;
-	*/
+	////////////////////////////////////////////////////
 
 	size_t size = 8;
 	int64_t big = 0x37EFCDAB04030201;
@@ -91,5 +93,17 @@ int main()
 
 	std::cout << std::hex << big << std::endl;
 
+	*/
+
+	float inp[5] = {1,2,4,8,3};
+	float exp[5] = { 0,1,2,3,1.584962500721156f };
+
+	for (int i = 0; i < 5; i++)
+	{
+		std::cout << inp[i] << " => " << fast_log2(inp[i]) << " == " << exp[i] << std::endl;
+	}
+
 	return 0;
+
+	
 }
