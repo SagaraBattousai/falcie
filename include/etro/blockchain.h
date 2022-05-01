@@ -1,113 +1,97 @@
-#ifndef __ETRO_CHAIN_H__
-#define __ETRO_CHAIN_H__
+#ifndef __ETRO_BLOCKCHAIN_H__
+#define __ETRO_BLOCKCHAIN_H__
+
+//CPP Header Only
 
 #include <cstdint>
 #include <array>
 
-//How to check if std::uintptr_t is defined?
+#include <etro/chain.h>
+
+extern "C" {
+#include <etro/types.h>
+}
+
+template<typename T> using mine_func = void(*)(T&, sha256hash_t&);
+template<typename T> using hash_func = sha256hash_t(*)(T&);
+
 
 template<typename T, size_t MaxElems>
-class Chain
+class Blockchain
 {
 public:
-	Chain();
-	virtual ~Chain();
+	Blockchain(T genisis, mine_func<T> m, hash_func<T> h);
+	//virtual ~Blockchain();
 	void Add(T elem);
-	T GetLast();
+	bool Validate();
 
 private:
-	typedef struct Node
-	{
-		std::uintptr_t link;
-		//No point using std::array as I have to keep
-		//track of the current number of elements anyway
-		T elements[MaxElems];
-		size_t elementCount;
-		
-	} Node_t;
-
-	Node_t* addNewNode();
-
-	Node_t *head;
-	Node_t *tail;
-
+	Chain<T, MaxElems> chain;
+	mine_func mine;
+	hash_func hash;
 };
 
 template<typename T, size_t MaxElems>
-Chain<T, MaxElems>::Chain()
+Blockchain<T, MaxElems>::Blockchain(T genisis, mine_func<T> m, hash_func<T> h) : 
+	mine(m), 
+	hash(h)
 {
-	Node_t* node = new Node_t();
-	node->link = reinterpret_cast<std::uintptr_t>(node);
-	node->elementCount = 0;
+	this->chain = Chain<T, MaxElems>();
+	chain.Add(genisis);
+}
 
-	this->head = node;
-	this->tail = node;
+/*
+template<typename T, size_t MaxElems>
+Blockchain<T, MaxElems>::~Blockchain() {} 
+*/
+
+template<typename T, size_t MaxElems>
+void Blockchain<T, MaxElems>::Add(T elem)
+{
+	T prev = chain.GetLast();
+	sha256hash_t prev_hash = this->hash(prev);
+
+	//TODO:Update Difficulty
+
+	this->mine(elem, prev_hash);
+
+	//TODO:Set everything else required on block
+
+	this->chain.Add(elem);
+
 }
 
 template<typename T, size_t MaxElems>
-Chain<T, MaxElems>::~Chain()
+bool Blockchain<T, MaxElems>::Validate()
 {
-	//Semi Safety check
-	if (this->head == nullptr)
-	{
-		return;
-	}
+node: = blockchain.head
+var prevBlock, currBlock* FederatedBlock
 
-	Node_t* node = this->head;
-	std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(node);
-	while (node != this->tail) {
-		addr = addr ^ node->link;
-		delete node;
-		node = reinterpret_cast<Node_t*>(addr);
-	}
-	delete node;
-	//Shouldn't need to set head and tail to nullptr since object is dead/deleted
+var i int = 1 //In order to skip genisis in first chain
+
+for node != nil{
+	for i < len(node.elements) - 1 {
+		prevBlock = node.elements[i]
+		currBlock = node.elements[i + 1]
+
+			//Annoying I cant use if's shortcircuit because I need an
+			//address to then reference
+			prevBlockHash: = prevBlock.Hash()
+			currBlockHash : = currBlock.Hash()
+
+			if !(bytes.Equal(prevBlockHash[:],
+				currBlock.BlockHeader.Prevhash[:]) &&
+				bytes.Compare(currBlockHash[:],
+					currBlock.BlockHeader.Target.As256Bit()[:]) == -1) {
+				return false
+			}
+			i++
+		}
+		i = 0
+		node = node.next
 }
+return true
 
-template<typename T, size_t MaxElems>
-void Chain<T, MaxElems>::Add(T elem)
-{
-	Node_t* node = this->tail;
-
-	if (node->elementCount == MaxElems) 
-	{
-		node = this->addNewNode();
-	}
-
-	node->elements[node->elementCount] = elem;
-	node->elementCount++;
-
-}
-
-
-template<typename T, size_t MaxElems>
-T Chain<T, MaxElems>::GetLast()
-{
-	Node_t* last = this->tail;
-	return last->elements[last->elementCount - 1];
-
-}
-
-//Why I need typename I do no understand, unfortunatly I do not have time.
-//Will only work so long as nodes are onlyy added and only to the end
-template<typename T, size_t MaxElems>
-typename Chain<T, MaxElems>::Node_t* Chain<T, MaxElems>::addNewNode()
-{
-	Node_t* prev = this->tail;
-	std::uintptr_t prev_addr = reinterpret_cast<std::uintptr_t>(prev);
-
-	Node_t* node = new Node_t();
-	//TODO: may want to xor wirh self to help with iter
-	node->link = prev_addr;//reinterpret_cast<std::uintptr_t>(node);
-	node->elementCount = 0;
-
-	//std::uintptr_t node_addr = reinterpret_cast<std::uintptr_t>(node);
-
-	prev->link ^= reinterpret_cast<std::uintptr_t>(node);  //node_addr;
-
-	this->tail = node;
-
-	return node;
 }
 
 

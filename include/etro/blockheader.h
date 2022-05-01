@@ -17,7 +17,7 @@ typedef struct block_header
     uint64_t timestamp;
     sha256hash_t prev_hash;
     sha256hash_t transaction_hash;
-    cactuar target;
+    cactuar_t target;
     uint32_t nonce;
 } blockheader_t;
 
@@ -26,9 +26,6 @@ void mine(blockheader_t * const header);
 sha256hash_t hash(const blockheader_t* const header);
 
 uint64_t generate_timestamp();
-
-
-void encode(blockheader_t* header, unsigned char* encoded);
 
 
 #endif

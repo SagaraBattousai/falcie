@@ -9,12 +9,12 @@
 
 /*
 * These all seem to just be for convenience now I think about it. I mean tbh most of it is just byte
-* swapping and convert_number and decode_number do almost the exact same thing!!
+* swapping and convert_data and decode_data do almost the exact same thing!!
 */
 
-void encode_number(const void* const number, unsigned char* encoded, size_t size)
+void encode_data(const void* const data, unsigned char* encoded, size_t size)
 {
-	unsigned char* src = (unsigned char*)number;
+	unsigned char* src = (unsigned char*)data;
 
 	if (system_is_little_endian())
 	{
@@ -30,9 +30,9 @@ void encode_number(const void* const number, unsigned char* encoded, size_t size
 	}
 }
 
-unsigned char* convert_number(void* number, size_t size)
+unsigned char* convert_data(void* data, size_t size)
 {
-	unsigned char* encoded = (unsigned char*)number;
+	unsigned char* encoded = (unsigned char*)data;
 
 	if (system_is_big_endian())
 	{
@@ -48,7 +48,7 @@ unsigned char* convert_number(void* number, size_t size)
 	return encoded;
 }
 
-void decode_number(unsigned char* encoded, size_t size) {
+void decode_data(unsigned char* encoded, size_t size) {
 
 	if (system_is_big_endian())
 	{

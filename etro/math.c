@@ -16,7 +16,7 @@
 #define C_COEFF 1.674873
 
 float fast_log2(float val) {
-	uint32_t *bits = (uint32_t *) convert_number(&val, sizeof(float));
+	uint32_t *bits = (uint32_t *) convert_data(&val, sizeof(float));
 
 	//Below is the exponent, usually its exponent -1
 	//but this time our mantissa calculation doesn't add 1

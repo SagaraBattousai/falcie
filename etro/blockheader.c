@@ -1,49 +1,42 @@
 
 #include <time.h>
+#include <string.h>
 
 #include <etro/blockheader.h>
 #include <etro/encoding.h>
+#include <etro/crypto.h>
 
 #define NANO_TO_MILLI 1000000
 
 void mine(blockheader_t* const header)
 {
 	//TODO: add error for invalid cactaur values
-/*difficultyArray: = blockHeader.Target.As256Bit()
+	byte_t difficulty_array[32] = { 0 };
+	unravel_cactuar(header->target, difficulty_array); // blockHeader.Target.As256Bit()
 
-headerHash : = blockHeader.Hash()
+	sha256hash_t currHash = hash(header);
 
-for bytes.Compare(headerHash[:], difficultyArray[:]) != -1 {
-	blockHeader.Nonce += 1
-		headerHash = blockHeader.Hash()
-}
-*/
+	while (memcmp(currHash.hash, difficulty_array, 32) > 0) {
+		header->nonce += 1;
+		currHash = hash(header);
+	}
+
 
 }
 
 sha256hash_t hash(const blockheader_t* const header)
 {
-	/*//Double 256Hash
-	func(blockHeader * BlockHeader) Hash()[sha256.Size]byte{
-		hash: = sha256.New()
+	sha256hash_t hash;
 
-		//Encode not casting using unsafe ptr as MUST be little endian
-		versionBytes : = cactuar.Encode32(blockHeader.Version)
-		timestampBytes : = cactuar.Encode64(blockHeader.Timestamp)
-		targetBytes : = cactuar.Encode32(blockHeader.Target)
-		nonceBytes : = cactuar.Encode32(blockHeader.Nonce)
+	byte_t encoded[sizeof(blockheader_t)] = { 0 };
+	encode_data(header, encoded, sizeof(blockheader_t));
 
-		hash.Write(versionBytes[:])
-		hash.Write(timestampBytes[:])
-		hash.Write(blockHeader.Prevhash[:])
-		hash.Write(blockHeader.Transhash[:])
-		hash.Write(targetBytes[:])
-		hash.Write(nonceBytes[:])
+	EVP_MD_CTX *ctx = get_default_sha256_context();
+	
+	EVP_DigestUpdate(ctx, encoded, sizeof(blockheader_t));
+	EVP_DigestFinal_ex(ctx, hash.hash, NULL);
 
-		return sha256.Sum256(hash.Sum(nil))
-	}*/
-	sha256hash_t tmp;
-	return tmp;
+	return hash;
 }
 
 uint64_t generate_timestamp()
