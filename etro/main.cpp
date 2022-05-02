@@ -1,5 +1,6 @@
 
 #include <etro/chain.h>
+#include <etro/blockchain.h>
 #include <iostream>
 #include <cstdint>
 #include <cstring>

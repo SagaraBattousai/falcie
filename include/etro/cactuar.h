@@ -41,4 +41,6 @@ typedef uint32_t cactuar_t;
 ************************************************************/
 void unravel_cactuar(const cactuar_t *const cactuar, byte_t* bytes);
 
+int targetcmp(const cactuar_t* const cactuar, const sha256hash_t* const hash)
+
 #endif
