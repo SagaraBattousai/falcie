@@ -4,7 +4,7 @@
 //CPP Header Only
 
 #include <cstdint>
-#include <array>
+//#include <array>
 #include <cstring>
 
 #include <etro/chain.h>
@@ -14,11 +14,30 @@ extern "C" {
 #include <etro/cactuar.h>
 }
 
+/*
+void mine_federated(federatedblock_t* const header, sha256hash_t* const prev_hash);
+
+sha256hash_t hash_federated(const federatedblock_t* const header);
+
+sha256hash_t prev_hash_federated(const federatedblock_t* const header);
+
+cactuar_t target_federated(const federatedblock_t* const header);
+*/
+
+template<typename T> using mine_func = void(*)(T *const, const sha256hash_t* const);
+template<typename T> using hash_func = sha256hash_t(*)(const T *const);
+
+template<typename T> using prev_hash_getter = sha256hash_t(*)(const T *const);
+template<typename T> using target_getter = cactuar_t(*)(const T* const);
+
+/*
 template<typename T> using mine_func = void(*)(T&, sha256hash_t&);
 template<typename T> using hash_func = sha256hash_t&(*)(const T&);
 
 template<typename T> using prev_hash_getter = sha256hash_t&(*)(const T&);
 template<typename T> using target_getter = cactaur_t&(*)(T&);
+*/
+
 
 template<typename T, size_t MaxElems>
 class Blockchain
@@ -28,6 +47,8 @@ public:
 	//virtual ~Blockchain();
 	void Add(T elem);
 	bool Validate();
+	typename Chain<T, MaxElems>::ChainIterator begin();
+	typename Chain<T, MaxElems>::ChainIterator end();
 
 private:
 	Chain<T, MaxElems> chain;
@@ -59,11 +80,11 @@ template<typename T, size_t MaxElems>
 void Blockchain<T, MaxElems>::Add(T elem)
 {
 	T prev = chain.GetLast();
-	sha256hash_t prev_hash = this->hash(prev);
+	sha256hash_t prev_hash = this->hash(&prev);
 
 	//TODO:Update Difficulty
 
-	this->mine(elem, prev_hash);
+	this->mine(&elem, &prev_hash);
 
 	//TODO:Set everything else required on block
 
@@ -91,21 +112,23 @@ bool Blockchain<T, MaxElems>::Validate()
 	* prev_hash_getter<T> prev_hash;
 	* target_getter<T> target;
 	*/
-
-	while (it != this->chain.end())
+	auto end = this->chain.end();
+	while (++it != end) //< Is it acceptable to inc in the while? Is that defined behavouir?
 	{
-		++it;
+		//++it;
 		currBlock = *it;
 
 		//previousBlock'sHash == current->blockheader->prevhash
 		// &&
 		//currentBlock'sHash < currentBlocks Target
 
-		if !(
-			(std::memcmp(this->hash(prevBlock), this->prev_hash(currBlock), sizeof(sha256hash_t)) == 0)
+		auto test = (this->target(&currBlock));
+
+		if (!(
+			(std::memcmp(&(this->hash(&prevBlock)), &(this->prev_hash(&currBlock)), sizeof(sha256hash_t)) == 0)
 			&&
-			(targetcmp(target(currBlock), this->hash(currBlock)))
-			)
+			(targetcmp(&test, &(this->hash(&currBlock))) < 0)
+			))
 		{
 			return false;
 		}
@@ -113,6 +136,18 @@ bool Blockchain<T, MaxElems>::Validate()
 		prevBlock = currBlock;
 	}
 	return true;
+}
+
+template<typename T, size_t MaxElems>
+typename Chain<T, MaxElems>::ChainIterator Blockchain<T, MaxElems>::begin()
+{
+	return this->chain.begin();
+}
+
+template<typename T, size_t MaxElems>
+typename Chain<T, MaxElems>::ChainIterator Blockchain<T, MaxElems>::end()
+{
+	return this->chain.end();
 }
 
 

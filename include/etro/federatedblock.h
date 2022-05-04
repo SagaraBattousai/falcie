@@ -2,20 +2,24 @@
 #define __ETRO_FEDERATEDBLOCK_H__
 
 #include <stdint.h>
+#include <etro/types.h>
 #include <etro/blockheader.h>
-#define SHA256_BYTES 32
+#include <etro/cactuar.h>
 
-	typedef unsigned char byte_t;
-	typedef uint32_t cactuar;
+typedef struct federated_block
+{
+	blockheader_t header;
+} federatedblock_t;
 
-	typedef struct federated_block
-	{
-		blockheader_t* header;
-	} federatedblock_t;
+federatedblock_t new_federated_block();
 
-sha256hash_t hash(const federatedblock_t* const header);
+sha256hash_t hash_federated(const federatedblock_t* const block);
 
-void mine(const federatedblock_t* const header);
+void mine_federated(federatedblock_t* const block, const sha256hash_t* const prev_hash);
+
+sha256hash_t prev_hash_federated(const federatedblock_t* const block);
+
+cactuar_t target_federated(const federatedblock_t* const block);
 
 
 #endif

@@ -21,7 +21,7 @@ typedef struct block_header
     uint32_t nonce;
 } blockheader_t;
 
-void mine(blockheader_t * const header);
+void mine(blockheader_t * const header, const sha256hash_t* const prev_hash);
 
 sha256hash_t hash(const blockheader_t* const header);
 

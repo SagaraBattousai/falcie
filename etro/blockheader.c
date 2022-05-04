@@ -8,11 +8,14 @@
 
 #define NANO_TO_MILLI 1000000
 
-void mine(blockheader_t* const header)
+void mine(blockheader_t* const header, const sha256hash_t* const prev_hash)
 {
+	header->prev_hash = *prev_hash;
+	header->timestamp = generate_timestamp();
+
 	//TODO: add error for invalid cactaur values
 	byte_t difficulty_array[32] = { 0 };
-	unravel_cactuar(header->target, difficulty_array); // blockHeader.Target.As256Bit()
+	unravel_cactuar(&header->target, difficulty_array); // blockHeader.Target.As256Bit()
 
 	sha256hash_t currHash = hash(header);
 
@@ -26,7 +29,7 @@ void mine(blockheader_t* const header)
 
 sha256hash_t hash(const blockheader_t* const header)
 {
-	sha256hash_t hash;
+	sha256hash_t hash;// = { 0 };
 
 	byte_t encoded[sizeof(blockheader_t)] = { 0 };
 	encode_data(header, encoded, sizeof(blockheader_t));

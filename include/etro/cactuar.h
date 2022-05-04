@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <etro/types.h>
 
-#define BASE_DIFFICULTY 0x1F0FFF1D
+#define CACTUAR_BASE_DIFFICULTY 0x1F0FFF1D
 #define MULTIPLIER_MASK 0x00FFFFFF
 
 //Same as bitcoin, used to scale the bits to bytes
@@ -41,6 +41,6 @@ typedef uint32_t cactuar_t;
 ************************************************************/
 void unravel_cactuar(const cactuar_t *const cactuar, byte_t* bytes);
 
-int targetcmp(const cactuar_t* const cactuar, const sha256hash_t* const hash)
+int targetcmp(const cactuar_t* const cactuar, const sha256hash_t* const hash);
 
 #endif
