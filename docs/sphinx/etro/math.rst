@@ -1,0 +1,5 @@
+Math
+========
+
+.. doxygenfile:: math.h
+
