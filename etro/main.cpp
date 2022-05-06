@@ -8,7 +8,6 @@
 
 extern "C" {
 #include <etro/crypto.h>
-#include <openssl/evp.h>
 #include <etro/blockheader.h>
 #include <etro/math.h>
 #include <etro/cactuar.h>

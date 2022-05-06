@@ -5,6 +5,9 @@ vim_sessions/
 # visualStudios
 *.vs
 
+#Project specific
+docs/sphinx/_static/css/_*
+
 ############################################################
 # Go Ignore
 ############################################################

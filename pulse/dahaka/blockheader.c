@@ -34,10 +34,15 @@ sha256hash_t hash(const blockheader_t* const header)
 	byte_t encoded[sizeof(blockheader_t)] = { 0 };
 	encode_data(header, encoded, sizeof(blockheader_t));
 
-	EVP_MD_CTX *ctx = get_default_sha256_context();
+	//TODO: Clean this up!
+	hasher_t *hasher = get_default_sha256_hasher();
 	
-	EVP_DigestUpdate(ctx, encoded, sizeof(blockheader_t));
-	EVP_DigestFinal_ex(ctx, hash.hash, NULL);
+	/*
+	update_hash(hasher, encoded, sizeof(blockheader_t));
+	output_hash(hasher, hash.hash, NULL);
+	* ^^ is the same as VV
+	*/
+	hash_data(hasher, encoded, sizeof(blockheader_t), hash.hash, NULL);
 
 	return hash;
 }

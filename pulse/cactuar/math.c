@@ -1,7 +1,7 @@
+#include <stdint.h>
 
 #include <etro/math.h>
 #include <etro/encoding.h>
-#include <etro/types.h>
 
 #define EXPONENT_OFFSET 23
 #define LOWER_BYTE_MASK 255

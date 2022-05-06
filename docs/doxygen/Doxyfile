@@ -874,7 +874,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../include/etro/blockchain.h ../include/etro/blockheader.h ../include/etro/cactuar.h ../include/etro/chain.h ../include/etro/clist.h ../include/etro/crypto.h ../include/etro/encoding.h ../include/etro/federated_blockchain.h ../include/etro/federatedblock.h ../include/etro/list.h ../include/etro/math.h ../include/etro/matrix.h ../include/etro/types.h ../etro/blockchain.cpp ../etro/blockheader.c ../etro/cactuar.c ../etro/crypto.c ../etro/encoding.c ../etro/endianness_check.cpp ../etro/federated_blockchain.cpp ../etro/federatedblock.c ../etro/list.cpp ../etro/main.cpp ../etro/math.c ../etro/matrix.c
+INPUT                  = ../include/etro/blockchain.h ../include/etro/blockheader.h ../include/etro/cactuar.h ../include/etro/chain.h ../include/etro/clist.h ../include/etro/crypto.h ../include/etro/encoding.h ../include/etro/federated_blockchain.h ../include/etro/federatedblock.h ../include/etro/list.h ../include/etro/math.h ../include/etro/matrix.h ../include/etro/types.h ../etro/main.cpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
