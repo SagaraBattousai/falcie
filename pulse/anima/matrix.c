@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <immintrin.h>
 
-#include <etro/matrix.h>
+#include <pulse/matrix.h>
 
 void f(float *x)
 {

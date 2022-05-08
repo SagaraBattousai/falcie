@@ -7,6 +7,7 @@
 macro(configure_doxygen_and_add_command)
   set(DOXYGEN_GENERATE_XML YES)
   set(DOXYGEN_GENERATE_HTML NO)
+  set(DOXYGEN_GENERATE_MAN YES)
   set(DOXYGEN_GENERATE_LATEX NO)
   set(DOXYGEN_JAVADOC_BANNER YES)
 

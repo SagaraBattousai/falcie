@@ -1,9 +1,9 @@
 
-#include <etro/federated_blockchain.h>
-#include <etro/blockchain.h>
+#include <pulse/federated_blockchain.h>
+#include <pulse/blockchain.h>
 
 extern "C" {
-#include <etro/federatedblock.h>
+#include <pulse/federatedblock.h>
 }
 
 

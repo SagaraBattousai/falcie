@@ -23,7 +23,7 @@ function(copy_openssl_runtime_lib_to_target target lib)
 endfunction()
 
 
-#ATM only useful for windows as dll is hardcoded
+#At the moment only useful for windows as the "*.dll" GLOB is hardcoded
 #Could add check for extra extension command but
 #As I dont know the dir structure on unix I cant be sure whats best
 function(get_openssl_runtime_lib lib)

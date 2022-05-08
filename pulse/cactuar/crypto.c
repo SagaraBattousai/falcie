@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include <openssl/evp.h>
-#include <etro/crypto.h>
+#include <pulse/crypto.h>
 
 typedef struct hasher 
 {

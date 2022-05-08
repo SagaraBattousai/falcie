@@ -1,10 +1,10 @@
 
-#include <etro/encoding.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <stdio.h>
 
+#include <pulse/encoding.h>
 #include "endianness_check.h"
 
 /*
@@ -61,5 +61,4 @@ void decode_data(unsigned char* encoded, size_t size) {
 			*(encoded + i) = tmp;
 		}
 	}
-	return encoded;
 }

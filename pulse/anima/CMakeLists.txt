@@ -1,15 +1,15 @@
 
-set(src_files "matrix.c")
+set(c_sources "matrix.c")
 
-file(GLOB public_headder_files "${INCLUDE_ROOT}/etro/*.h")
-
-add_library(anima OBJECT
-  ${src_files}
-  ${public_headder_files})
+add_library(anima OBJECT ${c_sources})
 
 if(MSVC)
   #For matrix mult
   target_compile_options(anima PUBLIC "/arch:AVX512")
 endif()
 
-target_include_directories(anima PUBLIC ${INCLUDE_ROOT})
+target_sources(anima PUBLIC 
+  FILE_SET public_headers 
+  TYPE HEADERS
+  BASE_DIRS "${INCLUDE_ROOT}" 
+  FILES "${PULSE_INCLUDE_ROOT}/matrix.h")

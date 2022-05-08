@@ -1,7 +1,7 @@
 
-#include <etro/federatedblock.h>
-#include <etro/blockheader.h>
-#include <etro/cactuar.h>
+#include <pulse/federatedblock.h>
+#include <pulse/blockheader.h>
+#include <pulse/cactuar.h>
 
 /*
 *void mine(blockheader_t * const header);
@@ -26,7 +26,7 @@ sha256hash_t hash_federated(const federatedblock_t* const block)
 
 void mine_federated(federatedblock_t* const block, const sha256hash_t* const prev_hash)
 {
-	return mine(&(block->header), prev_hash);
+	mine(&(block->header), prev_hash);
 }
 
 sha256hash_t prev_hash_federated(const federatedblock_t* const block)

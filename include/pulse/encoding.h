@@ -1,5 +1,5 @@
-#ifndef __ETRO_ENCODING_H__
-#define __ETRO_ENCODING_H__
+#ifndef __PULSE_CACTUAR_ENCODING_H__
+#define __PULSE_CACTUAR_ENCODING_H__
 
 #include <stddef.h>
 

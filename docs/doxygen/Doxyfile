@@ -874,7 +874,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../include/etro/blockchain.h ../include/etro/blockheader.h ../include/etro/cactuar.h ../include/etro/chain.h ../include/etro/clist.h ../include/etro/crypto.h ../include/etro/encoding.h ../include/etro/federated_blockchain.h ../include/etro/federatedblock.h ../include/etro/list.h ../include/etro/math.h ../include/etro/matrix.h ../include/etro/types.h ../etro/main.cpp
+INPUT                  = ../include/pulse/blockchain.h ../include/pulse/blockheader.h ../include/pulse/cactuar.h ../include/pulse/chain.h ../include/pulse/crypto.h ../include/pulse/encoding.h ../include/pulse/federated_blockchain.h ../include/pulse/federatedblock.h ../include/pulse/math.h ../include/pulse/matrix.h ../include/pulse/types.h ../etro/main.cpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -2098,7 +2098,7 @@ RTF_EXTENSIONS_FILE    =
 # classes and files.
 # The default value is: NO.
 
-GENERATE_MAN           = NO
+GENERATE_MAN           = YES
 
 # The MAN_OUTPUT tag is used to specify where the man pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

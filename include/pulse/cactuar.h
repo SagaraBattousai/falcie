@@ -1,7 +1,7 @@
-#ifndef __ETRO_CACTAUR_H__
-#define __ETRO_CACTAUR_H__
+#ifndef __PULSE_CACTUAR_CACTAUR_H__
+#define __PULSE_CACTUAR_CACTAUR_H__
 #include <stdint.h>
-#include <etro/types.h>
+#include <pulse/crypto.h>
 
 #define CACTUAR_BASE_DIFFICULTY 0x1F0FFF1D
 #define MULTIPLIER_MASK 0x00FFFFFF
@@ -39,7 +39,7 @@ typedef uint32_t cactuar_t;
 * This is in BigEndian format due to the hash leading zeros style.
 * 
 ************************************************************/
-void unravel_cactuar(const cactuar_t *const cactuar, byte_t* bytes);
+void unravel_cactuar(const cactuar_t *const cactuar, unsigned char* bytes);
 
 int targetcmp(const cactuar_t* const cactuar, const sha256hash_t* const hash);
 

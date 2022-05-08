@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include <etro/federatedblock.h>
+#include <pulse/federatedblock.h>
 
 #ifdef __cplusplus
 }
@@ -22,7 +22,7 @@ extern "C" {
 * undefined struct in C so as to be somewhat type safier than void *.
 */
 #ifdef __cplusplus
-#include <etro/blockchain.h>
+#include <pulse/blockchain.h>
 typedef Blockchain<federatedblock_t, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE> federated_blockchain_t;
 #else
 typedef struct federated_blockchain federated_blockchain_t;

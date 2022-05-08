@@ -1,5 +1,5 @@
-#ifndef __ETRO_ENDIANNESS_CHECK_H__
-#define __ETRO_ENDIANNESS_CHECK_H__
+#ifndef __PULSE_CACTUAR_ENDIANNESS_CHECK_H__
+#define __PULSE_CACTUAR_ENDIANNESS_CHECK_H__
 
 #ifdef __cplusplus
 constexpr int endianTest = 0xABCDEF37;

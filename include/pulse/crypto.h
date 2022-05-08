@@ -1,9 +1,14 @@
-#ifndef __ETRO_CRYPTO_H__
-#define __ETRO_CRYPTO_H__
-//All C code!
-#include <etro/types.h>
+#ifndef __PULSE_CACTUAR_CRYPTO_H__
+#define __PULSE_CACTUAR_CRYPTO_H__
+
+#define SHA256_BYTES 32
+
+typedef struct sha256_hash {
+	unsigned char hash[SHA256_BYTES];
+}sha256hash_t;
 
 typedef struct hasher hasher_t;
+
 
 hasher_t* get_default_sha256_hasher();
 

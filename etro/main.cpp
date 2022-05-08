@@ -1,16 +1,16 @@
 
-#include <etro/chain.h>
-#include <etro/blockchain.h>
-#include <etro/federated_blockchain.h>
+#include <pulse/chain.h>
+#include <pulse/blockchain.h>
+#include <pulse/federated_blockchain.h>
 #include <iostream>
 #include <cstdint>
 #include <cstring>
 
 extern "C" {
-#include <etro/crypto.h>
-#include <etro/blockheader.h>
-#include <etro/math.h>
-#include <etro/cactuar.h>
+#include <pulse/crypto.h>
+#include <pulse/blockheader.h>
+#include <pulse/math.h>
+#include <pulse/cactuar.h>
 }
 
 int main()

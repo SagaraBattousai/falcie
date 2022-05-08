@@ -2,9 +2,9 @@
 #define __ETRO_FEDERATEDBLOCK_H__
 
 #include <stdint.h>
-#include <etro/types.h>
-#include <etro/blockheader.h>
-#include <etro/cactuar.h>
+#include <pulse/types.h>
+#include <pulse/blockheader.h>
+#include <pulse/cactuar.h>
 
 typedef struct federated_block
 {

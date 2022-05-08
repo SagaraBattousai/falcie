@@ -1,13 +1,13 @@
 
-set(src_files "federated_blockchain.cpp" "blockheader.c" "federatedblock.c")
+add_library(dahaka INTERFACE
+  "${PULSE_INCLUDE_ROOT}/chain.h"
+  "${PULSE_INCLUDE_ROOT}/blockchain.h"
+  )
 
-file(GLOB public_headder_files "${INCLUDE_ROOT}/etro/*.h")
-# file(GLOB private_headder_files "*.h")
+#target_sources(dahaka PUBLIC FILE_SET public_headers TYPE HEADERS
+#  BASE_DIRS "${INCLUDE_ROOT}" FILES ${public_headder_files})
 
-add_library(dahaka OBJECT
-  ${src_files}
-  ${public_headder_files})
-#  ${private_headder_files})
-
-target_include_directories(dahaka PUBLIC ${INCLUDE_ROOT})
-
+target_include_directories(dahaka INTERFACE
+  $<BUILD_INTERFACE:${INCLUDE_ROOT}>
+  $<INSTALL_INTERFACE:include>
+  )

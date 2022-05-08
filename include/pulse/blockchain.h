@@ -1,28 +1,15 @@
-#ifndef __ETRO_BLOCKCHAIN_H__
-#define __ETRO_BLOCKCHAIN_H__
+#ifndef __PULSE_DAHAKA_BLOCKCHAIN_H__
+#define __PULSE_DAHAKA_BLOCKCHAIN_H__
 
-//CPP Header Only
+/*-------------------------------------------
+* C++ Code only (Template code)
+---------------------------------------------*/
 
 #include <cstdint>
-//#include <array>
 #include <cstring>
 
-#include <etro/chain.h>
-
-extern "C" {
-#include <etro/types.h>
-#include <etro/cactuar.h>
-}
-
-/*
-void mine_federated(federatedblock_t* const header, sha256hash_t* const prev_hash);
-
-sha256hash_t hash_federated(const federatedblock_t* const header);
-
-sha256hash_t prev_hash_federated(const federatedblock_t* const header);
-
-cactuar_t target_federated(const federatedblock_t* const header);
-*/
+#include <pulse/types.h>
+#include <pulse/chain.h>
 
 template<typename T> using mine_func = void(*)(T *const, const sha256hash_t* const);
 template<typename T> using hash_func = sha256hash_t(*)(const T *const);
@@ -39,7 +26,7 @@ template<typename T> using target_getter = cactaur_t&(*)(T&);
 */
 
 
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 class Blockchain
 {
 public:
@@ -59,7 +46,7 @@ private:
 };
 
 //Might want an additional temp param for difficulty change ... thinggy ...
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 Blockchain<T, MaxElems>::Blockchain(T genisis, mine_func<T> m, hash_func<T> h,
 	prev_hash_getter<T> p, target_getter<T> t) 
 	: mine(m)
@@ -72,11 +59,11 @@ Blockchain<T, MaxElems>::Blockchain(T genisis, mine_func<T> m, hash_func<T> h,
 }
 
 /*
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 Blockchain<T, MaxElems>::~Blockchain() {} 
 */
 
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 void Blockchain<T, MaxElems>::Add(T elem)
 {
 	T prev = chain.GetLast();
@@ -92,7 +79,7 @@ void Blockchain<T, MaxElems>::Add(T elem)
 
 }
 
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 bool Blockchain<T, MaxElems>::Validate()
 {
 	//----------- OLD --------------------------------------------
@@ -138,13 +125,13 @@ bool Blockchain<T, MaxElems>::Validate()
 	return true;
 }
 
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 typename Chain<T, MaxElems>::ChainIterator Blockchain<T, MaxElems>::begin()
 {
 	return this->chain.begin();
 }
 
-template<typename T, size_t MaxElems>
+template<typename T, std::size_t MaxElems>
 typename Chain<T, MaxElems>::ChainIterator Blockchain<T, MaxElems>::end()
 {
 	return this->chain.end();

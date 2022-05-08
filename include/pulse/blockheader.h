@@ -2,8 +2,8 @@
 #define __ETRO_BLOCKHEADER_H__
 
 //All C code!
-#include <etro/types.h>
-#include <etro/cactuar.h>
+#include <pulse/types.h>
+#include <pulse/cactuar.h>
 
 /******************************************************************
 * The header for  block on the chain which is hashed to provide PoW
