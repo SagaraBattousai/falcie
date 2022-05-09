@@ -26,7 +26,7 @@ template<typename T> using target_getter = cactaur_t&(*)(T&);
 */
 
 
-template<typename T, std::size_t MaxElems>
+template<typename T, std::size_t UnrolledElems>
 class Blockchain
 {
 public:
@@ -34,11 +34,11 @@ public:
 	//virtual ~Blockchain();
 	void Add(T elem);
 	bool Validate();
-	typename Chain<T, MaxElems>::ChainIterator begin();
-	typename Chain<T, MaxElems>::ChainIterator end();
+	typename Chain<T, UnrolledElems>::ChainIterator begin();
+	typename Chain<T, UnrolledElems>::ChainIterator end();
 
 private:
-	Chain<T, MaxElems> chain;
+	Chain<T, UnrolledElems> chain;
 	mine_func<T> mine;
 	hash_func<T> hash;
 	prev_hash_getter<T> prev_hash;
@@ -46,25 +46,25 @@ private:
 };
 
 //Might want an additional temp param for difficulty change ... thinggy ...
-template<typename T, std::size_t MaxElems>
-Blockchain<T, MaxElems>::Blockchain(T genisis, mine_func<T> m, hash_func<T> h,
+template<typename T, std::size_t UnrolledElems>
+Blockchain<T, UnrolledElems>::Blockchain(T genisis, mine_func<T> m, hash_func<T> h,
 	prev_hash_getter<T> p, target_getter<T> t) 
 	: mine(m)
 	, hash(h)
 	, prev_hash(p)
 	, target(t)
-	, chain(Chain<T, MaxElems>())
+	, chain(Chain<T, UnrolledElems>())
 {
 	chain.Add(genisis);
 }
 
 /*
-template<typename T, std::size_t MaxElems>
-Blockchain<T, MaxElems>::~Blockchain() {} 
+template<typename T, std::size_t UnrolledElems>
+Blockchain<T, UnrolledElems>::~Blockchain() {} 
 */
 
-template<typename T, std::size_t MaxElems>
-void Blockchain<T, MaxElems>::Add(T elem)
+template<typename T, std::size_t UnrolledElems>
+void Blockchain<T, UnrolledElems>::Add(T elem)
 {
 	T prev = chain.GetLast();
 	sha256hash_t prev_hash = this->hash(&prev);
@@ -79,8 +79,8 @@ void Blockchain<T, MaxElems>::Add(T elem)
 
 }
 
-template<typename T, std::size_t MaxElems>
-bool Blockchain<T, MaxElems>::Validate()
+template<typename T, std::size_t UnrolledElems>
+bool Blockchain<T, UnrolledElems>::Validate()
 {
 	//----------- OLD --------------------------------------------
 	// node: = blockchain.head
@@ -89,7 +89,7 @@ bool Blockchain<T, MaxElems>::Validate()
 	// var i int = 1 //In order to skip genisis in first chain
 	//------------------------------------------------------------
 
-	Chain<T, MaxElems>::ChainIterator it = this->chain.begin();
+	Chain<T, UnrolledElems>::ChainIterator it = this->chain.begin();
 	++it; //In order to skip genisis //< I prefer it++ but since I wrote both and it++ calls ++it ... 
 
 	T prevBlock = *it;
@@ -125,14 +125,14 @@ bool Blockchain<T, MaxElems>::Validate()
 	return true;
 }
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator Blockchain<T, MaxElems>::begin()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator Blockchain<T, UnrolledElems>::begin()
 {
 	return this->chain.begin();
 }
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator Blockchain<T, MaxElems>::end()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator Blockchain<T, UnrolledElems>::end()
 {
 	return this->chain.end();
 }

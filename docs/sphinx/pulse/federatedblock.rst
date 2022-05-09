@@ -1,0 +1,6 @@
+
+federatedblock
+===============
+
+.. doxygenfile:: federatedblock.h
+

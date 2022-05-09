@@ -1,16 +1,16 @@
 
 macro(configure_sphinx_and_add_command)
 
-  set(SPHINX_CSS_FILES_LIST "\"css/style.css\",")
+  set(SPHINX_CSS_FILES_LIST "\"css/godot_style.css\",")
 
   set(SPHINX_JS_FILES_LIST "") #"\"js/falcie_docs.js\","
 
   set(BREATHE_DOMAIN_BY_EXTENSION_DICT "\"h\" : \"c\",")
 
   set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT 
-  "\"../include/etro/chain.h\" : \"cpp\",
-   \"../include/etro/lish.h\" : \"cpp\",
-   \"../include/etro/blockchain.h\" : \"cpp\",")
+  "\"../include/etro/chain.h\"       : \"cpp\",
+   \"../include/etro/blockchain.h\"  : \"cpp\",
+   \"../include/etro/orderedlish.h\" : \"cpp\",")
 
   configure_file(${SPHINX_CONF_IN} ${SPHINX_CONF_OUT} @ONLY)
 
@@ -18,6 +18,9 @@ macro(configure_sphinx_and_add_command)
   set(SPHINX_DOXYGEN_XML_DIR 
     "${CMAKE_CURRENT_SOURCE_DIR}/${DOXYGEN_OUTPUT_DIRECTORY}/xml")
 
+  #I don't like the glob here but since there are so many files and this
+  #file is already messy. Just be sure to run cmake .. if you add an new
+  #.rst file
   file(GLOB_RECURSE SPHINX_RESTRUCTRED_TEXT "${SPHINX_ROOT_DIRECTORY}/*.rst")
 
   #VV Could one day replace globs since files (tho escaped) are manually listed
@@ -34,6 +37,7 @@ macro(configure_sphinx_and_add_command)
     "-Dbreathe_projects.${PROJECT_NAME}=${SPHINX_DOXYGEN_XML_DIR}"
     "-Dbreathe_default_project=${PROJECT_NAME}"
     ${SPHINX_ROOT_DIRECTORY} ${SPHINX_OUTPUT_DIRECTORY}
+    ${SPHINX_CSS} ${SPHINX_JS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     MAIN_DEPENDENCY ${SPHINX_CONF_OUT}
     DEPENDS ${SPHINX_RESTRUCTRED_TEXT} ${DOXYGEN_XML_INDEX_FILE}

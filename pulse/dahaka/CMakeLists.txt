@@ -2,6 +2,7 @@
 add_library(dahaka INTERFACE
   "${PULSE_INCLUDE_ROOT}/chain.h"
   "${PULSE_INCLUDE_ROOT}/blockchain.h"
+  "${PULSE_INCLUDE_ROOT}/orderedlist.h"
   )
 
 #target_sources(dahaka PUBLIC FILE_SET public_headers TYPE HEADERS

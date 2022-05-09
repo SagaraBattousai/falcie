@@ -59,9 +59,9 @@ breathe_domain_by_extension = {
     }
 
 breathe_domain_by_file_pattern = {
-    "../include/etro/chain.h" : "cpp",
-   "../include/etro/lish.h" : "cpp",
-   "../include/etro/blockchain.h" : "cpp",
+    "../include/etro/chain.h"       : "cpp",
+   "../include/etro/blockchain.h"  : "cpp",
+   "../include/etro/orderedlish.h" : "cpp",
     }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -83,7 +83,7 @@ html_theme = 'sphinx_rtd_theme'
 # Theme options
 html_theme_options = {
     # If we have a html_logo below, this shows only the logo with no title text
-    #"logo_only": True,
+    "logo_only": True,
     # Collapse navigation (False makes it tree-like)
     "collapse_navigation": False,
 }
@@ -96,7 +96,7 @@ html_static_path = ['_static']
 
 #Relative to html_static_path
 html_css_files = [
-    "css/style.css",
+    "css/godot_style.css",
 ]
 
 #if not on_rtd:
@@ -107,6 +107,7 @@ html_js_files = [
 ]
 
 
+html_logo = "img/OniDocsIcon.svg"
 
 ######################################################################
 ## Read the docs config ##

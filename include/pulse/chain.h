@@ -1,16 +1,20 @@
-#ifndef __ETRO_CHAIN_H__
-#define __ETRO_CHAIN_H__
+#ifndef __PULSE_DAHAKA_CHAIN_H__
+#define __PULSE_DAHAKA_CHAIN_H__
+
+/// @anchor __PULSE_DAHAKA_CHAIN_H__
+
 
 /*-------------------------------------------
 * C++ Code only (Template code)
 ---------------------------------------------*/
 
 #include <iterator>
+#include <stdexcept>
 #include <cstdint>
 
 //How to check if std::uintptr_t is defined?
 
-template<typename T, std::size_t MaxElems>
+template<typename T, std::size_t UnrolledElems>
 class Chain
 {
 public:
@@ -25,7 +29,7 @@ private:
 		std::uintptr_t link;
 		//No point using std::array as I have to keep
 		//track of the current number of elements anyway
-		T elements[MaxElems];
+		T elements[UnrolledElems];
 		std::size_t elementCount;
 
 	} Node_t;
@@ -49,7 +53,7 @@ public:
 	private:
 		friend class Chain;
 		enum class CurrentNodeDirection : unsigned char { Forward, Backward };
-		ChainIterator(const Chain<T, MaxElems>& chain); //< private constructor for Chain to use
+		ChainIterator(const Chain<T, UnrolledElems>& chain); //< private constructor for Chain to use
 
 		Node_t* node;
 		std::uintptr_t lastVisitedNode;
@@ -57,7 +61,7 @@ public:
 		CurrentNodeDirection dir;
 
 	public:
-		ChainIterator(const Chain<T, MaxElems>& chain, ChainIteratorStartingPoint startingPoint);
+		ChainIterator(const Chain<T, UnrolledElems>& chain, ChainIteratorStartingPoint startingPoint);
 		ChainIterator& operator++();
 		ChainIterator operator++(int);
 		ChainIterator& operator--();
@@ -71,8 +75,8 @@ public:
 	ChainIterator end();
 };
 
-template<typename T, std::size_t MaxElems>
-Chain<T, MaxElems>::Chain()
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::Chain()
 {
 	Node_t* node = new Node_t();
 	node->link = reinterpret_cast<std::uintptr_t>(node);
@@ -82,8 +86,8 @@ Chain<T, MaxElems>::Chain()
 	this->tail = node;
 }
 
-template<typename T, std::size_t MaxElems>
-Chain<T, MaxElems>::~Chain()
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::~Chain()
 {
 	//Semi Safety check
 	if (this->head == nullptr)
@@ -114,12 +118,12 @@ Chain<T, MaxElems>::~Chain()
 	//Shouldn't need to set head and tail to nullptr since object is dead/deleted
 }
 
-template<typename T, std::size_t MaxElems>
-void Chain<T, MaxElems>::Add(T elem)
+template<typename T, std::size_t UnrolledElems>
+void Chain<T, UnrolledElems>::Add(T elem)
 {
 	Node_t* node = this->tail;
 
-	if (node->elementCount == MaxElems)
+	if (node->elementCount == UnrolledElems)
 	{
 		node = this->addNewNode();
 	}
@@ -129,8 +133,8 @@ void Chain<T, MaxElems>::Add(T elem)
 
 }
 
-template<typename T, std::size_t MaxElems>
-T Chain<T, MaxElems>::GetLast()
+template<typename T, std::size_t UnrolledElems>
+T Chain<T, UnrolledElems>::GetLast()
 {
 	Node_t* last = this->tail;
 	return last->elements[last->elementCount - 1];
@@ -139,8 +143,8 @@ T Chain<T, MaxElems>::GetLast()
 
 //Why I need typename I do no understand, unfortunatly I do not have time.
 //Will only work so long as nodes are onlyy added and only to the end
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::Node_t* Chain<T, MaxElems>::addNewNode()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::Node_t* Chain<T, UnrolledElems>::addNewNode()
 {
 	Node_t* prev = this->tail;
 	std::uintptr_t prev_addr = reinterpret_cast<std::uintptr_t>(prev);
@@ -160,20 +164,20 @@ typename Chain<T, MaxElems>::Node_t* Chain<T, MaxElems>::addNewNode()
 }
 
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator Chain<T, MaxElems>::begin()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::begin()
 {
 	return ChainIterator(*this, ChainIteratorStartingPoint::Head);
 }
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator Chain<T, MaxElems>::end()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::end()
 {
 	return ChainIterator(*this);
 }
 
-template<typename T, std::size_t MaxElems>
-Chain<T, MaxElems>::ChainIterator::ChainIterator(const Chain<T, MaxElems>& chain, ChainIteratorStartingPoint startingPoint)
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::ChainIterator::ChainIterator(const Chain<T, UnrolledElems>& chain, ChainIteratorStartingPoint startingPoint)
 {
 	switch (startingPoint)
 	{
@@ -189,19 +193,22 @@ Chain<T, MaxElems>::ChainIterator::ChainIterator(const Chain<T, MaxElems>& chain
 		this->unwrappedIndex = chain.tail->elementCount - 1;
 		this->dir = CurrentNodeDirection::Backward;
 		break;
+	default:
+		throw std::invalid_argument("Parameter \"startingPoint\" must be either "
+			"ChainIteratorStartingPoint::Head or ChainIteratorStartingPoint::Tail.");
 	}
 }
 
-template<typename T, std::size_t MaxElems>
-Chain<T, MaxElems>::ChainIterator::ChainIterator(const Chain<T, MaxElems>& chain)
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::ChainIterator::ChainIterator(const Chain<T, UnrolledElems>& chain)
 	: node(chain.tail)
 	, lastVisitedNode(reinterpret_cast<std::uintptr_t>(chain.tail))
 	, unwrappedIndex(chain.tail->elementCount)
 	, dir(CurrentNodeDirection::Backward)
 {}
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator& Chain<T, MaxElems>::ChainIterator::operator++()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator& Chain<T, UnrolledElems>::ChainIterator::operator++()
 {
 	//TODO: Do the increment here
 
@@ -246,16 +253,16 @@ typename Chain<T, MaxElems>::ChainIterator& Chain<T, MaxElems>::ChainIterator::o
 	return *this;
 }
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator Chain<T, MaxElems>::ChainIterator::operator++(int unused)
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::ChainIterator::operator++(int unused)
 {
 	auto tmp = *this;
 	operator++();
 	return tmp;
 }
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator& Chain<T, MaxElems>::ChainIterator::operator--()
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator& Chain<T, UnrolledElems>::ChainIterator::operator--()
 {
 	//TODO: Do the decrement here
 
@@ -288,30 +295,30 @@ typename Chain<T, MaxElems>::ChainIterator& Chain<T, MaxElems>::ChainIterator::o
 	return *this;
 }
 
-template<typename T, std::size_t MaxElems>
-typename Chain<T, MaxElems>::ChainIterator Chain<T, MaxElems>::ChainIterator::operator--(int)
+template<typename T, std::size_t UnrolledElems>
+typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::ChainIterator::operator--(int)
 {
 	auto tmp = *this;
 	operator--();
 	return tmp;
 }
 
-template<typename T, std::size_t MaxElems>
-bool Chain<T, MaxElems>::ChainIterator::operator==(ChainIterator other) const
+template<typename T, std::size_t UnrolledElems>
+bool Chain<T, UnrolledElems>::ChainIterator::operator==(ChainIterator other) const
 {
 	//Note, direction doesn't matter for equality, nor does last Visited Node
 
 	return (this->node == other.node) && (this->unwrappedIndex == other.unwrappedIndex);
 }
 
-template<typename T, std::size_t MaxElems>
-bool Chain<T, MaxElems>::ChainIterator::operator!=(ChainIterator other) const
+template<typename T, std::size_t UnrolledElems>
+bool Chain<T, UnrolledElems>::ChainIterator::operator!=(ChainIterator other) const
 {
 	return !(operator==(other));
 }
 
-template<typename T, std::size_t MaxElems>
-T& Chain<T, MaxElems>::ChainIterator::operator*()
+template<typename T, std::size_t UnrolledElems>
+T& Chain<T, UnrolledElems>::ChainIterator::operator*()
 {
 	return this->node->elements[this->unwrappedIndex];
 }

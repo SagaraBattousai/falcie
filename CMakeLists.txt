@@ -21,12 +21,22 @@ if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation")
+set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation.")
+set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 
-set(INCLUDE_ROOT "${CMAKE_SOURCE_DIR}/include")
+set(INCLUDE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(pulse)
 #add_subdirectory(etro)
+
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
+if(BUILD_DOCS)
+  add_subdirectory(docs)
+endif()
 
 # add_library(etro SHARED) # $<TARGET_OBJECTS:pulse>)
 
@@ -41,9 +51,6 @@ if(WIN32)
   copy_openssl_runtime_lib_to_target(T crypto)
 endif()
 
-if(BUILD_DOCS)
-  add_subdirectory(docs)
-endif()
 
 #----------------------------------------------
 #   Install settings

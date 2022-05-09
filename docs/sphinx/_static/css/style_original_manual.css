@@ -1,0 +1,164 @@
+
+:root {
+}
+
+
+/* Dark theme colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --body-color: rgba(255, 255, 255, 0.85);
+    --content-wrap-background-color: #202326;
+    --content-background-color: #2e3236;
+
+    /* admonition */
+    --note-background-color: #303d4f;
+    --note-text-color: #bfeeff;
+
+    --note-title-background-color: #6ab0de;
+    --note-title-text-color: #bfefff;
+
+    --input-background-color: #333537;
+    --search-active-color: #202326;
+
+    /* Decrease the logo opacity when using the dark theme to be less distracting */
+    --logo-opacity: 0.85;
+    --navbar-background-color: #25282b;
+    --navbar-background-color-hover: #333639;
+    --navbar-background-color-active: #111417;
+    --navbar-current-background-color: #333639;
+
+
+    --navbar-current-background-color-hover: #44474a;
+    --navbar-current-background-color-active: #222528;
+    --navbar-level-1-color: #ddd;
+    --navbar-level-2-color: #ccc;
+    --navbar-level-3-color: #bbb;
+    --navbar-heading-color: #ee7381;
+    --navbar-scrollbar-color: #be5460;
+    --navbar-scrollbar-hover-color: #963e48;
+    --navbar-scrollbar-active-color: #5f3034;
+    --navbar-scrollbar-background: #1c1e21;
+
+    --link-color: #8cf;
+    --link-color-hover: #9df;
+    --link-color-active: #6ad;
+    --link-color-visited: #cb99f6;
+  }
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+input[type="text"],
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+textarea,
+legend,
+.btn,
+.rst-content .toctree-wrapper p.caption,
+.rst-versions {
+    /* Use a system font stack for better performance (no Web fonts required) */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+
+
+body {
+  color: var(--body-color);
+}
+
+.wy-nav-content-wrap {
+  background: var(--content-wrap-background-color);
+}
+
+
+.wy-body-for-nav{
+  background: var(--content-wrap-background-color);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.wy-body-for-nav .search__outer {
+  border: 2px solid var(--content-background-color);
+}
+
+.wy-nav-side {
+  left: inherit;
+  background-color: var(--navbar-background-color);
+}
+
+.wy-side-nav-search {
+  background-color: var(--navbar-background-color);
+}
+
+.wy-nav-content {
+  background: var(--content-background-color);
+
+}
+
+.rst-content div.figure p.caption {
+    /* Tweak caption styling to be closer to typical captions */
+    text-align: center;
+    margin-top: 8px;
+    opacity: 0.75;
+}
+
+/* .admonition.note *//* < more specific than below methinks */
+.rst-content .note {
+  background-color: var(--note-background-color);
+  color: var(--note-text-color);
+}
+
+.rst-content .note .admonition-title {
+  background-color: var(--note-title-background-color);
+  color: var(--note-title-text-color);
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:visited {
+  color: var(--link-color-visited);
+}
+
+.wy-menu-vertical p.caption {
+  color: var(--navbar-heading-color);
+  letter-spacing: 0.75px;
+}
+
+.wy-side-nav-search input[type="text"] {
+  background-color: var(--input-background-color);
+  color: var(--body-color);
+  /* Avoid reflowing when toggling the focus state */
+  border: 2px solid transparent;
+  box-shadow: none;
+  /* Make visual feedback instant */
+  transition: none;
+  font-size: 14px;
+}
+
+.wy-menu-vertical li.current a{
+  background-color: var(--navbar-current-background-color);
+  color: var(--navbar-level-2-color);
+  display: flex;
+}
+
+.wy-menu-vertical a:hover {
+    background-color: var(--navbar-background-color-hover);
+    color: var(--navbar-level-1-color);
+}
+
+/* VV Not working!!! */
+/* Search item section */
+.wy-body-for-nav .outer_div_page_results:hover,
+.wy-body-for-nav .search__result__box .active {
+    background-color: var(--search-active-color);
+}
+
+
