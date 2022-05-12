@@ -1,189 +1,10 @@
 /**
- * Various tweaks to the Read the Docs theme to better conform with Godot's
- * visual identity. Many colors are also overridden to use CSS variables.
+ * Based Upon Godot's Css which looks significantly better than the default
+ * Read the Docs theme. Many colors are also overridden to use CSS variables.
  * This makes it possible to provide an automatically-used dark theme
  * based on browser preferences.
  */
 
- /* Default (light) theme colors */
- :root {
-    --body-color: #404040;
-    --content-wrap-background-color: #efefef;
-    --content-background-color: #fcfcfc;
-    --logo-opacity: 1.0;
-    --navbar-background-color: #333f67;
-    --navbar-background-color-hover: #29355c;
-    --navbar-background-color-active: #212d51;
-    --navbar-current-background-color: #212d51;
-    --navbar-current-background-color-hover: #182343;
-    --navbar-current-background-color-active: #131e3b;
-    --navbar-level-1-color: #c3e3ff;
-    --navbar-level-2-color: #b8d6f0;
-    --navbar-level-3-color: #a3c4e1;
-    --navbar-heading-color: #ff7381;
-    --navbar-scrollbar-color: #d45a66;
-    --navbar-scrollbar-hover-color: #b14550;
-    --navbar-scrollbar-active-color: #72383e;
-    --navbar-scrollbar-background: #131e2b;
-
-    --link-color: #2980b9;
-    --link-color-hover: #3091d1;
-    --link-color-active: #105078;
-    --link-color-visited: #9b59b6;
-    --external-reference-icon: url("data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjEyIiB3aWR0aD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjk4MGI5Ij48cGF0aCBkPSJtNy41IDcuMXYzLjRoLTZ2LTZoMy40Ii8+PHBhdGggZD0ibTUuNzY1IDFoNS4yMzV2NS4zOWwtMS41NzMgMS41NDctMS4zMS0xLjMxLTIuNzI0IDIuNzIzLTIuNjktMi42ODggMi44MS0yLjgwOC0xLjMxMy0xLjMxeiIvPjwvZz48L3N2Zz4K");
-    --classref-badge-text-color: hsl(0, 0%, 45%);
-
-    --hr-color: #e1e4e5;
-    --table-row-odd-background-color: #f3f6f6;
-    --code-background-color: #fff;
-    --code-border-color: #e1e4e5;
-    --code-literal-color: #d04c60;
-    --input-background-color: #fcfcfc;
-    --input-focus-border-color: #5f8cff;
-
-    --search-input-background-color: #e6eef3; /* derived from --input-background-color */
-    --search-match-color: #2c6b96; /* derived from --link-color */
-    --search-match-background-color: #e3f2fd; /* derived from --link-color */
-    --search-active-color: #efefef;
-    --search-credits-background-color: #333f67; /* derived from --navbar-background-color */
-    --search-credits-color: #b3b3b3; /* derived from --footer-color */
-    --search-credits-link-color: #4392c5; /* derived from --link-color */
-
-    --highlight-background-color: #f5ffe1;
-    --highlight-background-emph-color: #dbe6c3;
-    --highlight-default-color: #404040;
-    --highlight-comment-color: #408090;
-    --highlight-keyword-color: #007020;
-    --highlight-keyword2-color: #902000;
-    --highlight-number-color: #208050;
-    --highlight-decorator-color: #4070a0;
-    --highlight-type-color: #007020;
-    --highlight-type2-color: #0e84b5;
-    --highlight-function-color: #06287e;
-    --highlight-operator-color: #666666;
-    --highlight-string-color: #4070a0;
-
-    --admonition-note-background-color: #e7f2fa;
-    --admonition-note-color: #404040;
-    --admonition-note-title-background-color: #6ab0de;
-    --admonition-note-title-color: #fff;
-    --admonition-attention-background-color: #ffedcc;
-    --admonition-attention-color: #404040;
-    --admonition-attention-title-background-color: #f0b37e;
-    --admonition-attention-title-color: #fff;
-    --admonition-danger-background-color: #fcf3f2;
-    --admonition-danger-color: #404040;
-    --admonition-danger-title-background-color: #e9a499;
-    --admonition-danger-title-color: #fff;
-    --admonition-tip-background-color: #dbfaf4;
-    --admonition-tip-color: #404040;
-    --admonition-tip-title-background-color: #1abc9c;
-    --admonition-tip-title-color: #fff;
-
-    --kbd-background-color: #fafbfc;
-    --kbd-outline-color: #d1d5da;
-    --kbd-shadow-color: #b0b7bf;
-    --kbd-text-color: #444d56;
-
-    --code-example-good-color: #3fb950;
-    --code-example-bad-color: #f85149;
-
-    --btn-neutral-background-color: #f3f6f6;
-    --btn-neutral-hover-background-color: #e5ebeb;
-    --footer-color: #808080;
-}
-
-/* Dark theme colors */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --body-color: rgba(255, 255, 255, 0.85);
-        --content-wrap-background-color: #202326;
-        --content-background-color: #2e3236;
-        /* Decrease the logo opacity when using the dark theme to be less distracting */
-        --logo-opacity: 0.85;
-        --navbar-background-color: #25282b;
-        --navbar-background-color-hover: #333639;
-        --navbar-background-color-active: #111417;
-        --navbar-current-background-color: #333639;
-        --navbar-current-background-color-hover: #44474a;
-        --navbar-current-background-color-active: #222528;
-        --navbar-level-1-color: #ddd;
-        --navbar-level-2-color: #ccc;
-        --navbar-level-3-color: #bbb;
-        --navbar-heading-color: #ee7381;
-        --navbar-scrollbar-color: #be5460;
-        --navbar-scrollbar-hover-color: #963e48;
-        --navbar-scrollbar-active-color: #5f3034;
-        --navbar-scrollbar-background: #1c1e21;
-
-        --link-color: #8cf;
-        --link-color-hover: #9df;
-        --link-color-active: #6ad;
-        --link-color-visited: #cb99f6;
-        --external-reference-icon: url("data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjEyIiB3aWR0aD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOGNmIj48cGF0aCBkPSJtNy41IDcuMXYzLjRoLTZ2LTZoMy40Ii8+PHBhdGggZD0ibTUuNzY1IDFoNS4yMzV2NS4zOWwtMS41NzMgMS41NDctMS4zMS0xLjMxLTIuNzI0IDIuNzIzLTIuNjktMi42ODggMi44MS0yLjgwOC0xLjMxMy0xLjMxeiIvPjwvZz48L3N2Zz4K");
-        --classref-badge-text-color: hsl(0, 0%, 70%);
-
-        --hr-color: #555;
-        --table-row-odd-background-color: #3b3e41;
-        --code-background-color: #434649;
-        --code-border-color: #505356;
-        --code-literal-color: #faa;
-        --input-background-color: #333537;
-        --input-focus-border-color: #5f8cff;
-
-        --search-input-background-color: #43464a; /* derived from --input-background-color */
-        --search-match-color: #52b4ff; /* derived from --link-color */
-        --search-match-background-color: #414c56; /* derived from --link-color */
-        --search-active-color: #202326;
-        --search-credits-background-color: #202123; /* derived from --navbar-background-color */
-        --search-credits-color: #6b6b6b; /* derived from --footer-color */
-        --search-credits-link-color: #628fb1; /* derived from --link-color */
-
-        /* Colors taken from the Godot script editor with the Adaptive theme */
-        --highlight-background-color: #202531;
-        --highlight-background-emph-color: #2d3444;
-        --highlight-default-color: rgba(255, 255, 255, 0.85);
-        --highlight-comment-color: rgba(204, 206, 211, 0.5);
-        --highlight-keyword-color: #ff7085;
-        --highlight-keyword2-color: #42ffc2;
-        --highlight-number-color: #a1ffe0;
-        --highlight-decorator-color: #ffb373;
-        --highlight-type-color: #8effda;
-        --highlight-type2-color: #c6ffed;
-        --highlight-function-color: #57b3ff;
-        --highlight-operator-color: #abc8ff;
-        --highlight-string-color: #ffeca1;
-
-        --admonition-note-background-color: #303d4f;
-        --admonition-note-color: #bfeeff;
-        --admonition-note-title-background-color: #305070;
-        --admonition-note-title-color: #bfefff;
-        --admonition-attention-background-color: #444033;
-        --admonition-attention-color: #ffeeaf;
-        --admonition-attention-title-background-color: #665022;
-        --admonition-attention-title-color: #ffeeaf;
-        --admonition-danger-background-color: #433;
-        --admonition-danger-color: #fcc;
-        --admonition-danger-title-background-color: #633;
-        --admonition-danger-title-color: #fcc;
-        --admonition-tip-background-color: #28382d;
-        --admonition-tip-color: #dfd;
-        --admonition-tip-title-background-color: #336648;
-        --admonition-tip-title-color: #dfd;
-
-        --kbd-background-color: #595b5d;
-        --kbd-outline-color: #3d4144;
-        --kbd-shadow-color: #1e2023;
-        --kbd-text-color: #e2f2ff;
-
-        --code-example-good-color: #3fb950;
-        --code-example-bad-color: #f85149;
-
-        --btn-neutral-background-color: #404040;
-        --btn-neutral-hover-background-color: #505050;
-        --footer-color: #aaa;
-    }
-}
 
 body,
 h1,
@@ -331,7 +152,7 @@ hr,
 }
 
 /* JavaScript documentation directives */
-.rst-content dl:not(.docutils) dt {
+.rst-content dl:not(.docutils):not(.c) dt {
     background-color: var(--admonition-note-background-color) !important;
     border-color: var(--admonition-note-title-background-color);
     color: var(--admonition-note-color);
@@ -1087,3 +908,18 @@ kbd.compound > .kbd,
     border-left-color: var(--code-example-bad-color);
     border-left-width: 8px;
 }
+
+/* .rst-content .breathe-sectiondef.docutils dl.c dt.sig.sig-object.c { */ 
+/* Must use important as there are just far too many vars to increase */
+/* Specificity */
+.rst-content dl.c .sig.c { 
+  background-color: var(--c-signature-background-color) !important;
+}
+
+.rst-content dl.c .sig-name {
+  color: var(--c-sig-name-color) !important;
+}
+
+
+
+

@@ -15,7 +15,9 @@ find_package(OpenSSL 3 REQUIRED)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+include(SystemCheck)
 include(LibUtils)
+set_system_check_vars()
 
 if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)

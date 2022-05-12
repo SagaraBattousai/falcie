@@ -1,44 +1,30 @@
+/* Can't trust __AVX__ to be defined for non MSVC.
+ * Therefore setting USE_AVX_INTRIN from CMAKE if compiled with AVX.
+ * 
+ * Look at matrix_avx.c for intrinsics version.
+ */
+
+#ifndef USE_AVX_INTRIN
+
 #include <stdlib.h>
-#include <stdio.h>
-#include <immintrin.h>
-
 #include <pulse/matrix.h>
-
-void f(float *x)
+// Don't swap j and k. That benifit removed stride from inner loop but
+// the way we chose our indicies does this automatically.
+// i.e. Inner loop var (in this case k) is not multiplied in said loop.
+void matrix_multiply(float *in1, float *in2, float *out,
+    const unsigned int dim1, const unsigned int dim2, const unsigned int dim3)
 {
-    float y[2] = { 1.0, 2.0 };
-    *(x + 2) = 2.7;
-    printf("%f\n%f\n\n", *(x + 2), *(y + 1));
-}
-/*
-void inner(int s, int *rowB, int *rowC)
-{
-  __m512i sv = _mm512_set1_epi32(s);
-  for (int j = 0; j < ARR_SHAPE/16; j++)
+  for (unsigned int i = 0; i < dim1; i++)
   {
-    //Do I need/should u? Maybe if last load isn't full?
-    __m512i cv = _mm512_loadu_epi32(&rowC[16*j]); 
-    __m512i bv = _mm512_loadu_epi32(&rowB[16*j]); 
-    //Apparently can't do FMA from intrinsic cv = _mm512_fmadd_pd(sv, bv, cv);
-    //Compiler should hopefully do it for me
-    __m512i mult = _mm512_mullo_epi32(bv, sv);
-    cv = _mm512_add_epi32(mult, cv);
-    _mm512_storeu_epi32(&rowC[16*j], cv);   
+    for (unsigned int j = 0; j < dim2; j++)
+    {
+        for (unsigned int k = 0; k < dim3; k++)
+        {
+            out[i * dim3 + k] += in1[i * dim2 + j] * in2[j * dim3 + k];
+        }
+    }
   }
 }
 
-int *gemm3(int *matrix1, int *matrix2)
-{
-  int *out = calloc(ARR_SIZE, sizeof(int));
-  for (int i = 0; i < ARR_SHAPE; i++)
-  {
-    for (int k = 0; k < ARR_SHAPE; k++)
-    {
-      inner(matrix1[i * ARR_SHAPE + k],
-          &matrix2[k * ARR_SHAPE],
-          &out[i * ARR_SHAPE]);
-      }
-    }
-  return out;
-}
-*/
+
+#endif

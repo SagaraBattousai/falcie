@@ -52,7 +52,7 @@ extensions = [ "breathe"
 breathe_projects = { "@PROJECT_NAME@" : "@SPHINX_RELATIVE_DOXYGEN_XML_DIR@" }
 breathe_default_project = "@PROJECT_NAME@"
 breathe_show_include = True
-breathe_default_members = ('members', 'undoc-members')
+#breathe_default_members = ('members', 'undoc-members')
 
 breathe_domain_by_extension = {
     @BREATHE_DOMAIN_BY_EXTENSION_DICT@

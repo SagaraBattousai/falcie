@@ -8,7 +8,15 @@
 
 typedef struct federated_block
 {
+	unsigned int magic; //Always 0x43616C6F
+	unsigned int blocksize;
 	blockheader_t header;
+	//varint Transaction counter
+	//transactions	the(non empty) list of transactions
+	//TODO: Just for now VV
+	//LocalUpdates[]cactuar.Pair [[]float32, int]
+	//	GlobalUpdate[]float32
+
 } federatedblock_t;
 
 federatedblock_t new_federated_block();

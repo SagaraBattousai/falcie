@@ -52,16 +52,17 @@ extensions = [ "breathe"
 breathe_projects = { "falcie" : "../build/xml" }
 breathe_default_project = "falcie"
 breathe_show_include = True
-breathe_default_members = ('members', 'undoc-members')
+#breathe_default_members = ('members', 'undoc-members')
 
 breathe_domain_by_extension = {
     "h" : "c",
     }
 
 breathe_domain_by_file_pattern = {
-    "../include/etro/chain.h"       : "cpp",
-   "../include/etro/blockchain.h"  : "cpp",
-   "../include/etro/orderedlish.h" : "cpp",
+    
+  "*/include/pulse/chain.h"       : "cpp",
+  "*/include/pulse/blockchain.h"  : "cpp",
+  "*/include/pulse/orderedlist.h" : "cpp",
     }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -96,7 +97,13 @@ html_static_path = ['_static']
 
 #Relative to html_static_path
 html_css_files = [
-    "css/godot_style.css",
+    
+  "css/style.css",
+  "css/colour.css",
+  "css/defaults.css",
+  "css/dark.css",
+  "css/light.css",
+  
 ]
 
 #if not on_rtd:

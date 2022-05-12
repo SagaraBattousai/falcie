@@ -1,16 +1,25 @@
 
 macro(configure_sphinx_and_add_command)
 
-  set(SPHINX_CSS_FILES_LIST "\"css/godot_style.css\",")
+  #Order matters
+  set(SPHINX_CSS_FILES_LIST "
+  \"css/style.css\",
+  \"css/colour.css\",
+  \"css/defaults.css\",
+  \"css/dark.css\",
+  \"css/light.css\",
+  ")
 
   set(SPHINX_JS_FILES_LIST "") #"\"js/falcie_docs.js\","
 
   set(BREATHE_DOMAIN_BY_EXTENSION_DICT "\"h\" : \"c\",")
 
-  set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT 
-  "\"../include/etro/chain.h\"       : \"cpp\",
-   \"../include/etro/blockchain.h\"  : \"cpp\",
-   \"../include/etro/orderedlish.h\" : \"cpp\",")
+  #dont need * and path but A I like path and B ...
+  #I cant seem to use ../../ soooo......
+  set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT "
+  \"*/include/pulse/chain.h\"       : \"cpp\",
+  \"*/include/pulse/blockchain.h\"  : \"cpp\",
+  \"*/include/pulse/orderedlist.h\" : \"cpp\",")
 
   configure_file(${SPHINX_CONF_IN} ${SPHINX_CONF_OUT} @ONLY)
 
@@ -37,7 +46,10 @@ macro(configure_sphinx_and_add_command)
     "-Dbreathe_projects.${PROJECT_NAME}=${SPHINX_DOXYGEN_XML_DIR}"
     "-Dbreathe_default_project=${PROJECT_NAME}"
     ${SPHINX_ROOT_DIRECTORY} ${SPHINX_OUTPUT_DIRECTORY}
-    ${SPHINX_CSS} ${SPHINX_JS}
+    # Note incremental build doesn't copy over css/js however I
+    # hate having to specify manually so just remember to copy over
+    # your css and js if theyre different. I'll add a copy if different later.
+    # ${SPHINX_RESTRUCTRED_TEXT} ${SPHINX_CSS} ${SPHINX_JS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     MAIN_DEPENDENCY ${SPHINX_CONF_OUT}
     DEPENDS ${SPHINX_RESTRUCTRED_TEXT} ${DOXYGEN_XML_INDEX_FILE}

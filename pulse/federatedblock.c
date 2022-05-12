@@ -13,7 +13,8 @@ federatedblock_t new_federated_block()
 	//nonce ~must/should be 0 and target will be set for now but can change when needed
 	blockheader_t header = { .version = 0x01, .nonce = 0, .target = CACTUAR_BASE_DIFFICULTY };
 
-	federatedblock_t block = { header };
+	//TODO: fix
+	federatedblock_t block = { 0 }; // { header };
 
 	return block;
 }

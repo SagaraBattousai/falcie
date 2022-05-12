@@ -32,6 +32,9 @@ private:
 		T elements[UnrolledElems];
 		std::size_t elementCount;
 
+		Node();
+		explicit Node(std::uintptr_t link);
+		Node(std::uintptr_t link, std::size_t elementCount);
 	} Node_t;
 
 	Node_t* addNewNode();
@@ -79,8 +82,6 @@ template<typename T, std::size_t UnrolledElems>
 Chain<T, UnrolledElems>::Chain()
 {
 	Node_t* node = new Node_t();
-	node->link = reinterpret_cast<std::uintptr_t>(node);
-	node->elementCount = 0;
 
 	this->head = node;
 	this->tail = node;
@@ -141,28 +142,38 @@ T Chain<T, UnrolledElems>::GetLast()
 
 }
 
-//Why I need typename I do no understand, unfortunatly I do not have time.
-//Will only work so long as nodes are onlyy added and only to the end
 template<typename T, std::size_t UnrolledElems>
 typename Chain<T, UnrolledElems>::Node_t* Chain<T, UnrolledElems>::addNewNode()
 {
 	Node_t* prev = this->tail;
 	std::uintptr_t prev_addr = reinterpret_cast<std::uintptr_t>(prev);
 
-	Node_t* node = new Node_t();
-	//TODO: may want to xor wirh self to help with iter
-	node->link = prev_addr;//reinterpret_cast<std::uintptr_t>(node);
-	node->elementCount = 0;
+	Node_t* node = new Node_t(prev_addr);
 
-	//std::uintptr_t node_addr = reinterpret_cast<std::uintptr_t>(node);
-
-	prev->link ^= reinterpret_cast<std::uintptr_t>(node);  //node_addr;
+	prev->link ^= reinterpret_cast<std::uintptr_t>(node);
 
 	this->tail = node;
 
 	return node;
 }
 
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::Node::Node()
+	: link(reinterpret_cast<std::uintptr_t>(this))
+	, elementCount(0)
+{}
+
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::Node::Node(std::uintptr_t link)
+	: link(link)
+	, elementCount(0)
+{}
+
+template<typename T, std::size_t UnrolledElems>
+Chain<T, UnrolledElems>::Node::Node(std::uintptr_t link, std::size_t elementCount)
+	: link(link)
+	, elementCount(elementCount)
+{}
 
 template<typename T, std::size_t UnrolledElems>
 typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::begin()
