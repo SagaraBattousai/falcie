@@ -2,7 +2,7 @@
 /* Default/Shared theme colors */
 :root {
   --input-focus-border-color: #5f8cff;
-  --c-signature-background-color: RGBA(185,30,35,0.48); /* #b91e237a; */
+  --c-signature-background-color: #f8eeae;/*RGBA(185,30,35,0.48); /* #b91e237a; */
   --c-sig-name-color: #029dcf;
 
 }

@@ -12,6 +12,7 @@ Pulse
    blockheader
    federatedblock
    
+   anima/anima
    anima/matrix
    cactuar/cactuar
    cactuar/encoding

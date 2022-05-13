@@ -1,6 +1,6 @@
 
 set(c_sources
-  "crypto.c" "encoding.c" "cactuar.c" "math.c")
+  "crypto.c" "encoding.c" "cactuar.c" "cactuar_math.c")
 
 set(cpp_sources "endianness_check.cpp")
 
@@ -9,7 +9,7 @@ set(public_header_files
   "${PULSE_INCLUDE_ROOT}/crypto.h"
   "${PULSE_INCLUDE_ROOT}/encoding.h"
   "${PULSE_INCLUDE_ROOT}/cactuar.h"
-  "${PULSE_INCLUDE_ROOT}/math.h")
+  "${PULSE_INCLUDE_ROOT}/cactuar_math.h")
 
 set(private_header_files "endianness_check.h")
 

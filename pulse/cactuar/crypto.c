@@ -20,7 +20,6 @@ hasher_t* get_default_sha256_hasher()
 		{
 			return NULL;
 		}
-			
 		sha256->hash_context = EVP_MD_CTX_new();
 		EVP_DigestInit_ex2(sha256->hash_context, EVP_sha256(), NULL);
 	}
