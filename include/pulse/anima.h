@@ -1,46 +1,86 @@
 #ifndef __PULSE_ANIMA_ANIMA_H__
 #define __PULSE_ANIMA_ANIMA_H__
 
+#include <stdint.h>
+
 typedef float (*activation_t)(float);
-/*-----------------------------------------------------------------
-Note: Messy af and fiddly to delete memory as input is also pointed
-to by both layers and pre_act_layers. Starting to see why we should
-use smart pointers but alas, for now we shall ignore!
+typedef float (*delta_activation_t)(float);
 
-TODO: Replace with structs!
-------------------------------------------------------------------*/
+typedef struct neural_network
+{ 
+    /** @c input_length: The length of the input array. */
+    int64_t input_size;
+    /** @c input: A pointer to the networks inputs. */
+    float *input;
+    /**
+     * @c num_layers: The number of neuron / weight layers in the network,
+     * i.e. the total number of layers excluding the input layer (also equal
+     * to the dimensions of the weight array).
+     */
+    int64_t num_layers;
+    /**
+     * @c neuron_dims is an array describing the shape
+     * of the neurons in each layer. The array must be of length @c num_layers
+     * and structured such that @c neuron_dims[layer - 1] is the number of neurons
+     * at layer @c layer
+     */
+    int64_t *neuron_dims;
+    /**
+    * @c weights: An array of weights with @c num_layers dimensions each of
+    * which are described by @c neuron_dims. The true dimensions of weights, 
+    * since it is a 2D array, 
+    * is @c [neuron_dims[layer1 - 1] * neuron_dims[layer2 -1]], such that 
+    * the weight connects layer1 to layer2
+    */
+    float **weights;
 
+    //TODO: make into an activation array.
+    /**
+    * @c activation: A function pointer to the
+    * activation function for the network.
+    */
+    activation_t activation;
 
-//-------------------------------------------------
-// Usually I hate returning something I've malloced in a func.
-// However, I think this time it's somewhat justified.
+    delta_activation_t delta_activation;
+
+    /** @c learning_rate: The learning rate of the network. */
+    float learning_rate;
+} neural_network_t;
+
+typedef struct feedforward_tracking
+{
+    /** @c layers: A matrix of the layers through the network. */
+    float **layers;
+    /**
+     * @c pre_act_layers: A matrix of the layers, before the activation
+     * is applied, through the network.
+     */
+    float **pre_activation_layers;
+
+    /** @c total_layer_count: The number of layers (including the
+     * input layer). Used primarily to help with freeing memory.
+     */
+    int64_t total_layer_count;
+
+}feedforward_tracking_t;
+
+//Not my weight dims are swiched from Benny's example.
 /*****************************************************************************
 * Neural Network feed forward.
-*
-*
-* @param[in]  input          is a pointer to the networks inputs.
-* @param[in]  weights        is an array of weights with **num_layers** 
-* dimensions and described by weight_dims. 
-* @param[in]  activation     is a function pointer to the activation 
-* function for the network.
-* TODO: make into an activation array.
-* @param[in, out] layers         will be a matrix of the layers through the 
-* network. Must be of size num_layers + 1.
-* Don't forget to free once you're done.
-* @param[in, out] pre_act_layers will be a matrix of the layers, before the
-* activation is applied, through the network. Must be of size num_layers + 1.
-* Don't forget to free once you're done.
-* @param[in]  input_length   is the length of the input array
-* @param[in]  num_layers     is the number of neuron/weight layers
-* in the network, i.e. the total number of layers excluding the input layer.
-* (also equal to the dimensions of the weight array).
-* @param[in]  weight_dims    is an array describing the shape of the weights
-* array.
+* 
+* @param[in] network The network to perform the forward pass on.
+* @param[out] tracking Records the layers and and pre activation layers
+* through a forward pass of the network. This can then be used to calculate
+* the gradients via backpropagation.
 ******************************************************************************/
-int feedforward(float *input, float **weights, activation_t act, float **layers, float **pre_act_layers,
-    unsigned int input_length, unsigned int num_nodes, unsigned int *weight_dims);
+int feedforward(neural_network_t *network, feedforward_tracking_t *tracking);
+
+int backpropagation(float ***new_weights, float *desired, neural_network_t *network, feedforward_tracking_t *tracking);
 
 
+void free_tracking(feedforward_tracking_t *tracking);
 
+//TODO: Hide this later
+int copy_weights(float ***dst, float**src, int64_t num_layers, int64_t input_dim, int64_t *neuron_dims);
 
 #endif

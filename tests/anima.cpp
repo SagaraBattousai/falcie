@@ -25,7 +25,7 @@ TEST(AnimaMatrix, VectorViaMatrixMult)
 	EXPECT_EQ(std::memcmp(actual, expected, 1), 0);
 }
 
-TEST(AnimaMatrix, VectorDot)
+TEST(AnimaVector, VectorDot)
 {
 	float in1[6] = { 7,  8,  9, 10, 11, 12 };
 	float in2[6] = { 27, 28, 29, 30, 31, 32 };
@@ -33,3 +33,46 @@ TEST(AnimaMatrix, VectorDot)
 	float actual = vector_dot(in1, in2, 6);
 	EXPECT_EQ(actual, expected);
 }
+
+TEST(AnimaVector, VectorBroadcast)
+{
+	float in1[3] = { 1, 2, 3 };
+	float in2[5] = { 6, 7, 8, 9, 10 };
+
+	float expected[15] = {  6, 12, 18,
+						    7, 14, 21,
+						    8, 16, 24,
+						    9, 18, 27,
+						   10, 20, 30};
+
+	float actual[15] = { 0 };
+
+	broadcast_vectors(in1, in2, actual, 3, 5, mult());
+	EXPECT_EQ(std::memcmp(actual, expected, sizeof(float) * 15), 0);
+}
+
+TEST(AnimaVector, VectorScalarMult)
+{
+	float scalar = 9;
+	float in1[5] = { 6, 7, 8, 9, 10 };
+
+	float expected[5] = { 54, 63, 72, 81, 90 };
+
+	float actual[5] = { 0 };
+
+	scalar_vector_mult(scalar, in1, actual, 5);
+	EXPECT_EQ(std::memcmp(actual, expected, sizeof(float) * 5), 0);
+}
+
+TEST(AnimaVector, VectorMutableScalarMult)
+{
+	float scalar = 9;
+	float in1[5] = { 6, 7, 8, 9, 10 };
+
+	float expected[5] = { 54, 63, 72, 81, 90 };
+
+	scalar_vector_mult(scalar, in1, in1, 5);
+	EXPECT_EQ(std::memcmp(in1, expected, sizeof(float) * 5), 0);
+
+}
+

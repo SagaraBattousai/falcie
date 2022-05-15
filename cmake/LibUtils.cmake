@@ -1,10 +1,24 @@
+
+#Note, small changes to dll can sometime (as in this case and why I 
+#am writing this function) result in no change to the dll
+#therefore symlinking is better!
+function(symlink_library_to_target target lib)
+  add_custom_command(TARGET ${target}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+    $<TARGET_FILE:${lib}>
+    $<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${lib}>
+    COMMENT "Creating a symbolic link to ${lib} from Target ${target}'s \
+    directory.")
+endfunction()
+
 function(copy_library_to_target target lib)
   add_custom_command(TARGET ${target}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:${lib}>
     $<TARGET_FILE_DIR:${target}>
-    # USES_TERMINAL #Guess I dont need :D (Is it better without?)
+    USES_TERMINAL #Guess I dont need :D (Is it better without?)
     COMMENT "Copying ${lib} to Target ${target}'s directory")
 endfunction()
 

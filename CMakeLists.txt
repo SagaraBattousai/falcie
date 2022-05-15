@@ -49,7 +49,7 @@ target_include_directories(T PUBLIC ${INCLUDE_ROOT})
 #DLL's must be in same dir as exe (or added to path but i'd rather
 #avoid that if I can.
 if(WIN32)
-  copy_library_to_target(T pulse)
+  symlink_library_to_target(T pulse)
   copy_openssl_runtime_lib_to_target(T crypto)
 endif()
 

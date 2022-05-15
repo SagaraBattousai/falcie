@@ -12,11 +12,15 @@ typedef struct hasher hasher_t;
 
 hasher_t* get_default_sha256_hasher();
 
+/** size_t required for compatability with OpenSSL */
 inline void update_hash(hasher_t* hasher, const void* data, size_t count);
 
+/** unsigned int required for compatability with OpenSSL */
 inline void output_hash(hasher_t* hasher, unsigned char* dst, unsigned int* size);
 
+
 //Potentiall make inline, combo of the two above sans the func calls.
+/** size_t, unsigned int required for compatability with OpenSSL */
 void hash_data(hasher_t* hasher, const void* src, size_t src_count,
 	unsigned char* dst, unsigned int* dst_size);
 

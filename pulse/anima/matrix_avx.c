@@ -26,23 +26,23 @@ static inline void inner_intrin_matrix_mult(__m512 sv, float *rowB, float *rowC)
 }
 
 void matrix_multiply(float *in1, float *in2, float *out,
-    const unsigned int dim1, const unsigned int dim2, const unsigned int dim3)
+    const int64_t dim1, const int64_t dim2, const int64_t dim3)
 {
-    const unsigned int packed_width = dim3 >> AVX_512_PACK_SHIFT; //i.e. /16
+    const int64_t packed_width = dim3 >> AVX_512_PACK_SHIFT; //i.e. /16
 
-    for (unsigned int i = 0; i < dim1; i++)
+    for (int64_t i = 0; i < dim1; i++)
     {
-        unsigned int out_row_start = i * dim3;
+        int64_t out_row_start = i * dim3;
 
-        for (unsigned int j = 0; j < dim2; j++)
+        for (int64_t j = 0; j < dim2; j++)
         {
             __m512 sv = _mm512_set1_ps(in1[i * dim2 + j]); //A_ij
-            unsigned int in_row_start = j * dim3;
+            int64_t in_row_start = j * dim3;
 
             //Can only work on 16 elements per row at a time
-            for (unsigned int packed_segment = 0; packed_segment < packed_width; packed_segment++)
+            for (int64_t packed_segment = 0; packed_segment < packed_width; packed_segment++)
             {
-                unsigned int packed_offset = packed_segment << AVX_512_PACK_SHIFT; //i.e. * 16
+                int64_t packed_offset = packed_segment << AVX_512_PACK_SHIFT; //i.e. * 16
                
                 inner_intrin_matrix_mult(
                     sv,
@@ -53,10 +53,10 @@ void matrix_multiply(float *in1, float *in2, float *out,
 
             // Handle remaining coloumns when the number of elements is not a multiple of
             // The packing size. In this case 16.
-            unsigned int columns_remaining = dim3 % AVX_512_PACK_SIZE;
+            int64_t columns_remaining = dim3 % AVX_512_PACK_SIZE;
             if (columns_remaining != 0)
             {
-                unsigned int remaining_offset = dim3 - columns_remaining;
+                int64_t remaining_offset = dim3 - columns_remaining;
                 // Don't want the possibility of reading from bad location so we 
                 // pad the input row too.
                 float in_padded_row[AVX_512_PACK_SIZE] = { 0 };

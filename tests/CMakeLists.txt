@@ -28,7 +28,7 @@ add_executable(Testing ${testing_sources})
 target_link_libraries(Testing PRIVATE gtest_main pulse)
 # target_include_directories(Testing PUBLIC "${INCLUDE_ROOT}")
 
-copy_library_to_target(Testing pulse)
+symlink_library_to_target(Testing pulse)
 copy_openssl_runtime_lib_to_target(Testing crypto)
 
 include(GoogleTest)
