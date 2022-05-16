@@ -43,4 +43,9 @@ void unravel_cactuar(const cactuar_t *const cactuar, unsigned char* bytes);
 
 int targetcmp(const cactuar_t* const cactuar, const sha256hash_t* const hash);
 
+float fast_log2(float val);
+
+float frand(unsigned int *seed);
+
+
 #endif

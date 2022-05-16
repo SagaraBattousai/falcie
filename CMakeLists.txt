@@ -42,15 +42,25 @@ endif()
 
 # add_library(etro SHARED) # $<TARGET_OBJECTS:pulse>)
 
-add_executable(T "etro/main.cpp")
-target_link_libraries(T pulse)
-target_include_directories(T PUBLIC ${INCLUDE_ROOT})
+add_executable(etro_cpp "etro/main.cpp")
+target_link_libraries(etro_cpp pulse)
+target_include_directories(etro_cpp PUBLIC ${INCLUDE_ROOT})
+
+add_executable(etro_c "etro/main.c")
+target_link_libraries(etro_c pulse)
+target_include_directories(etro_c PUBLIC ${INCLUDE_ROOT})
 
 #DLL's must be in same dir as exe (or added to path but i'd rather
 #avoid that if I can.
 if(WIN32)
-  symlink_library_to_target(T pulse)
-  copy_openssl_runtime_lib_to_target(T crypto)
+  symlink_library_to_target(etro_c pulse)
+  symlink_library_to_target(etro_cpp pulse)
+  copy_openssl_runtime_lib_to_target(etro_c crypto)
+  copy_openssl_runtime_lib_to_target(etro_cpp crypto)
+endif()
+
+if(MSVC)
+  set(VS_STARTUP_PROJECT etro_c)
 endif()
 
 

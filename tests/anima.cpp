@@ -76,3 +76,30 @@ TEST(AnimaVector, VectorMutableScalarMult)
 
 }
 
+TEST(AnimaVector, ScalarVectorBroadcastMult)
+{
+	float in1[3] = { 1.5, 0.02, -0.34 };
+	float in2[1] = { 0.00675 };
+
+	float expected[3] = { 0.010125,  0.000135, -0.002295 };
+
+	float actual[3] = { 0 };
+
+	broadcast_vectors(in1, in2, actual, 3, 1, mult());
+
+	EXPECT_EQ(std::memcmp(actual, expected, sizeof(float) * 3), 0);
+}
+
+/*
+broadcast_vectors(tracking->layers[j], delta, weightupdate,
+			back_neuron_count, curr_neuron_count, mult());
+
+		//learning_rate* weight_update
+		scalar_vector_mult(network->learning_rate, weightupdate, weightupdate,
+			weight_size);
+
+		vector_vector_sum(network->weights[j], weightupdate, *((*new_weights) + j),
+			weight_size);
+
+*/
+

@@ -1,27 +1,10 @@
-#include <stdlib.h>
+
+#include<stdlib.h>
+
 #include <string.h>
 #include <pulse/anima.h>
 #include <pulse/linalg.h>
 
-/*
-def feedforward(inp,weights):
-	prev_layer=inp;
-	prev_layer=np.append(prev_layer,1);#add the bias
-	curlayers=[prev_layer];
-	bcurlayers=[prev_layer];#current neuron states (before activation)
-	nolayers=len(weights);
-	for l in range(nolayers):
-		no_neurons=weights[l].shape[0]
-		thislayer=np.zeros(no_neurons);
-		bthislayer=np.zeros(no_neurons);#before activation
-		for i in range(no_neurons):
-			bthislayer[i]=np.dot(prev_layer,weights[l][i]);#(before activation)
-			thislayer[i]=sigmoid(bthislayer[i]);
-		prev_layer=thislayer;
-		curlayers.append(np.array(thislayer));
-		bcurlayers.append(np.array(bthislayer));#add to the layers (before activation)
-	return curlayers,bcurlayers;
-*/
 int feedforward(neural_network_t *network, feedforward_tracking_t *tracking)
 {
 	tracking->total_layer_count = network->num_layers + 1;
@@ -43,8 +26,14 @@ int feedforward(neural_network_t *network, feedforward_tracking_t *tracking)
 	{
 		return -1;
 	}
-	*prev_layer = 1.f; //The bias term
-	memcpy(prev_layer + 1, network->input, (sizeof(float) * network->input_size));
+	//*prev_layer = 1.f; //The bias term
+	//memcpy(prev_layer + 1, network->input, (sizeof(float) * network->input_size));
+
+	//VV USe when using xor_answer_weights
+	memcpy(prev_layer, network->input, (sizeof(float) * network->input_size));
+	*(prev_layer + network->input_size) = 1.f; //The bias term
+
+
 	tracking->layers[0] = prev_layer;
 	tracking->pre_activation_layers[0] = prev_layer;
 	float *thislayer;
@@ -83,36 +72,26 @@ int feedforward(neural_network_t *network, feedforward_tracking_t *tracking)
 	return 0;
 }
 
-/*
-* def backpropagation(desired,curlayers,bcurlayers,weights,learning_rate):
-	newweights=np.copy(weights);
-	nolayers=len(weights);
-	output=curlayers[nolayers];
-	delta=aconst*(desired-output)*output*(1-output);#the output neuron
-	for l in reversed(range(nolayers)):#propagate backwards
-		pdelta=np.array([delta],dtype=object);#convert it to a 2D array for transpose
-		newweights[l]=weights[l]+ learning_rate*curlayers[l]*pdelta.T;
-		delta=aconst*curlayers[l]*(1-curlayers[l])*(np.dot(delta,weights[l]));
-	return newweights;
-*/
 int backpropagation(float ***new_weights, float *desired, neural_network_t *network, feedforward_tracking_t *tracking)
 {
 	copy_weights(new_weights, network->weights, network->num_layers, network->input_size, network->neuron_dims);
 
 	//Output neurons
+	float *output = tracking->layers[tracking->total_layer_count - 1];
+
 	int64_t curr_neuron_count = network->neuron_dims[network->num_layers - 1];
+
 	float *delta = (float *)malloc(sizeof(float) * curr_neuron_count);
 	if (delta == NULL)
 	{
 		return -1;
 	}
-	float *output = tracking->layers[tracking->total_layer_count - 1];
+
 	for (int64_t i = 0; i < curr_neuron_count; i++)
 	{
-		//MSVC doesn't like writing to the syntactical sugar [i]
-		*(delta + i) = network->delta_activation(output[i]) * (desired[i] - output[i]);
+		//*(delta + i) = network->delta_activation(output[i]) * (desired[i] - output[i]);
+		*(delta + i) = 2 * output[i] * (1 - output[i]) * (desired[i] - output[i]);
 	}
-	///////////////////////////////////////////////////////////////////////////////
 
 	// The neuron count for the next layer, which is actually
 	// the previous layer in the network, as we are backtracking.
@@ -155,12 +134,18 @@ int backpropagation(float ***new_weights, float *desired, neural_network_t *netw
 		if (j != 0)
 		{
 			float *next_delta = (float*)malloc(sizeof(float) * back_neuron_count);
+			
+			
+			//delta=aconst*curlayers[l]*(1-curlayers[l])*(np.dot(delta,weights[l]));
 
 			for (int64_t k = 0; k < back_neuron_count; k++)
 			{
-				*(next_delta + k) = network->delta_activation(*(tracking->layers[j] + k));
+				float clayer = *(tracking->layers[j] + k);
+				//*(next_delta + k) = network->delta_activation(*(tracking->layers[j] + k));
+				*(next_delta + k) = 2 * clayer * (1 - clayer);
 			}
 			float *delta_weights = (float *)calloc(back_neuron_count, sizeof(float));
+
 			matrix_multiply(network->weights[j], delta, delta_weights,
 				back_neuron_count, curr_neuron_count, 1);
 
@@ -171,6 +156,7 @@ int backpropagation(float ***new_weights, float *desired, neural_network_t *netw
 				return -1;
 			}
 			vector_vector_mult(next_delta, delta_weights, delta, back_neuron_count);
+			
 			free(next_delta);
 			free(delta_weights);
 		}
@@ -188,10 +174,14 @@ int backpropagation(float ***new_weights, float *desired, neural_network_t *netw
 //since at the moment we cant tell if it wascmalloc'd
 void free_tracking(feedforward_tracking_t *tracking)
 {
-	for (int64_t i = 0; i < tracking; i++)
+	for (int64_t i = 0; i < tracking->total_layer_count; i++)
 	{
+
 		free(tracking->layers[i]);
-		free(tracking->pre_activation_layers[i]);
+		if (i > 0)
+		{
+			free(tracking->pre_activation_layers[i]);
+		}
 	}
 
 	free(tracking->layers);
@@ -223,7 +213,7 @@ int copy_weights(float ***dst, float**src, int64_t num_layers, int64_t input_dim
 		{
 			return -1;
 		}
-		memcpy(*((*dst) + i), *(src + i), (sizeof(float) * weight_dims));
+		//memcpy(*((*dst) + i), *(src + i), (sizeof(float) * weight_dims));
 	}
 	return 0;
 }

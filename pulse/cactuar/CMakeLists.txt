@@ -9,8 +9,7 @@ set(public_header_files
   "${PULSE_INCLUDE_ROOT}/crypto.h"
   "${PULSE_INCLUDE_ROOT}/encoding.h"
   "${PULSE_INCLUDE_ROOT}/cactuar.h"
-  "${PULSE_INCLUDE_ROOT}/cactuar_math.h")
-
+  )
 set(private_header_files "endianness_check.h")
 
 add_library(cactuar OBJECT ${c_sources} ${cpp_sources})

@@ -1,5 +1,8 @@
 #include <pulse/cactuar.h>
 #include <string.h>
+#include <stdlib.h>
+
+#define FRAND_DIV ((float)RAND_MAX + 0.02)
 
 //In BigEndian format due to the hash leading zeros style
 //Pre: bytes must be zeroed and (at least) 32 bytes (256 bits)
@@ -22,3 +25,15 @@ int targetcmp(const cactuar_t* const cactuar, const sha256hash_t* const hash)
 	
 	return memcmp(hash, bytes, 32);
 }
+
+
+float frand(unsigned int *seed)
+{
+	if (seed != NULL)
+	{
+		srand(*seed);
+	}
+
+	return rand() / FRAND_DIV;
+}
+

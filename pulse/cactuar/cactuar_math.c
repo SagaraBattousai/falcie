@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include <pulse/cactuar_math.h>
+#include <pulse/cactuar.h>
 #include <pulse/encoding.h>
 
 #define EXPONENT_OFFSET 23

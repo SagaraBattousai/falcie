@@ -1,16 +1,40 @@
 
+#define _CRTDBG_MAP_ALLOC 1
+
 extern "C" {
 #include <pulse/anima.h>
+#include <pulse/linalg.h>
+#include <pulse/cactuar.h>
 }
+#include<ctime>
 #include<cstring>
 #include<cstdint>
 #include<cmath>
+#include<cfloat>
 #include<cstdlib>
 #include<iostream>
+#include <crtdbg.h>
+
+
+float sq_error(float *output, float *desired, int64_t dim)
+{
+	float *diff = (float *)malloc(sizeof(float) * dim);
+
+	vector_vector_sub(output, desired, diff, dim);
+	float ret = vector_dot(diff, diff, dim);
+	free(diff);
+	return ret;
+}
+
+float totalerr_energy(float *output, float *desired, int64_t dim)
+{
+	return sq_error(output, desired, dim) / 2.f;
+}
+
 
 float act(float x)
 {
-	return 1.f / (1.f + expf( -2.f * x));
+	return 1.f / (1.f + expf(-2.f * x));
 }
 
 float dact(float x)
@@ -19,100 +43,241 @@ float dact(float x)
 	return 2 * actx * (1 - actx);
 }
 
+
+void rand_weights(float ***weight_ptr, int64_t no_layers, int64_t no_inputs, int64_t *nd, unsigned *seed)
+{
+	frand(seed);
+
+
+	*weight_ptr = (float **)malloc(sizeof(float*) * no_layers);
+	if (*weight_ptr == NULL)
+	{
+		exit(-6);
+	}
+	float **weights = *weight_ptr;
+
+
+
+	int64_t prev_dims = no_inputs + 1;
+	int64_t weight_size;
+	for (int64_t i = 0; i < no_layers; i++)
+	{
+		weight_size = nd[i] * prev_dims;
+		*(weights + i) = (float *)malloc(sizeof(float) * weight_size);
+		if (*(weights + i) == NULL)
+		{
+			exit(-5);
+		}
+
+		for (int64_t j = 0; j < weight_size; j++)
+		{
+			*(*(weights + i) + j) = frand(NULL);
+		}
+		prev_dims = nd[i];
+	}
+}
+
+//For Testing
+void fixed_weights(float ***weight_ptr, int64_t no_layers, int64_t no_inputs, int64_t *nd)
+{
+	*weight_ptr = (float **)malloc(sizeof(float*) * no_layers);
+	if (*weight_ptr == NULL)
+	{
+		exit(-6);
+	}
+	float **weights = *weight_ptr;
+
+
+	int64_t prev_dims = no_inputs + 1;
+	int64_t weight_size;
+
+	float weight_range_value = 0.001;
+	float weight_range_inc = 0.05;
+
+	for (int64_t i = 0; i < no_layers; i++)
+	{
+		weight_size = nd[i] * prev_dims;
+		*(weights + i) = (float *)malloc(sizeof(float) * weight_size);
+		if (*(weights + i) == NULL)
+		{
+			exit(-5);
+		}
+		for (int64_t j = 0; j < weight_size; j++)
+		{
+			*(*(weights + i) + j) = weight_range_value;
+			weight_range_value += weight_range_inc;
+		}
+		prev_dims = nd[i];
+	}
+}
+
 int main()
 {
-	float input[2] = { 0, 1 };
 
-	//float l1w[9] = { 1, 2, 3, 
-	//				 4, 5, 6, 
-	//				 7, 8, 9 };
+	int64_t no_inputs = 2;
+	int64_t no_output = 1;
 
-	float l1w[9] = { 1, 4, 7,
-					 2, 5, 8,
-					 3, 6, 9 };
+	float training_data[4][2] = { {0.f, 0.f},  {0.f, 1.f}, {1.f, 0.f}, {1.f, 1.f} };
+	float desired_outputs[4] = { 0.f,       1.f,      1.f,      0.f };
 
+	float learning_rate = 0.9;
 
-	float l2w[3] = { 10, 11, 12 };
+	int max_epochs = 2;// 5000;
+	float target_error = 0.0001;
 
-	float* weights[2] = { l1w, l2w };
-	
+	int64_t no_layers = 2;
 	int64_t nd[2] = { 3, 1 };
 
-	neural_network_t net = {2,
-							input,
-							2,
+	float **weights;
+
+	//Not 100% safe
+	//unsigned time_seed = (unsigned)time(NULL);
+	//unsigned seed = 0x56324;
+	//rand_weights(&weights, no_layers, no_inputs, nd, &seed);
+
+	fixed_weights(&weights, no_layers, no_inputs, nd);
+
+
+	neural_network_t net = { no_inputs,
+							NULL,
+							no_layers,
 							nd,
 							weights,
 							&act,
 							&dact,
-							0.9};
-
-	//float **layers = (float **)malloc(sizeof(float*) * 3);
-	//float **blayers = (float **)malloc(sizeof(float*) * 3);
-	feedforward_tracking_t track;
-
-	
-	//feedforward(input, weights, &id, layers, blayers, 1, 2, wd);
-	feedforward(&net, &track);
-	std::cout << "[" << std::endl;
-	std::cout << track.pre_activation_layers[0][0] << std::endl;
-	std::cout << track.pre_activation_layers[0][1] << std::endl;
-	std::cout << track.pre_activation_layers[0][2] << std::endl;
-
-	std::cout << track.pre_activation_layers[1][0] << std::endl;
-	std::cout << track.pre_activation_layers[1][1] << std::endl;
-	std::cout << track.pre_activation_layers[1][2] << std::endl;
-
-	std::cout << track.pre_activation_layers[2][0] << std::endl;
-	std::cout << "]" << std::endl;
+							learning_rate };
 
 
-	std::cout << std::endl << std::endl;
-
-	std::cout << "[" << std::endl;
-
-	std::cout << track.layers[0][0] << std::endl;
-	std::cout << track.layers[0][1] << std::endl;
-	std::cout << track.layers[0][2] << std::endl;
-
-	std::cout << track.layers[1][0] << std::endl;
-	std::cout << track.layers[1][1] << std::endl;
-	std::cout << track.layers[1][2] << std::endl;
-
-	std::cout << track.layers[2][0] << std::endl;
-	std::cout << "]" << std::endl;
-
-	float desired = 1.f;
+	int64_t no_training_data = 4;
+	float avg_error = 1.f;
+	int epoch = 0;
 
 	float **new_weights;
 
-	backpropagation(&new_weights, &desired, &net, &track);
+	feedforward_tracking_t track;
 
-	std::cout << std::endl << "***************" << std::endl;
+	while (avg_error > target_error && epoch < max_epochs)
+	{
+		//for (int64_t j = 0; j < no_training_data; j++)
+		//{
+		net.input = training_data[1];
+		float *desired = desired_outputs + 1;
 
-	std::cout << "[" << std::endl;
-	std::cout << new_weights[0][0] << std::endl;
-	std::cout << new_weights[0][1] << std::endl;
-	std::cout << new_weights[0][2] << std::endl;
-	std::cout << new_weights[0][3] << std::endl;
-	std::cout << new_weights[0][4] << std::endl;
-	std::cout << new_weights[0][5] << std::endl;
-	std::cout << new_weights[0][6] << std::endl;
-	std::cout << new_weights[0][7] << std::endl;
-	std::cout << new_weights[0][8] << std::endl;
-	std::cout << "]" << std::endl;
+		feedforward(&net, &track);
 
-	std::cout << std::endl;
+		float *output = track.layers[no_layers];
 
-	std::cout << "[" << std::endl;
-	std::cout << new_weights[1][0] << std::endl;
-	std::cout << new_weights[1][1] << std::endl;
-	std::cout << new_weights[1][2] << std::endl;
-	std::cout << "]" << std::endl;
+		backpropagation(&new_weights, desired, &net, &track);
 
-	free(new_weights[1]);
-	free(new_weights[0]);
-	free(new_weights);
+		avg_error += totalerr_energy(output, desired, 1);
+
+		int64_t prev_dims = no_inputs + 1;
+		int64_t weight_size;
+		std::cout << "Weights:\n";
+		for (int x = 0; x < no_layers; x++)
+		{
+			std::cout << "[\n";
+			weight_size = prev_dims * nd[x];
+			for (int y = 0; y < weight_size; y++)
+			{
+				if (y % prev_dims == 0)
+					std::cout << "[ ";
+				std::cout << net.weights[x][y] << ", ";
+				if (y % prev_dims == (prev_dims - 1))
+					std::cout << "]\n";
+			}
+			prev_dims = nd[x];
+			std::cout << "]\n\n";
+		}
+
+		std::cout << std::endl << std::endl;
+
+		std::cout << "bcurrlayers:\n";
+		int64_t blayer_dims = no_inputs + 1;
+		for (int x = 0; x < no_layers + 1; x++)
+		{
+			std::cout << "[ ";
+			for (int y = 0; y < blayer_dims; y++)
+			{
+				std::cout << track.pre_activation_layers[x][y] << ", ";
+			}
+			blayer_dims = nd[x];
+			std::cout << "]\n";
+		}
+
+		std::cout << std::endl << std::endl;
+
+		std::cout << "currlayers:\n";
+		int64_t layer_dims = no_inputs + 1;
+		for (int x = 0; x < no_layers + 1; x++)
+		{
+			std::cout << "[ ";
+			for (int y = 0; y < layer_dims; y++)
+			{
+				std::cout << track.layers[x][y] << ", ";
+			}
+			layer_dims = nd[x];
+			std::cout << "]\n";
+		}
+
+		std::cout << std::endl << std::endl;
+
+		std::cout << "Output: " << *output << std::endl;
+
+		//MAnual cheat for now
+		free(net.weights[0]);
+		free(net.weights[1]);
+		free(net.weights);
+
+		net.weights = new_weights;
+		new_weights = NULL;
+
+		prev_dims = no_inputs + 1;
+		std::cout << "New Weights:\n";
+		for (int x = 0; x < no_layers; x++)
+		{
+			std::cout << "[\n";
+			weight_size = prev_dims * nd[x];
+			for (int y = 0; y < weight_size; y++)
+			{
+				if (y % prev_dims == 0)
+					std::cout << "[ ";
+				std::cout << net.weights[x][y] << ", ";
+				if (y % prev_dims == (prev_dims - 1))
+					std::cout << "]\n";
+			}
+			prev_dims = nd[x];
+			std::cout << "]\n\n";
+		}
+
+		std::cout << std::endl << std::endl;
+
+		//free_tracking(&track);
+		//track = { 0 };
+	//}
+
+		avg_error /= no_training_data;
+		epoch++;
+	}
+
+	std::cout << "no epochs: " << epoch << " averaged error: " << avg_error << std::endl;
+
+	std::cout << "--------------------------------" << std::endl;
+	std::cout << "Inferencing results" << std::endl;
+
+	for (int64_t j = 0; j < no_training_data; j++)
+	{
+		net.input = training_data[j];
+		float *desired = desired_outputs + j;
+
+		feedforward(&net, &track);
+
+		float *output = track.layers[no_layers];
+
+		std::cout << "input: " << *net.input << ", " << *(net.input + 1) << " desired : "
+			<< *desired << " NN output : " << *output << std::endl;
+	}
+	_CrtDumpMemoryLeaks();
 
 	return 0;
 }
