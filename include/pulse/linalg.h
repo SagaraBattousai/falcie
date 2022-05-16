@@ -14,10 +14,8 @@ combinator_ptr mult();
 float vector_dot(float *in1, float *in2, const int64_t dim);
 
 //TODO: AVX implemntation
-// Similar to numpy's but only on vectors (shape output based on numpy).
-//in1 is [1 * dim1] and  in2 is [dim2 * 1]. out is [dim2 * dim1]
-//Note: Probably neater to take pointer to out array to show its a pointer to an array?
-//But unnessicary for in1/2 so ......
+// Big mistake to try and copy numpy!! Their order is wrong for you!!!
+//in1 is [m * 1] and  in2 is [1 * n]. out is [m * n]
 void broadcast_vectors(const float *in1, const float *in2, float *out,
 	const int64_t dim1, const int64_t dim2, combinator_ptr combinator);
 

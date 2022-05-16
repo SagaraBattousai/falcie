@@ -64,7 +64,7 @@ typedef struct feedforward_tracking
 
 }feedforward_tracking_t;
 
-//Not my weight dims are swiched from Benny's example.
+//Note my weight dims are swiched from Benny's example.
 /*****************************************************************************
 * Neural Network feed forward.
 * 
@@ -76,7 +76,6 @@ typedef struct feedforward_tracking
 int feedforward(neural_network_t *network, feedforward_tracking_t *tracking);
 
 int backpropagation(float ***new_weights, float *desired, neural_network_t *network, feedforward_tracking_t *tracking);
-
 
 void free_tracking(feedforward_tracking_t *tracking);
 

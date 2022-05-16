@@ -55,24 +55,12 @@ void vector_vector_mult(float *vector1, float *vector2, float *out, const int64_
 }
 
 //TODO: AVX implemntation
-//in1 is [1 * m] and  in2 is [n * 1]. out is [n * m]
+//in1 is [m * 1] and  in2 is [1 * n]. out is [m * n]
 //Can't be mutable as in1 nd in2 are reused (double looped) therefore
 //overwriting would change values.
 void broadcast_vectors(const float *in1, const float *in2, float *out,
     const int64_t dim1, const int64_t dim2, combinator_ptr combinator)
 {
-    /*
-    for (int64_t i = 0; i < dim2; i++)
-    {
-        for (int64_t j = 0; j < dim1; j++)
-        {
-            out[i * dim1 + j] = combinator(in1[j], in2[i]);
-        }
-
-    }
-    */
-    //Try flipping YES!!! Flipping worked
-    //REMEMBER IM doing everything transposed to benny and numpy
     for (int64_t i = 0; i < dim1; i++)
     {
         for (int64_t j = 0; j < dim2; j++)

@@ -151,8 +151,8 @@ int main()
 
 	float learning_rate = 0.9;
 
-	int max_epochs = 5000; //2824;//<- for fixed weights
-	float target_error = 0.0001;
+	int max_epochs = 50000; //2824;//<- for fixed weights
+	float target_error = 0.00001;
 
 	int64_t no_layers = 2;
 	int64_t nd[2] = { 3, 1 };
@@ -301,26 +301,6 @@ int main()
 
 
 	printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
-	printf("##############################\n");
-
-	printf("[[ %f, %f, %f ]\n[ %f, %f, %f ]\n %f, %f, %f ]]\n",
-		net.weights[0][0],
-		net.weights[0][1],
-		net.weights[0][2],
-		net.weights[0][3],
-		net.weights[0][4],
-		net.weights[0][5],
-		net.weights[0][6],
-		net.weights[0][7],
-		net.weights[0][8]
-		);
-
-	printf("\n[[ %f, %f, %f ]]\n",
-		net.weights[1][0],
-		net.weights[1][1],
-		net.weights[1][2]
-	);
-
 
 	printf("--------------------------------\n");
 	printf("Inferencing results\n");
