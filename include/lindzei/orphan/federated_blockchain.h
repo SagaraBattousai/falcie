@@ -1,7 +1,5 @@
-#ifndef __ETRO_FEDERATED_BLOCKCHAIN_H__
-#define __ETRO_FEDERATED_BLOCKCHAIN_H__
-
-#define FEDERATED_BLOCKCHAIN_UNROLLED_SIZE 32
+#ifndef __LINDZEI_ORPHAN_FEDERATED_BLOCKCHAIN_H__
+#define __LINDZEI_ORPHAN_FEDERATED_BLOCKCHAIN_H__
 
 /*********************************
 * Federated block's header should be specified first so uses if extern etc here.
@@ -10,7 +8,7 @@
 extern "C" {
 #endif
 
-#include <pulse/federatedblock.h>
+#include <orphan/federatedblock.h>
 
 #ifdef __cplusplus
 }
@@ -22,7 +20,11 @@ extern "C" {
 * undefined struct in C so as to be somewhat type safier than void *.
 */
 #ifdef __cplusplus
-#include <pulse/blockchain.h>
+#include <cstdint>
+#include <pulse/dahaka.h>
+
+constexpr int64_t FEDERATED_BLOCKCHAIN_UNROLLED_SIZE = 32;
+
 typedef Blockchain<federatedblock_t, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE> federated_blockchain_t;
 #else
 typedef struct federated_blockchain federated_blockchain_t;

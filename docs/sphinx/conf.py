@@ -60,9 +60,9 @@ breathe_domain_by_extension = {
 
 breathe_domain_by_file_pattern = {
     
-  "*/include/pulse/chain.h"       : "cpp",
-  "*/include/pulse/blockchain.h"  : "cpp",
-  "*/include/pulse/orderedlist.h" : "cpp",
+  "*/include/pulse/internal/dahaka/chain.h"       : "cpp",
+  "*/include/pulse/internal/dahaka/blockchain.h"  : "cpp",
+  "*/include/pulse/internal/dahaka/orderedlist.h" : "cpp",
     }
 
 # Add any paths that contain templates here, relative to this directory.

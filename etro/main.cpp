@@ -1,9 +1,10 @@
-
+/*
 #define _CRTDBG_MAP_ALLOC 1
 
 extern "C" {
+//#include <pulse/internal/anima/ai.h>
+//#include <pulse/internal/anima/linalg.h>
 #include <pulse/anima.h>
-#include <pulse/linalg.h>
 #include <pulse/cactuar.h>
 }
 #include<ctime>
@@ -41,40 +42,6 @@ float dact(float x)
 {
 	float actx = act(x);
 	return 2 * actx * (1 - actx);
-}
-
-
-void rand_weights(float ***weight_ptr, int64_t no_layers, int64_t no_inputs, int64_t *nd, unsigned *seed)
-{
-	frand(seed);
-
-
-	*weight_ptr = (float **)malloc(sizeof(float*) * no_layers);
-	if (*weight_ptr == NULL)
-	{
-		exit(-6);
-	}
-	float **weights = *weight_ptr;
-
-
-
-	int64_t prev_dims = no_inputs + 1;
-	int64_t weight_size;
-	for (int64_t i = 0; i < no_layers; i++)
-	{
-		weight_size = nd[i] * prev_dims;
-		*(weights + i) = (float *)malloc(sizeof(float) * weight_size);
-		if (*(weights + i) == NULL)
-		{
-			exit(-5);
-		}
-
-		for (int64_t j = 0; j < weight_size; j++)
-		{
-			*(*(weights + i) + j) = frand(NULL);
-		}
-		prev_dims = nd[i];
-	}
 }
 
 //For Testing
@@ -173,6 +140,7 @@ int main()
 
 		int64_t prev_dims = no_inputs + 1;
 		int64_t weight_size;
+
 		std::cout << "Weights:\n";
 		for (int x = 0; x < no_layers; x++)
 		{
@@ -279,5 +247,11 @@ int main()
 	}
 	_CrtDumpMemoryLeaks();
 
+	return 0;
+}
+*/
+
+int main(void)
+{
 	return 0;
 }

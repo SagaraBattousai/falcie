@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include <pulse/encoding.h>
+#include <pulse/internal/cactuar/encoding.h>
 }
 
 

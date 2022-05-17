@@ -1,7 +1,6 @@
 
-#include <pulse/federatedblock.h>
-#include <pulse/blockheader.h>
 #include <pulse/cactuar.h>
+#include <orphan/federatedblock.h>
 
 /*
 *void mine(blockheader_t * const header);

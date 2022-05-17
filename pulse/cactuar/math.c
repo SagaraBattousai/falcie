@@ -1,7 +1,10 @@
-#include <stdint.h>
 
-#include <pulse/cactuar.h>
-#include <pulse/encoding.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include <cactuar/math.h>
+#include <cactuar/encoding.h>
+
 
 #define EXPONENT_OFFSET 23
 #define LOWER_BYTE_MASK 255
@@ -30,3 +33,5 @@ float fast_log2(float val) {
 	float mantissa = ((A_COEFF * val + B_COEFF) * val - C_COEFF);
 	return characteristic + mantissa;
 }
+
+

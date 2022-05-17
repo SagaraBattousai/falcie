@@ -4,8 +4,8 @@
 
 #include <stdio.h>
 
-#include <pulse/encoding.h>
-#include "endianness_check.h"
+#include <cactuar/encoding.h>
+#include <cactuar/endianness_check.h>
 
 /*
 * These all seem to just be for convenience now I think about it. I mean tbh most of it is just byte

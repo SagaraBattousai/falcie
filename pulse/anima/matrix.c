@@ -7,7 +7,7 @@
 #ifndef USE_AVX_INTRIN
 
 #include <stdlib.h>
-#include <pulse/matrix.h>
+#include <anima/matrix.h>
 // Don't swap j and k. That benifit removed stride from inner loop but
 // the way we chose our indicies does this automatically.
 // i.e. Inner loop var (in this case k) is not multiplied in said loop.

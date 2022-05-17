@@ -8,6 +8,8 @@ project(falcie
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 #Force is just for now until all kinks are worked out
 set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} CACHE PATH 
   "Path to the root directory of an OpenSSL installation.")
@@ -17,6 +19,7 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(SystemCheck)
 include(LibUtils)
+
 set_system_check_vars()
 
 if(MSVC)
@@ -29,6 +32,7 @@ set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 set(INCLUDE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(pulse)
+#add_subdirectory(lindzei)
 #add_subdirectory(etro)
 
 if(BUILD_TESTS)

@@ -11,7 +11,7 @@
 #define AVX_512_PACK_SHIFT 4 //Used for multipying by 16
 
 #include <stdlib.h>
-#include <pulse/matrix.h>
+#include <anima/matrix.h>
 
 #include <immintrin.h>
 

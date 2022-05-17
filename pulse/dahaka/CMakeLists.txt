@@ -1,15 +1,18 @@
+###################################################################
+################ Dahaka The Container Target ######################
+###################################################################
 
-add_library(dahaka INTERFACE
-  "${PULSE_INCLUDE_ROOT}/chain.h"
-  "${PULSE_INCLUDE_ROOT}/blockchain.h"
-  "${PULSE_INCLUDE_ROOT}/orderedlist.h"
-  "${PULSE_INCLUDE_ROOT}/tree.h"
+set(target_name dahaka)
+
+set(headers "${INTERNAL_INCLUDE_ROOT}/${target_name}/chain.h"
+            "${INTERNAL_INCLUDE_ROOT}/${target_name}/blockchain.h"
+            "${INTERNAL_INCLUDE_ROOT}/${target_name}/orderedlist.h"
+            "${INTERNAL_INCLUDE_ROOT}/${target_name}/tree.h"
   )
 
-#target_sources(dahaka PUBLIC FILE_SET public_headers TYPE HEADERS
-#  BASE_DIRS "${INCLUDE_ROOT}" FILES ${public_headder_files})
-
-target_include_directories(dahaka INTERFACE
+add_library(${target_name} INTERFACE ${headers})
+  
+target_include_directories(${target_name} INTERFACE
   $<BUILD_INTERFACE:${INCLUDE_ROOT}>
   $<INSTALL_INTERFACE:include>
   )

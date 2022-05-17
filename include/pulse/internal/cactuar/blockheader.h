@@ -1,14 +1,14 @@
 #ifndef __ETRO_BLOCKHEADER_H__
 #define __ETRO_BLOCKHEADER_H__
 
-//All C code!
-#include <pulse/types.h>
-#include <pulse/cactuar.h>
+#include <stdint.h>
 
-/******************************************************************
+#include <cactuar/crypto.h>
+
+/*******************************************************************
 * The header for  block on the chain which is hashed to provide PoW
-*
-*/
+********************************************************************/
+
 typedef struct block_header
 {
     uint32_t version;
@@ -17,7 +17,7 @@ typedef struct block_header
     uint64_t timestamp;
     sha256hash_t prev_hash;
     sha256hash_t transaction_hash;
-    cactuar_t target;
+    uint32_t target;
     uint32_t nonce;
 } blockheader_t;
 

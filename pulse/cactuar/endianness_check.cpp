@@ -1,4 +1,4 @@
-#include "endianness_check.h"
+#include <cactuar/endianness_check.h>
 
 constexpr bool SystemIsLittleEndian()
 {

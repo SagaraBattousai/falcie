@@ -1,5 +1,5 @@
 
-#include <pulse/linalg.h>
+#include <anima/linalg.h>
 
 //TODO: AVX implemntation
 float vector_dot(float *in1, float *in2, const int64_t dim)

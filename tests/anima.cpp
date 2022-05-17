@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include <pulse/linalg.h>
+#include <pulse/internal/anima/linalg.h>
 }
 
 TEST(AnimaMatrix, MatrixMult)

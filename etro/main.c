@@ -11,8 +11,11 @@
 #include<math.h>
 #include<float.h>
 
+/*
+#include <pulse/internal/anima/ai.h>
+#include <pulse/internal/anima/linalg.h>
+*/
 #include <pulse/anima.h>
-#include <pulse/linalg.h>
 #include <pulse/cactuar.h>
 
 
@@ -159,52 +162,53 @@ int main()
 
 	float **weights;
 
-	//Not 100% safe
-	unsigned seed = (unsigned)time(NULL);
-	//unsigned seed = 0x56324;
-	rand_weights(&weights, no_layers, no_inputs, nd, &seed);
-
-	//fixed_weights(&weights, no_layers, no_inputs, nd);
-
-
-	neural_network_t net = { no_inputs,
-							NULL,
-							no_layers,
-							nd,
-							weights,
-							&act,
-							&dact,
-							learning_rate };
+	neural_network_t *net = new_neural_network(
+		no_inputs, no_layers, nd,
+		&act, &dact, learning_rate,
+		NULL);
 
 
 	int64_t no_training_data = 4;
 	float avg_error = 1.f;
 	int epoch = 0;
 
-	float **new_weights;
+	float **delta_weights;
 
-	feedforward_tracking_t track;
+	float *output;
 
 	while (avg_error > target_error && epoch < max_epochs)
 	{
 		for (int64_t j = 0; j < no_training_data; j++)
 		{
-			net.input = training_data[j];
+
+			set_input(net, training_data[j]);
 			float *desired = desired_outputs + j;
 
-			if (feedforward(&net, &track) != 0)
+			if (feedforward(net) != 0)
 			{
 				exit(-371);
 			}
 
-			float *output = track.layers[no_layers];
+			get_network_output(net, &output);
 
-			if (backpropagation(&new_weights, desired, &net, &track) != 0)
+			if (backpropagation(&delta_weights, desired, net) != 0)
 			{
 				exit(-372);
 			}
 
 			avg_error += totalerr_energy(output, desired, 1);
+
+			update_weight(net, delta_weights);
+
+			//TODO Clean this up!
+			for (int64_t k = 0; k < 2; k++)
+			{
+				free(delta_weights[k]);
+			}
+			free(delta_weights);
+			delta_weights = NULL;
+
+			free(output);
 
 			/*
 			int64_t prev_dims = no_inputs + 1;
@@ -261,12 +265,12 @@ int main()
 			printf("Output: %f\n", *output);
 			*/
 			//Manual cheat for now
-			free(net.weights[0]);
-			free(net.weights[1]);
-			free(net.weights);
+			//free(net.weights[0]);
+			//free(net.weights[1]);
+			//free(net.weights);
 
-			net.weights = new_weights;
-			new_weights = NULL;
+			//net.weights = new_weights;
+			//new_weights = NULL;
 			/*
 			prev_dims = no_inputs + 1;
 			printf("New Weights:\n");
@@ -289,8 +293,6 @@ int main()
 			printf("\n\n");
 			*/
 			
-			free_tracking(&track);
-
 		}
 
 		avg_error /= (float)no_training_data;
@@ -307,21 +309,20 @@ int main()
 
 	for (int64_t j = 0; j < no_training_data; j++)
 	{
-		net.input = training_data[j];
+		set_input(net, training_data[j]);
 		float *desired = desired_outputs + j;
 
-		feedforward(&net, &track);
+		feedforward(net);
 
-		float *output = track.layers[no_layers];
+		get_network_output(net, &output);
 
-		printf("input: %f, %f desired: %f.....NN Output: %f\n", net.input[0], net.input[1], *desired, *output);
+		printf("input: %f, %f desired: %f.....NN Output: %f\n",
+			training_data[j][0], training_data[j][1], *desired, *output);
 
-		free_tracking(&track);
+		free(output);
 	}
-	//Manual cheat for now
-	free(net.weights[0]);
-	free(net.weights[1]);
-	free(net.weights);
+
+	free_neural_network(net);
 
 	_CrtDumpMemoryLeaks();
 

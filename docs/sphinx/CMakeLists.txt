@@ -14,12 +14,10 @@ macro(configure_sphinx_and_add_command)
 
   set(BREATHE_DOMAIN_BY_EXTENSION_DICT "\"h\" : \"c\",")
 
-  #dont need * and path but A I like path and B ...
-  #I cant seem to use ../../ soooo......
   set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT "
-  \"*/include/pulse/chain.h\"       : \"cpp\",
-  \"*/include/pulse/blockchain.h\"  : \"cpp\",
-  \"*/include/pulse/orderedlist.h\" : \"cpp\",")
+  \"*/include/pulse/internal/dahaka/chain.h\"       : \"cpp\",
+  \"*/include/pulse/internal/dahaka/blockchain.h\"  : \"cpp\",
+  \"*/include/pulse/internal/dahaka/orderedlist.h\" : \"cpp\",")
 
   configure_file(${SPHINX_CONF_IN} ${SPHINX_CONF_OUT} @ONLY)
 

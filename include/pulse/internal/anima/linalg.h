@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 //Maybe everything should just be in this file but for now...
-#include <pulse/matrix.h>
+#include <anima/matrix.h>
 
 typedef float (*combinator_ptr)(float, float);
 

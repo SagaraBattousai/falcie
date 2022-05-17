@@ -35,3 +35,4 @@ add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_XML_INDEX_FILE})
 configure_sphinx_and_add_command()
 add_custom_target(Sphinx ALL DEPENDS ${SPHINX_HTML_INDEX_FILE})
 
+set_target_properties(Doxygen Sphinx PROPERTIES FOLDER Docs)
