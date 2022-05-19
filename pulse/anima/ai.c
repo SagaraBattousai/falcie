@@ -343,7 +343,7 @@ int train_network_with_stats(float **desired, float **batch, int64_t batch_size,
 	int64_t epochs, neural_network_t *network, int64_t *epochs_taken, float *avg_err, float target_err, error_energy err_func)
 {
 	float avg_error = 1.f;
-	int epoch = 0;
+	int64_t epoch = 0;
 
 	//float **delta_weights;
 
@@ -354,10 +354,10 @@ int train_network_with_stats(float **desired, float **batch, int64_t batch_size,
 
 		for (int j = 0; j < batch_size; j++)
 		{
-			train_network(desired, batch[j], 1, 1, network);
+			train_network(desired + j, batch + j, 1, 1, network);
 			get_network_output(network, &output);
 
-			avg_error += err_func(output, desired, 1);
+			avg_error += err_func(output, desired[j], 1);
 			free(output);
 		}
 

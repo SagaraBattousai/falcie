@@ -176,13 +176,17 @@ int main()
 		new_neural_network(no_inputs, no_layers, nd,
 			&act, &dact, learning_rate, NULL);
 
-	float avg_error = 1.f;
-	int epoch = 0;
+	float avg_error;// = 1.f;
+	int64_t epoch;// = 0;
 
 	float **delta_weights;
 
 	float *output;
 
+	train_network_with_stats(desired_ptr, training_ptr, 4, max_epochs, network,
+		&epoch, &avg_error, target_error, &totalerr_energy);
+
+	/*
 	while (avg_error > target_error && epoch < max_epochs)
 	{
 		for (int64_t j = 0; j < no_training_data; j++)
@@ -222,33 +226,11 @@ int main()
 		avg_error /= (float)no_training_data;
 		epoch++;
 	}
-	
-	//xor_answer_weights(&net.weights);
-
-
-	printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
-
-	printf("--------------------------------\n");
-	
-	/*
-	printf("Inferencing results\n");
-
-	for (int64_t j = 0; j < no_training_data; j++)
-	{
-		set_input(network, training_data[j]);
-		float *desired = desired_outputs + j;
-
-		feedforward(network);
-
-		get_network_output(network, &output);
-
-		printf("input: %f, %f desired: %f.....NN Output: %f\n",
-			training_data[j][0], training_data[j][1], *desired, *output);
-
-		free(output);
-	}
 	*/
-	
+
+	printf("no epochs: %lli averaged error: %f\n", epoch, avg_error);
+
+	printf("--------------------------------\n");	
 
 	print_inferencing_results(network, training_ptr, 4, 2,
 		desired_ptr, 1);

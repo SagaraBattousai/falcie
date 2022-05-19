@@ -95,6 +95,9 @@ int main(void)
 	neural_network_t *network2 = new_neural_network(no_inputs, no_layers, nd,
 		&act, &dact, learning_rate, NULL);
 
+	neural_network_t *network_control = new_neural_network(no_inputs, no_layers,
+		nd, &act, &dact, learning_rate, NULL);
+
 	float **weights1;
 	float **weights2;
 
@@ -106,7 +109,8 @@ int main(void)
 	{
 		train_network(desired_outputs1, training_data1, no_training_data, 1, network1);
 		train_network(desired_outputs2, training_data2, no_training_data, 1, network2);
-		
+		train_network(desired_ptr, training_ptr, 4, 1, network_control);
+
 		get_weight(network1, &weights1);
 		get_weight(network2, &weights2);
 
@@ -140,7 +144,12 @@ int main(void)
 
 	}
 
+	printf("\nNetwork 1 on all data:\n");
 	print_inferencing_results(network1, training_ptr, 4,
+		2, desired_ptr, 1);
+
+	printf("\nControl Network on all data:\n");
+	print_inferencing_results(network_control, training_ptr, 4,
 		2, desired_ptr, 1);
 
 
