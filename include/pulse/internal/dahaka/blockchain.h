@@ -14,20 +14,24 @@
 
 
 template<typename Block, typename HashType>
-using mine_func = void(*)(Block *const, const HashType* const);
+using MineBlock = void(*)(Block *const, const HashType* const);
 
 template<typename Block, typename HashType> 
-using get_hash = HashType(*)(const Block *const);
+using HashBlock = HashType*(*)(const Block *const);
 
 template<typename Block> 
-using get_target = uint32_t(*)(const Block* const)
+using GetBlockTarget = uint32_t(*)(const Block* const);
+
+template<typename HashType>
+using CheckHashTarget = int(*)(const uint32_t* const, const HashType* const);
+
 
 /*
-template<typename Block> using mine_func = void(*)(Block&, sha256hash_t&);
-template<typename Block> using get_hash = sha256hash_t&(*)(const Block&);
+template<typename Block> using MineBlock = void(*)(Block&, sha256hash_t&);
+template<typename Block> using HashBlock = sha256hash_t&(*)(const Block&);
 
-template<typename Block> using get_hash = sha256hash_t&(*)(const Block&);
-template<typename Block> using get_target = cactaur_t&(*)(Block&);
+template<typename Block> using HashBlock = sha256hash_t&(*)(const Block&);
+template<typename Block> using GetBlockTarget = cactaur_t&(*)(Block&);
 */
 
 template<typename Block, typename HashType, std::int64_t UnrolledElems>
@@ -35,35 +39,45 @@ class Blockchain
 {
 public:
 	Blockchain(Block genisis, 
-		mine_func mine, 
-		get_hash hash, 
-		get_hash previous_hash, 
-		get_target target);
+		MineBlock<Block, HashType> mine, 
+		HashBlock<Block, HashType> hash, 
+		HashBlock<Block, HashType> previous_hash, 
+		GetBlockTarget<Block> target,
+		CheckHashTarget<HashType> target_check,
+		int hash_size);
 
 	void Add(Block elem);
 	bool Validate();
+	Block GetLast();
 	typename Chain<Block, UnrolledElems>::ChainIterator begin();
 	typename Chain<Block, UnrolledElems>::ChainIterator end();
 
 private:
 	Chain<Block, UnrolledElems> chain;
-	mine_func mine;
-	get_hash hash;
-	get_hash previous_hash;
-	get_target target;
+	MineBlock<Block, HashType> mine;
+	HashBlock<Block, HashType> hash;
+	HashBlock<Block, HashType> previous_hash;
+	GetBlockTarget<Block> target;
+	CheckHashTarget<HashType> target_check;
+
+	int hash_size;
 };
 
 //Might want an additional temp param for difficulty change ... thinggy ...
 template<typename Block, typename HashType, std::int64_t UnrolledElems>
 Blockchain<Block, HashType, UnrolledElems>::Blockchain(Block genisis,
-	mine_func<Block, HashType> mine, 
-	get_hash<Block, HashType> hash,
-	get_hash<Block, HashType> previous_hash,
-	get_target<Block> target)
-	: mine(m)
-	, hash(h)
-	, previous_hash(p)
-	, target(t)
+	MineBlock<Block, HashType> mine, 
+	HashBlock<Block, HashType> hash,
+	HashBlock<Block, HashType> previous_hash,
+	GetBlockTarget<Block> target,
+	CheckHashTarget<HashType> target_check,
+	int hash_size)
+	: mine(mine)
+	, hash(hash)
+	, previous_hash(previous_hash)
+	, target(target)
+	, target_check(target_check)
+	, hash_size(hash_size)
 	, chain(Chain<Block, UnrolledElems>())
 {
 	chain.Add(genisis);
@@ -73,16 +87,22 @@ template<typename Block, typename HashType, std::int64_t UnrolledElems>
 void Blockchain<Block, HashType, UnrolledElems>::Add(Block elem)
 {
 	Block prev = chain.GetLast();
-	sha256hash_t prev_hash = this->hash(&prev);
+	unsigned char *prev_hash = this->hash(&prev);
 
 	//TODO:Update Difficulty
 
-	this->mine(&elem, &prev_hash);
+	this->mine(&elem, prev_hash);
 
 	//TODO:Set everything else required on block
 
 	this->chain.Add(elem);
 
+}
+
+template<typename Block, typename HashType, std::int64_t UnrolledElems>
+Block Blockchain<Block, HashType, UnrolledElems>::GetLast()
+{
+	return this->chain.GetLast();
 }
 
 template<typename Block, typename HashType, std::int64_t UnrolledElems>
@@ -101,9 +121,9 @@ bool Blockchain<Block, HashType, UnrolledElems>::Validate()
 	Block prevBlock = *it;
 	Block currBlock;
 	/*
-	* get_hash<Block> hash;
-	* get_hash<Block> prev_hash;
-	* get_target<Block> target;
+	* HashBlock<Block> hash;
+	* HashBlock<Block> prev_hash;
+	* GetBlockTarget<Block> target;
 	*/
 	auto end = this->chain.end();
 	while (++it != end) //< Is it acceptable to inc in the while? Is that defined behavouir?
@@ -115,12 +135,14 @@ bool Blockchain<Block, HashType, UnrolledElems>::Validate()
 		// &&
 		//currentBlock'sHash < currentBlocks Target
 
-		auto test = (this->target(&currBlock));
+		uint32_t test = this->target(&currBlock);
 
 		if (!(
-			(std::memcmp(&(this->hash(&prevBlock)), &(this->prev_hash(&currBlock)), sizeof(sha256hash_t)) == 0)
+			std::memcmp(this->hash(&prevBlock),
+				this->previous_hash(&currBlock),
+				sizeof(unsigned char) * this->hash_size) == 0
 			&&
-			(targetcmp(&test, &(this->hash(&currBlock))) < 0)
+			this->target_check(&test, this->hash(&currBlock)) < 0
 			))
 		{
 			return false;
@@ -130,6 +152,7 @@ bool Blockchain<Block, HashType, UnrolledElems>::Validate()
 	}
 	return true;
 }
+
 
 template<typename Block, typename HashType, std::int64_t UnrolledElems>
 typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashType, UnrolledElems>::begin()
@@ -142,8 +165,6 @@ typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashType, 
 {
 	return this->chain.end();
 }
-
-
 
 
 #endif

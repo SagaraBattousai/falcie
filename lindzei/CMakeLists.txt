@@ -7,7 +7,9 @@ add_subdirectory(orphan)
 #add_subdirectory(eden)
 #add_subdirectory(kujata)
 
-set_target_properties(orphan PROPERTIES FOLDER Lindzei)
+add_subdirectory(cocoon)
+
+set_target_properties(orphan cocoon PROPERTIES FOLDER Lindzei)
 
 
 

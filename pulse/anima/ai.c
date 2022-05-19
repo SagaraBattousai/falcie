@@ -5,6 +5,8 @@
 #include<stdlib.h>
 #include <crtdbg.h>
 
+#include<stdio.h>
+
 #include<time.h>
 
 #include <string.h>
@@ -22,7 +24,7 @@ neural_network_t* new_neural_network(int64_t input_size, int64_t num_layers,
 {
 	float **weights;
 	//Technically not safe but unlikly not an issue
-	unsigned weight_seed = seed != NULL? *seed : (unsigned)time(NULL);
+	unsigned weight_seed = seed != NULL ? *seed : (unsigned)time(NULL);
 
 	rand_weights(&weights, num_layers, input_size, neuron_dims, &weight_seed);
 
@@ -70,13 +72,20 @@ void set_input(neural_network_t *network, float *input)
 	memcpy(network->input, input, input_byte_size);
 }
 
-//TODO: Make weights opaque ptr so that we can force it to be malloced so we can 
+//Todo: Change this, sharing (in C) can be dangerous;
+void get_weight(neural_network_t *network, float ***weights)
+{
+	*weights = network->weights;
+}
+
+//TODO: Make weights opaque ptr so that we can force it to be malloced so we can  //<< ^^Bad for above
 //just change pointers and not have to copy memory (especially since 95% of the time
 //weights will have been malloced
 void set_weight(neural_network_t *network, float **weights)
 {
 	free(network->weights);
-	network->weights = weights;
+	//network->weights = weights;
+	copy_weights(&network->weights, weights, network->num_layers, network->input_size, network->neuron_dims);
 }
 
 void update_weight(neural_network_t *network, float** deltaweights)
@@ -90,7 +99,7 @@ void update_weight(neural_network_t *network, float** deltaweights)
 		next_dimensions = network->neuron_dims[i];
 		weight_size = prev_dimensions * next_dimensions;
 
-		vector_vector_sum(network->weights[i], deltaweights[i], 
+		vector_vector_sum(network->weights[i], deltaweights[i],
 			network->weights[i], weight_size);
 
 		prev_dimensions = next_dimensions;
@@ -239,7 +248,7 @@ int backpropagation(float ***delta_weights, float *desired, neural_network_t *ne
 		curr_neuron_count = network->neuron_dims[j];
 
 		back_neuron_count = j == 0 ? network->input_size + 1 : network->neuron_dims[j - 1];
-		
+
 		weight_size = (back_neuron_count * curr_neuron_count);
 
 		//weightupdate = curlayers[l] * pdelta.T
@@ -253,7 +262,7 @@ int backpropagation(float ***delta_weights, float *desired, neural_network_t *ne
 		if (j != 0)
 		{
 			float *next_delta = (float*)malloc(sizeof(float) * back_neuron_count);
-			
+
 			//delta=aconst*curlayers[l]*(1-curlayers[l])*(np.dot(delta,weights[l]));
 
 			for (int64_t k = 0; k < back_neuron_count; k++)
@@ -274,7 +283,7 @@ int backpropagation(float ***delta_weights, float *desired, neural_network_t *ne
 				return -1;
 			}
 			vector_vector_mult(next_delta, delta_update, delta, back_neuron_count);
-			
+
 			free(next_delta);
 			free(delta_update);
 		}
@@ -284,6 +293,131 @@ int backpropagation(float ***delta_weights, float *desired, neural_network_t *ne
 	return 0;
 }
 
+int train_network(float **desired, float **batch, int64_t batch_size,
+	int64_t epochs, neural_network_t *network)
+{
+	float **delta_weights = NULL;
+
+	for (int i = 0; i < epochs; i++)
+	{
+		for (int64_t j = 0; j < batch_size; j++)
+		{
+			set_input(network, batch[j]);
+			float *desired_output = desired[j];
+
+			if (feedforward(network) != 0)
+			{
+				return (-371);
+			}
+
+			//get_network_output(net, &output);
+
+			if (backpropagation(&delta_weights, desired_output, network) != 0)
+			{
+				return (-372);
+			}
+
+			//avg_error += totalerr_energy(output, desired, 1);
+
+			update_weight(network, delta_weights);
+
+			//TODO Clean this up!
+			for (int64_t k = 0; k < network->num_layers; k++)
+			{
+				free(delta_weights[k]);
+			}
+			free(delta_weights);
+			delta_weights = NULL;
+
+		}
+
+		//TODO: (potentially) Implement later
+		//avg_error /= (float)no_training_data;
+	}
+
+	return 0;
+}
+
+
+int train_network_with_stats(float **desired, float **batch, int64_t batch_size,
+	int64_t epochs, neural_network_t *network, int64_t *epochs_taken, float *avg_err, float target_err, error_energy err_func)
+{
+	float avg_error = 1.f;
+	int epoch = 0;
+
+	//float **delta_weights;
+
+	float *output;
+
+	while (avg_error > target_err && epoch < epochs)
+	{
+
+		for (int j = 0; j < batch_size; j++)
+		{
+			train_network(desired, batch[j], 1, 1, network);
+			get_network_output(network, &output);
+
+			avg_error += err_func(output, desired, 1);
+			free(output);
+		}
+
+		avg_error /= batch_size;
+
+		epoch++;
+	}
+	*epochs_taken = epoch;
+	*avg_err = avg_error;
+}
+
+//TODO: decide wheter to change to string.
+void print_inferencing_results(neural_network_t *network, 
+	float **training_data, int64_t training_data_size, int64_t training_data_dimension, 
+	float **desired, int64_t desired_dimension)
+{
+	//printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
+
+	//printf("--------------------------------\n");
+	printf("Inferencing results:\n--------------------\n");
+	
+	float *output = NULL;
+
+	for (int64_t j = 0; j < training_data_size; j++)
+	{
+		set_input(network, training_data[j]);
+		float *desired_output = desired[j];
+
+		feedforward(network);
+
+		get_network_output(network, &output);
+
+		printf("input: ( ");
+
+		int64_t all_but_last_training_dim = training_data_dimension - 1;
+		for (int64_t k = 0; k < all_but_last_training_dim; k++)
+		{
+			printf("%f, ", training_data[j][k]);
+		}
+
+		printf("%f ) desired: ( ", training_data[j][all_but_last_training_dim]);
+
+		int64_t all_but_last_output_dim = desired_dimension - 1;
+		for (int64_t k = 0; k < all_but_last_output_dim; k++)
+		{
+			printf("%f, ", desired[j][k]);
+		}
+
+		printf("%f ) -> Network Output : ( ", desired[j][all_but_last_output_dim]);
+		
+		for (int64_t k = 0; k < all_but_last_output_dim; k++)
+		{
+			printf("%f, ", output[k]);
+		}
+			
+		printf("%f )\n", output[all_but_last_output_dim]);
+
+		free(output);
+	}
+}
 
 void get_network_output(neural_network_t *network, float **output)
 {
@@ -340,11 +474,11 @@ int copy_weights(float ***dst, float**src, int64_t num_layers, int64_t input_siz
 
 	for (int64_t i = 0; i < num_layers; i++)
 	{
-		next_dimensions =  neuron_dims[i];
+		next_dimensions = neuron_dims[i];
 		weight_size = prev_dimensions * next_dimensions;
-		 
+
 		*(*dst + i) = (float *)malloc(sizeof(float) * weight_size);
-		
+
 		if (*(*dst + i) == NULL)
 		{
 			return -1;
@@ -353,6 +487,7 @@ int copy_weights(float ***dst, float**src, int64_t num_layers, int64_t input_siz
 		{
 			memcpy(*(*dst + i), *(src + i), (sizeof(float) * weight_size));
 		}
+		prev_dimensions = next_dimensions;
 	}
 	return 0;
 }

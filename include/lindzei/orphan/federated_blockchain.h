@@ -8,7 +8,9 @@
 extern "C" {
 #endif
 
+#include <pulse/cactuar.h>
 #include <orphan/federatedblock.h>
+
 
 #ifdef __cplusplus
 }
@@ -25,7 +27,7 @@ extern "C" {
 
 constexpr int64_t FEDERATED_BLOCKCHAIN_UNROLLED_SIZE = 32;
 
-typedef Blockchain<federatedblock_t, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE> federated_blockchain_t;
+typedef Blockchain<federatedblock_t, unsigned char, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE> federated_blockchain_t;
 #else
 typedef struct federated_blockchain federated_blockchain_t;
 #endif
@@ -43,6 +45,8 @@ federated_blockchain_t* new_federated_blockchain(federatedblock_t genisis);
 void add(federated_blockchain_t* const chain, federatedblock_t block);
 
 bool validate(federated_blockchain_t* const chain);
+
+federatedblock_t get_last(federated_blockchain_t* const chain);
 
 
 #ifdef __cplusplus

@@ -57,6 +57,11 @@ void free_hasher(hasher_t *hasher)
 	hasher = NULL;
 }
 
+void free_hash(hash_t *hash)
+{
+	free(hash->hash);
+	free(hash);
+}
 
 /*
 mdctx = EVP_MD_CTX_new();

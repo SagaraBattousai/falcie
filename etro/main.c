@@ -122,7 +122,7 @@ void xor_answer_weights(float ***weight_ptr)
 		exit(-6);
 	}
 	float **weights = *weight_ptr;
-	
+
 	*weights = (float *)malloc(sizeof(float) * 9);
 	*((*weights) + 0) = -3.38095519250527;
 	*((*weights) + 1) = 0.27972428792984166;
@@ -145,30 +145,37 @@ void xor_answer_weights(float ***weight_ptr)
 
 int main()
 {
+	float training_data[4][2] = { { 0.f, 0.f }, {1.f, 0.f }, { 0.f, 1.f }, { 1.f, 1.f } };
+	float *training_ptr[4] = { training_data[0],  training_data[1],  training_data[2],  training_data[3] };
+
+	float desired_outputs[4] = { 0.f, 1.f, 1.f, 0.f };
+	float *desired_ptr[4] = { &desired_outputs[0],  &desired_outputs[1],  &desired_outputs[2],  &desired_outputs[3] };
+
+	float *training_data1[2] = { training_ptr[0], training_ptr[1] };
+
+	float *training_data2[2] = { training_ptr[2], training_ptr[3] };
+
+	float *desired_outputs1[2] = { desired_ptr[0], desired_ptr[1] };
+	float *desired_outputs2[2] = { desired_ptr[2], desired_ptr[3] };
+
+	float learning_rate = 0.9;
+
+	int max_epochs = 50000;
+	float target_error = 0.00001;
 
 	int64_t no_inputs = 2;
 	int64_t no_output = 1;
 
-	float training_data[4][2] = { {0.f, 0.f},  {0.f, 1.f}, {1.f, 0.f}, {1.f, 1.f} };
-	float desired_outputs[4] = { 0.f,       1.f,      1.f,      0.f };
-
-	float learning_rate = 0.9;
-
-	int max_epochs = 50000; //2824;//<- for fixed weights
-	float target_error = 0.00001;
-
 	int64_t no_layers = 2;
 	int64_t nd[2] = { 3, 1 };
 
-	float **weights;
+	int64_t no_training_data = 4; //each
+	int64_t network_dims[3] = { 2, 3, 1 };
 
-	neural_network_t *net = new_neural_network(
-		no_inputs, no_layers, nd,
-		&act, &dact, learning_rate,
-		NULL);
+	neural_network_t *network =
+		new_neural_network(no_inputs, no_layers, nd,
+			&act, &dact, learning_rate, NULL);
 
-
-	int64_t no_training_data = 4;
 	float avg_error = 1.f;
 	int epoch = 0;
 
@@ -181,27 +188,27 @@ int main()
 		for (int64_t j = 0; j < no_training_data; j++)
 		{
 
-			set_input(net, training_data[j]);
+			set_input(network, training_data[j]);
 			float *desired = desired_outputs + j;
 
-			if (feedforward(net) != 0)
+			if (feedforward(network) != 0)
 			{
 				exit(-371);
 			}
 
-			get_network_output(net, &output);
+			get_network_output(network, &output);
 
-			if (backpropagation(&delta_weights, desired, net) != 0)
+			if (backpropagation(&delta_weights, desired, network) != 0)
 			{
 				exit(-372);
 			}
 
 			avg_error += totalerr_energy(output, desired, 1);
 
-			update_weight(net, delta_weights);
+			update_weight(network, delta_weights);
 
 			//TODO Clean this up!
-			for (int64_t k = 0; k < 2; k++)
+			for (int64_t k = 0; k < no_layers; k++)
 			{
 				free(delta_weights[k]);
 			}
@@ -210,119 +217,43 @@ int main()
 
 			free(output);
 
-			/*
-			int64_t prev_dims = no_inputs + 1;
-			int64_t weight_size;
-			printf("Weights:\n");
-			for (int x = 0; x < no_layers; x++)
-			{
-				printf("[\n");
-				weight_size = prev_dims * nd[x];
-				for (int y = 0; y < weight_size; y++)
-				{
-					if (y % prev_dims == 0)
-						printf("[ ");
-					printf("%f, ", net.weights[x][y]);
-					if (y % prev_dims == (prev_dims - 1))
-						printf("]\n");
-				}
-				prev_dims = nd[x];
-				printf("]\n\n");
-			}
-
-			printf("\n\n");
-
-			printf("bcurrlayers:\n");
-			int64_t blayer_dims = no_inputs + 1;
-			for (int x = 0; x < no_layers + 1; x++)
-			{
-				printf("[ ");
-				for (int y = 0; y < blayer_dims; y++)
-				{
-					printf("%f, ", track.pre_activation_layers[x][y]);
-				}
-				blayer_dims = nd[x];
-				printf("]\n");
-			}
-
-			printf("\n\n");
-
-			printf("currlayers:\n");
-			int64_t layer_dims = no_inputs + 1;
-			for (int x = 0; x < no_layers + 1; x++)
-			{
-				printf("[ ");
-				for (int y = 0; y < layer_dims; y++)
-				{
-					printf("%f, ", track.layers[x][y]);
-				}
-				layer_dims = nd[x];
-				printf("]\n");
-			}
-
-			printf("\n\n");
-
-			printf("Output: %f\n", *output);
-			*/
-			//Manual cheat for now
-			//free(net.weights[0]);
-			//free(net.weights[1]);
-			//free(net.weights);
-
-			//net.weights = new_weights;
-			//new_weights = NULL;
-			/*
-			prev_dims = no_inputs + 1;
-			printf("New Weights:\n");
-			for (int x = 0; x < no_layers; x++)
-			{
-				printf("[\n");
-				weight_size = prev_dims * nd[x];
-				for (int y = 0; y < weight_size; y++)
-				{
-					if (y % prev_dims == 0)
-						printf("[ ");
-					printf("%f, ", net.weights[x][y]);
-					if (y % prev_dims == (prev_dims - 1))
-						printf("]\n");
-				}
-				prev_dims = nd[x];
-				printf("]\n\n");
-			}
-
-			printf("\n\n");
-			*/
-			
 		}
 
 		avg_error /= (float)no_training_data;
 		epoch++;
 	}
-
+	
 	//xor_answer_weights(&net.weights);
 
 
 	printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
 
 	printf("--------------------------------\n");
+	
+	/*
 	printf("Inferencing results\n");
 
 	for (int64_t j = 0; j < no_training_data; j++)
 	{
-		set_input(net, training_data[j]);
+		set_input(network, training_data[j]);
 		float *desired = desired_outputs + j;
 
-		feedforward(net);
+		feedforward(network);
 
-		get_network_output(net, &output);
+		get_network_output(network, &output);
 
 		printf("input: %f, %f desired: %f.....NN Output: %f\n",
 			training_data[j][0], training_data[j][1], *desired, *output);
 
 		free(output);
 	}
+	*/
+	
 
-	free_neural_network(net);
+	print_inferencing_results(network, training_ptr, 4, 2,
+		desired_ptr, 1);
+
+	free_neural_network(network);
 
 	_CrtDumpMemoryLeaks();
 

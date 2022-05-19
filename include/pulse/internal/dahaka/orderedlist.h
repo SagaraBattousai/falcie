@@ -16,7 +16,7 @@ template <typename T>
 class OrderedLinkedList
 {
 public:
-	OrderedLinkedList(comparitor comp);
+	OrderedLinkedList(comparitor<T> comp);
 	virtual ~OrderedLinkedList();
 	void Add(T elem);
 
@@ -29,7 +29,7 @@ private:
 	};
 
 	Node *head;
-	comparitor comp;
+	comparitor<T> comp;
 };
 
 template <typename T>

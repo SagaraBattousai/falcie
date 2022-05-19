@@ -32,7 +32,7 @@ set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 set(INCLUDE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(pulse)
-#add_subdirectory(lindzei)
+add_subdirectory(lindzei)
 #add_subdirectory(etro)
 
 if(BUILD_TESTS)

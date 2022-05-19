@@ -1,12 +1,28 @@
 #ifndef __PULSE_CACTUAR_CRYPTO_H__
 #define __PULSE_CACTUAR_CRYPTO_H__
 
-#define SHA256_BYTES 32
+//#include <stdint.h>
 
+#include <pulse/cactuar.h>
+
+/*
 typedef struct sha256_hash {
-	unsigned char hash[SHA256_BYTES];
+	unsigned char hash[SHA256];
 }sha256hash_t;
 
+typedef struct ripemd160_hash {
+	unsigned char size = RIPEMD160;
+	unsigned char hash[RIPEMD160];
+}ripemd160hash_t;
+*/
+
+/*
+typedef struct hash
+{
+	int size;
+	unsigned char *hash;
+} hash_t;
+*/
 typedef struct hasher hasher_t;
 
 

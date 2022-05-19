@@ -5,26 +5,27 @@
 #include <pulse/types.h>
 #include <pulse/cactuar.h>
 
-/************ JUST FOR NOW *************************/
-/*******************************************************************
-* The header for  block on the chain which is hashed to provide PoW
-********************************************************************/
+typedef struct network_update
+{
+	int64_t num_layers;
+	int64_t *network_dims; ///< Must have @c num_layer @c + @c 1 many elements.
+						   ///< i.e. input_layer_size + neuron_dims
+	float **delta_weights;
+	int64_t examples_seen;
 
-typedef struct block_header blockheader_t;
-
-void mine(blockheader_t * const header, const sha256hash_t* const prev_hash);
-
-sha256hash_t hash(const blockheader_t* const header);
-
-uint64_t generate_timestamp();
-
-/********************************************************************/
+}network_update_t;
 
 typedef struct federated_block
 {
-	unsigned int magic; //Always 0x43616C6F
-	unsigned int blocksize;
+	uint32_t magic; //Always 0x43616C6F
+	uint32_t blocksize; ///< same as bitcoin, although unsinged aren't liked
+						///< it's the right choice for here I think.
 	blockheader_t *header;
+	int64_t local_update_count; ///< actual number of local updates assigned.
+	int64_t local_update_size; ///< size of malloced local updates (first dimension).
+	network_update_t **local_updates;
+	network_update_t *global_update;
+
 	//varint Transaction counter
 	//transactions	the(non empty) list of transactions
 	//TODO: Just for now VV
@@ -35,13 +36,21 @@ typedef struct federated_block
 
 federatedblock_t new_federated_block();
 
-sha256hash_t hash_federated(const federatedblock_t* const block);
+unsigned char *hash_federated(const federatedblock_t* const block);
 
-void mine_federated(federatedblock_t* const block, const sha256hash_t* const prev_hash);
+void mine_federated(federatedblock_t* const block, const unsigned char* const prev_hash);
 
-sha256hash_t prev_hash_federated(const federatedblock_t* const block);
+unsigned char *prev_hash_federated(const federatedblock_t* const block);
 
 cactuar_t target_federated(const federatedblock_t* const block);
+
+network_update_t *new_global_update(int64_t num_layers, int64_t *network_dims); ///<Should probably be hidden;
+
+int add_local_update(federatedblock_t *block, network_update_t *update);
+
+void get_global_update(federatedblock_t *block, network_update_t **update);
+
+int calculateGlobalUpdate(federatedblock_t *block);
 
 
 #endif
