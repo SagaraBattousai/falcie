@@ -1,6 +1,6 @@
 
-set(PULSE_INCLUDE_ROOT "${INCLUDE_ROOT}/pulse")
-set(INTERNAL_INCLUDE_ROOT "${PULSE_INCLUDE_ROOT}/internal")
+set(PULSE_MODULE_ROOT "${MODULE_ROOT}/pulse")
+# set(INTERNAL_INCLUDE_ROOT "${PULSE_INCLUDE_ROOT}/internal")
 
 add_subdirectory(anima)
 
@@ -10,25 +10,25 @@ add_subdirectory(cactuar)
 
 add_subdirectory(dahaka)
 
+set(PULSE_MODULE_ROOT "${MODULE_ROOT}/pulse")
 
-add_library(pulse SHARED $<TARGET_OBJECTS:anima> $<TARGET_OBJECTS:cactuar>)
+set(pulse_module "${PULSE_MODULE_ROOT}/pulse.ixx")
 
+#Currently CMake Can't handle making a dll with C++20 Modules and 
+#setting CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS; therfore, for now, we 
+#shall make it static.
+add_library(pulse STATIC #SHARED 
+  ${pulse_module})
 
-target_sources(pulse PUBLIC FILE_SET public_headers TYPE HEADERS 
-  BASE_DIRS "${INCLUDE_ROOT}"
-  FILES 
-  "${PULSE_INCLUDE_ROOT}/anima.h"
-  "${PULSE_INCLUDE_ROOT}/cactuar.h"
-  "${PULSE_INCLUDE_ROOT}/dahaka.h"
-)
+#Required to fix issue with MSVC Expecting a corresponding
+#.cpp and therefore looks for both *.ixx.obj and *.obj
+add_pseudo_module_impl_objects(pulse ${pulse_module})
+
 
 target_link_libraries(pulse PUBLIC anima cactuar dahaka)
 
-target_include_directories(pulse PUBLIC "${INCLUDE_ROOT}")
-target_include_directories(pulse PRIVATE "${INTERNAL_INCLUDE_ROOT}")
 
 set_target_properties(pulse anima cactuar dahaka PROPERTIES FOLDER Pulse)
-
 
 
 

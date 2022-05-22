@@ -1,4 +1,5 @@
-
+/*
+* 
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -34,4 +35,4 @@ float fast_log2(float val) {
 	return characteristic + mantissa;
 }
 
-
+*/

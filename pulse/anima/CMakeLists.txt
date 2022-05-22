@@ -2,43 +2,48 @@
 ################## Anima The AI Target ############################
 ###################################################################
 
-set(target_name anima)
+set(ANIMA_MODULE_ROOT "${PULSE_MODULE_ROOT}/anima")
 
-set(c_sources "matrix.c" "linalg.c" "matrix_avx.c" "ai.c")
+set(module_partition 
+  "${ANIMA_MODULE_ROOT}/anima-matrix.ixx" 
+  "${ANIMA_MODULE_ROOT}/anima-neural_network.ixx")
 
-set(headers "${INTERNAL_INCLUDE_ROOT}/${target_name}/matrix.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/linalg.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/ai.h"
-            )
+set(cpp_files "anima-matrix.cpp")
 
-add_library(${target_name} OBJECT ${c_sources})
+set(anima_module "${ANIMA_MODULE_ROOT}/anima.ixx")
 
-target_sources(${target_name} PRIVATE
-  FILE_SET private_headers 
-  TYPE HEADERS
-  BASE_DIRS "${INTERNAL_INCLUDE_ROOT}" 
-  FILES
-  ${headers}
-  )
+#Can't be Object anymore as add_custom_command for bost build wont work.
+#Static as we want pulse to be the dll and we can statically link the dll to 
+#this library and then only link to dll from client.
+add_library(anima STATIC ${anima_module} ${module_partition} ${cpp_files})
 
-target_sources(${target_name} PUBLIC
-  FILE_SET public_headers 
-  TYPE HEADERS
-  BASE_DIRS "${INCLUDE_ROOT}"
-  FILES 
-  "${PULSE_INCLUDE_ROOT}/${target_name}.h")
+if(MSVC)
+  # Required to fix issue with MSVC when using header only style 
+  # (due to template classes for example). In such cases MSVC 
+  # expects a corresponding .cpp and therefore looks for both
+  # *.ixx.obj and *.obj
+  # In This case however we do have an implementation file for anima-matrix
+  # as this stores our avx versions.
+  add_pseudo_module_impl_objects(anima 
+    ${anima_module} "${ANIMA_MODULE_ROOT}/anima-neural_network.ixx")
+  #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
+endif()
+
+
+
 
 if(x86)
+  #Add compile option for AVX Intrinsics
   if(MSVC)
-    #For matrix mult
-    target_compile_options(${target_name} PRIVATE "/arch:AVX512")
+    target_compile_options(anima PRIVATE "/arch:AVX512")
   else()
     #Risky as I've only check it's accaptable for GCC and Clang.
     # Do I need the specific -mavx512 extension versions?
-    target_compile_options(${target_name} PRIVATE "-mavx2")
+    target_compile_options(anima PRIVATE "-mavx2")
   endif()
+
   # I can't trust that __AVX__ is defined. (Or can I?).
   # Leave PUBLIC in case client program wants to test it
-  target_compile_definitions(${target_name} PUBLIC USE_AVX_INTRIN)
+  target_compile_definitions(anima PUBLIC USE_AVX_INTRIN)
 endif()
 

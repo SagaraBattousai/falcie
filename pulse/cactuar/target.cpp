@@ -1,6 +1,10 @@
+/*
+
 #include <cactuar/target.h>
 #include <string.h>
 #include <stdlib.h>
+*/
+
 
 /*
 cactuar_t base_difficulty()
@@ -11,6 +15,7 @@ cactuar_t base_difficulty()
 
 //In BigEndian format due to the hash leading zeros style
 //Pre: bytes must be zeroed and (at least) 32 bytes (256 bits)
+/*
 void unravel_cactuar(const cactuar_t *const cactuar, unsigned char* bytes)
 {
 	unsigned char exp = (*cactuar >> 24) & 255;
@@ -31,3 +36,5 @@ int targetcmp(const cactuar_t* const cactuar, const unsigned char* const hash)
 	return memcmp(hash, bytes, 32);
 }
 
+
+*/

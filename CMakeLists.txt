@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(falcie
-        VERSION 0.0.1
+        VERSION 0.0.2
         DESCRIPTION ""
         LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -19,9 +19,12 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(SystemCheck)
 include(LibUtils)
+include(ModuleUtils)
 
 set_system_check_vars()
 
+#Although no working currently for module based dll's it could still
+#Work for the C wrapper, aka etro. TODO: Let's see!
 if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
@@ -29,19 +32,22 @@ endif()
 set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation.")
 set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 
-set(INCLUDE_ROOT "${PROJECT_SOURCE_DIR}/include")
+# set(INCLUDE_ROOT "${PROJECT_SOURCE_DIR}/include")
+set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/modules")
 
 add_subdirectory(pulse)
-add_subdirectory(lindzei)
+# add_subdirectory(lindzei)
 #add_subdirectory(etro)
 
 if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(tests)
+  # enable_testing()
+  # add_subdirectory(tests)
 endif()
 
 if(BUILD_DOCS)
   add_subdirectory(docs)
+  #Do I need to add pulse's dependancies as well or is that transitive!?
+  add_dependencies(Doxygen pulse) #lindzei #etro
 endif()
 
 # add_library(etro SHARED) # $<TARGET_OBJECTS:pulse>)
@@ -57,8 +63,8 @@ target_include_directories(etro_c PUBLIC ${INCLUDE_ROOT})
 #DLL's must be in same dir as exe (or added to path but i'd rather
 #avoid that if I can.
 if(WIN32)
-  symlink_library_to_target(etro_c pulse)
-  symlink_library_to_target(etro_cpp pulse)
+  # symlink_library_to_target(etro_c pulse)
+  # symlink_library_to_target(etro_cpp pulse)
   copy_openssl_runtime_lib_to_target(etro_c crypto)
   copy_openssl_runtime_lib_to_target(etro_cpp crypto)
 endif()
@@ -66,7 +72,6 @@ endif()
 if(MSVC)
   set(VS_STARTUP_PROJECT etro_c)
 endif()
-
 
 #----------------------------------------------
 #   Install settings

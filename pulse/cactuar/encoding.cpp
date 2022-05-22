@@ -1,4 +1,4 @@
-
+/*
 #include <stdlib.h>
 #include <string.h>
 
@@ -6,12 +6,12 @@
 
 #include <cactuar/encoding.h>
 #include <cactuar/endianness_check.h>
-
+*/
 /*
 * These all seem to just be for convenience now I think about it. I mean tbh most of it is just byte
 * swapping and convert_data and decode_data do almost the exact same thing!!
 */
-
+/*
 void encode_data(const void* const data, unsigned char* encoded, size_t size)
 {
 	unsigned char* src = (unsigned char*)data;
@@ -62,3 +62,4 @@ void decode_data(unsigned char* encoded, size_t size) {
 		}
 	}
 }
+*/

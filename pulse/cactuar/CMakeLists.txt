@@ -2,43 +2,28 @@
 ################# Cactuar The Low Level Target #####################
 ####################################################################
 
-set(target_name cactuar)
+set(CACTUAR_MODULE_ROOT "${PULSE_MODULE_ROOT}/cactuar")
 
-set(c_sources "crypto.c" "encoding.c" "math.c" "blockheader.c" "target.c")
+set(cpp_sources "crypto.cpp" "encoding.cpp" "math.cpp" 
+  "blockheader.cpp" "target.cpp" "endianness_check.cpp")
 
-# "cactuar")
+set(cactuar_module "${CACTUAR_MODULE_ROOT}/cactuar.ixx")
 
-set(cpp_sources "endianness_check.cpp")
+add_library(cactuar STATIC ${cpp_sources} ${cactuar_module})
 
-set(headers "${INTERNAL_INCLUDE_ROOT}/${target_name}/crypto.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/encoding.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/target.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/math.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/blockheader.h"
-            "${INTERNAL_INCLUDE_ROOT}/${target_name}/endianness_check.h")
+if(MSVC)
+  #Required to fix issue with MSVC Expecting a corresponding
+  #.cpp and therefore looks for both *.ixx.obj and *.obj
+  add_pseudo_module_impl_objects(cactuar ${cactuar_module} ${module_partitions})
+  #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
+endif()
 
-add_library(${target_name} OBJECT ${c_sources} ${cpp_sources})
-
-target_sources(${target_name} PRIVATE 
-  FILE_SET private_headers 
-  TYPE HEADERS
-  BASE_DIRS "${INTERNAL_INCLUDE_ROOT}"
-  FILES 
-  ${headers})
-
-target_sources(${target_name} PUBLIC
-  FILE_SET public_headers 
-  TYPE HEADERS
-  BASE_DIRS "${INCLUDE_ROOT}"
-  FILES 
-  "${PULSE_INCLUDE_ROOT}/${target_name}.h")
-
-target_compile_definitions(${target_name} PRIVATE 
+target_compile_definitions(cactuar PRIVATE 
   "OPENSSL_API_COMPAT=30000" 
   "OPENSSL_NO_DEPRECATED")
 
-target_include_directories(${target_name} PRIVATE ${OPENSSL_INCLUDE_DIR})
-target_link_libraries(${target_name} PRIVATE OpenSSL::Crypto)
+target_include_directories(cactuar PRIVATE ${OPENSSL_INCLUDE_DIR})
+target_link_libraries(cactuar PRIVATE OpenSSL::Crypto)
 
 
 

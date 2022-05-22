@@ -27,7 +27,7 @@ copyright = '2022, James Calo'
 author = 'James Calo'
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1"
+release = "0.0.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -55,14 +55,11 @@ breathe_show_include = True
 #breathe_default_members = ('members', 'undoc-members')
 
 breathe_domain_by_extension = {
-    "h" : "c",
+    "h" : "cpp",
     }
 
 breathe_domain_by_file_pattern = {
     
-  "*/include/pulse/internal/dahaka/chain.h"       : "cpp",
-  "*/include/pulse/internal/dahaka/blockchain.h"  : "cpp",
-  "*/include/pulse/internal/dahaka/orderedlist.h" : "cpp",
     }
 
 # Add any paths that contain templates here, relative to this directory.

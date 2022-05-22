@@ -1,3 +1,4 @@
+/*
 #include <cactuar/endianness_check.h>
 
 constexpr bool SystemIsLittleEndian()
@@ -19,3 +20,5 @@ bool system_is_big_endian()
 {
 	return SystemIsBigEndian();
 }
+
+*/

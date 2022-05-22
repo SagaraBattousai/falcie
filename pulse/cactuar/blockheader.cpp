@@ -1,4 +1,4 @@
-
+/*
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -62,30 +62,32 @@ void mine(blockheader_t* const header, const unsigned char* const prev_hash)
 
 
 }
-
+*/
 //TODO: decide if hash type is optional
-hash_t *hash(const blockheader_t* const header)
-{
-	hash_t *hash = (hash_t *)malloc(sizeof(hash_t));
-	hash->size = SHA256;
-	hash->hash = (unsigned char *)malloc(sizeof(unsigned char) * hash->size);
+//hash_t *hash(const blockheader_t* const header)
+//{
+//	hash_t *hash = (hash_t *)malloc(sizeof(hash_t));
+//	hash->size = SHA256;
+//	hash->hash = (unsigned char *)malloc(sizeof(unsigned char) * hash->size);
 
-	unsigned char encoded[sizeof(blockheader_t)] = { 0 };
-	encode_data(header, encoded, sizeof(blockheader_t));
+//	unsigned char encoded[sizeof(blockheader_t)] = { 0 };
+//	encode_data(header, encoded, sizeof(blockheader_t));
 
 	//TODO: Clean this up!
-	hasher_t *hasher = get_default_sha256_hasher();
+//	hasher_t *hasher = get_default_sha256_hasher();
 	
 	/*
 	update_hash(hasher, encoded, sizeof(blockheader_t));
 	output_hash(hasher, hash.hash, NULL);
 	* ^^ is the same as VV
 	*/
-	hash_data(hasher, encoded, sizeof(blockheader_t), hash->hash, NULL);
 
-	return hash;
-}
+//	hash_data(hasher, encoded, sizeof(blockheader_t), hash->hash, NULL);
 
+//	return hash;
+//}
+
+/*
 int64_t generate_timestamp()
 {
 	struct timespec ts;
@@ -97,3 +99,4 @@ int64_t generate_timestamp()
 	timestamp += (int64_t)(ts.tv_nsec / NANO_TO_MILLI);
 	return timestamp;
 }
+*/

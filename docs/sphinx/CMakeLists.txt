@@ -1,6 +1,17 @@
 
 macro(configure_sphinx_and_add_command)
 
+  set(SPHINX_STATIC_DIR "${SPHINX_ROOT_DIRECTORY}/_static")
+
+  set(SPHINX_CSS 
+    "${SPHINX_STATIC_DIR}/css/style.css"
+    "${SPHINX_STATIC_DIR}/css/colour.css"
+    "${SPHINX_STATIC_DIR}/css/defaults.css"
+    "${SPHINX_STATIC_DIR}/css/dark.css"
+    "${SPHINX_STATIC_DIR}/css/light.css"
+    )
+
+  #Could use list(TRANSFORM but atm its just as easy to write twice
   #Order matters
   set(SPHINX_CSS_FILES_LIST "
   \"css/style.css\",
@@ -10,14 +21,18 @@ macro(configure_sphinx_and_add_command)
   \"css/light.css\",
   ")
 
-  set(SPHINX_JS_FILES_LIST "") #"\"js/falcie_docs.js\","
 
-  set(BREATHE_DOMAIN_BY_EXTENSION_DICT "\"h\" : \"c\",")
+  # set(SPHINX_JS_FILES_LIST "") #"\"js/falcie_docs.js\","
 
-  set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT "
-  \"*/include/pulse/internal/dahaka/chain.h\"       : \"cpp\",
-  \"*/include/pulse/internal/dahaka/blockchain.h\"  : \"cpp\",
-  \"*/include/pulse/internal/dahaka/orderedlist.h\" : \"cpp\",")
+  #set(SPHINX_JS "${SPHINX_STATIC_DIR}/js/falcie.js")
+
+
+  # Now everything should be C++
+  set(BREATHE_DOMAIN_BY_EXTENSION_DICT "\"h\" : \"cpp\",")
+
+  #TODO: Once etro (the C wrapper) is up and running
+  # set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT "
+  # \"*/include/etro .....\" : \"c\",
 
   configure_file(${SPHINX_CONF_IN} ${SPHINX_CONF_OUT} @ONLY)
 
@@ -25,16 +40,14 @@ macro(configure_sphinx_and_add_command)
   set(SPHINX_DOXYGEN_XML_DIR 
     "${CMAKE_CURRENT_SOURCE_DIR}/${DOXYGEN_OUTPUT_DIRECTORY}/xml")
 
-  #I don't like the glob here but since there are so many files and this
-  #file is already messy. Just be sure to run cmake .. if you add an new
-  #.rst file
-  file(GLOB_RECURSE SPHINX_RESTRUCTRED_TEXT "${SPHINX_ROOT_DIRECTORY}/*.rst")
-
-  #VV Could one day replace globs since files (tho escaped) are manually listed
-  #VV above ....
-  set(SPHINX_STATIC_DIR "${SPHINX_ROOT_DIRECTORY}/_static")
-  file(GLOB_RECURSE SPHINX_CSS "${SPHINX_STATIC_DIR}/css/*.css")
-  file(GLOB_RECURSE SPHINX_JS "${SPHINX_STATIC_DIR}/js/*.js")
+  #Sphinx Top Level rst's
+  set(SPHINX_RESTRUCTRED_TEXT 
+    "${SPHINX_ROOT_DIRECTORY}/pulse/pulse.rst"
+    "${SPHINX_ROOT_DIRECTORY}/pulse/atomos/atomos.rst"
+    # "${SPHINX_ROOT_DIRECTORY}/pulse/pulse.rst"
+    "${SPHINX_ROOT_DIRECTORY}/pulse/cactuar/cactuar.rst"
+    "${SPHINX_ROOT_DIRECTORY}/pulse/dahaka/dahaka.rst"
+    )
 
   add_custom_command(OUTPUT ${SPHINX_HTML_INDEX_FILE}
     COMMAND

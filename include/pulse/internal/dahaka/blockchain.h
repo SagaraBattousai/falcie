@@ -115,7 +115,7 @@ bool Blockchain<Block, HashType, UnrolledElems>::Validate()
 	// var i int = 1 //In order to skip genisis in first chain
 	//------------------------------------------------------------
 
-	Chain<Block, UnrolledElems>::ChainIterator it = this->chain.begin();
+	typename  Chain<Block, UnrolledElems>::ChainIterator it = this->chain.begin();
 	++it; //In order to skip genisis //< I prefer it++ but since I wrote both and it++ calls ++it ... 
 
 	Block prevBlock = *it;

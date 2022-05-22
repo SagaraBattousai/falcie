@@ -1,3 +1,5 @@
+/*
+
 #include <stdlib.h>
 
 #include <openssl/evp.h>
@@ -62,6 +64,8 @@ void free_hash(hash_t *hash)
 	free(hash->hash);
 	free(hash);
 }
+
+*/
 
 /*
 mdctx = EVP_MD_CTX_new();
