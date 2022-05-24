@@ -9,121 +9,169 @@ module;
 
 export module anima:matrix;
 
-import <array>;
+//import <array>;
 import <vector>;
+import <initializer_list>;
+import <utility>;
 
+using Dimensions = std::pair<std::int64_t, std::int64_t>;
 
 export namespace pulse
 {
-	template <typename T, std::int64_t Dim1, std::int64_t Dim2>
+	template <typename T>
 	class Matrix;
 
-	template<typename T, std::int64_t Dim1, std::int64_t Dim2, std::int64_t Dim3>
-	Matrix<T, Dim1, Dim3> operator*(const Matrix<T, Dim1, Dim2>&, const Matrix<T, Dim2, Dim3>&);
+	template<typename T>
+	Matrix<T> operator*(const Matrix<T>&, const Matrix<T>&);
 
-	template<typename T, std::int64_t Dim1, std::int64_t Dim2>
-	Matrix<T, Dim1, Dim2> operator+(Matrix<T, Dim1, Dim2>, const Matrix<T, Dim1, Dim2>&);
+	template<typename T>
+	Matrix<T> operator+(Matrix<T>, const Matrix<T>&);
 
-	template <typename T, std::int64_t Dim1, std::int64_t Dim2>
+	template <typename T>
 	class Matrix
 	{
 	public:
-		Matrix();
-		Matrix(std::array<std::array<T, Dim2>, Dim1> values);
+		Matrix(Dimensions init_shape);
+		Matrix(std::initializer_list<T> init);
+		Matrix(std::vector<T> values, Dimensions init_shape);
+
+		constexpr std::int64_t TotalElementCount();
+
+
 		//??? T(); Want ref to self but dims are swapped so .... Coud carry .T ref to self?
 
 		//As much as I hate defining in class declaration it seems MSVC has a bug
 		//that requires it when const overriding and operator :'(
-
-		const std::array<T, Dim2>& operator[](std::int64_t index) const
+		
+		const T& operator[](Dimensions index) const
 		{
-			return this->data[index];
+			return this->data[index.first * this->dims.second + index.second];
 		};
 
-		//Not sure I want writeable version
-		std::array<T, Dim2>& operator[](std::int64_t index)
+		//Writeable version
+		T& operator[](Dimensions index)
 		{
-			return this->data[index];
+			return this->data[index.first * this->dims.second + index.second];
 		};
 
-		//Doesnt need to be friend  So
-		//template<typename T, std::int64_t Dim1, std::int64_t Dim2, std::int64_t Dim3>
-		//friend Matrix<T, Dim1, Dim3> operator* <T, Dim1, Dim2, Dim3> (
-		//	const Matrix<T, Dim1, Dim2>&,
-		//	const Matrix<T, Dim2, Dim3>&);
+		const T& operator[](std::int64_t i) const
+		{
+			return this->data[i];
+		};
 
-		template<std::int64_t Dim3>
-		Matrix<T, Dim1, Dim3>& operator*=(const Matrix<T, Dim2, Dim3>& rhs);
+		//Writeable version
+		T& operator[](std::int64_t i)
+		{
+			return this->data[i];
+		};
+		
+
+		Matrix& operator*=(const Matrix& rhs);
+		
+		friend Matrix operator* <T> (const Matrix<T>&, const Matrix<T>&);
 
 		Matrix& operator+=(const Matrix&);
 
-		friend Matrix operator+ <T, Dim1, Dim2> (Matrix, const Matrix&);
+		friend Matrix operator+ <T> (Matrix, const Matrix&);
+
+		const std::vector<T>& Data();
+
+		const Dimensions& Shape();
 
 	private:
-		std::array<std::array<T, Dim2>, Dim1> data;
+		std::vector<T> data;
+		Dimensions dims;
 	};
 
-	template <typename T, std::int64_t Dim1>
-	using Vector = Matrix<T, Dim1, 1>;
 
-	template <typename T, std::int64_t Dim1, std::int64_t Dim2>
-	Matrix<T, Dim1, Dim2>::Matrix()
-		: Matrix(std::array<std::array<T, Dim2>, Dim1>{})
+	template <typename T>
+	Matrix<T>::Matrix(Dimensions init_shape) 
+		: Matrix(std::vector<T>(init_shape.first * init_shape.second), init_shape) 
 	{}
 
-	template <typename T, std::int64_t Dim1, std::int64_t Dim2>
-	Matrix<T, Dim1, Dim2>::Matrix(
-		std::array<std::array<T, Dim2>, Dim1> values)
+	//BUGS in constructure im gessing 
+	template <typename T>
+	Matrix<T>::Matrix(std::initializer_list<T> init) : Matrix(init, { (std::int64_t) init.size()}) {}
+
+
+	template <typename T>
+	Matrix<T>::Matrix(std::vector<T> values, Dimensions shape)
 		: data(values)
-	{}
+		, dims(shape)
+	{
+		this->data.shrink_to_fit(); //Data's size will not change
+	}
 
-	template<typename T, std::int64_t Dim1, std::int64_t Dim2>
-	template<std::int64_t Dim3>
-	Matrix<T, Dim1, Dim3>& pulse::Matrix<T, Dim1, Dim2>::operator*=(const Matrix<T, Dim2, Dim3>& rhs)
+	template <typename T>
+	const std::vector<T>& Matrix<T>::Data()
+	{
+		return this->data;
+	}
+
+	template <typename T>
+	const Dimensions& Matrix<T>::Shape()
+	{
+		return this->dims;
+	}
+
+	//TODO: Potential bug constexpr
+	template <typename T>
+	constexpr std::int64_t Matrix<T>::TotalElementCount()
+	{
+		return this->data.size();
+	}
+
+
+	template<typename T>
+	Matrix<T>& pulse::Matrix<T>::operator*=(const Matrix<T>& rhs)
 	{
 		*this = (*this * rhs);
 		return *this;
 	}
 
-	template<typename T, std::int64_t Dim1, std::int64_t Dim2, std::int64_t Dim3>
-	Matrix<T, Dim1, Dim3> operator*(
-		const Matrix<T, Dim1, Dim2>& lhs,
-		const Matrix<T, Dim2, Dim3>& rhs)
+	//TODO: improve non AVX code (AKA Modern C++ numerics features)
+	template<typename T>
+	Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs)
 	{
 		//Zero init output
-		std::array<std::array<T, Dim3>, Dim1> mout{};
+		std::vector<T> mout{};
+		mout.reserve(lhs.size());
+
 		//#ifdef USE_AVX_INTRIN
 			//
 		//#else
 
-		for (std::int64_t i = 0; i < Dim1; i++)
+		//Assert lhs.dims.second == rhs.dims.first
+
+		for (std::int64_t i = 0; i < lhs.dims.first; i++)
 		{
-			for (std::int64_t j = 0; j < Dim2; j++)
+			for (std::int64_t j = 0; j < lhs.dims.second; j++)
 			{
-				for (std::int64_t k = 0; k < Dim3; k++)
+				for (std::int64_t k = 0; k < rhs.dims.second; k++)
 				{
-					mout[i][k] += lhs[i][j] * rhs[j][k];
+					mout[i * rhs.dims.second + k] += 
+						lhs[i * lhs.dims.second + j] * rhs[j * rhs.dims.second + k];
 				}
 			}
 		}
 
 		//#endif
 
-		return Matrix<T, Dim1, Dim3>(mout);
+		return Matrix<T>(mout, { lhs.dims.first, rhs.dims.second });
 	}
 
-	template<typename T, std::int64_t Dim1, std::int64_t Dim2>
-	Matrix<T, Dim1, Dim2>& Matrix<T, Dim1, Dim2>::operator+=(const Matrix<T, Dim1, Dim2>& rhs)
+	template<typename T>
+	Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& rhs)
 	{
 		//#ifdef USE_AVX_INTRIN
 			//
 		//#else
 
-		for (std::int64_t i = 0; i < Dim1; i++)
+		for (std::int64_t i = 0; i < this->dims.first; i++)
 		{
-			for (std::int64_t j = 0; j < Dim2; j++)
+			for (std::int64_t j = 0; j < this->dims.second; j++)
 			{
-				(*this)[i][j] = (*this)[i][j] + rhs[i][j];
+				(*this)[i * this->dims.second + j] += rhs[i * this->dims.second + j];
 			}
 		}
 
@@ -132,8 +180,8 @@ export namespace pulse
 		return *this;
 	}
 
-	template<typename T, std::int64_t Dim1, std::int64_t Dim2>
-	Matrix<T, Dim1, Dim2> operator+(Matrix<T, Dim1, Dim2> lhs, const Matrix<T, Dim1, Dim2>& rhs)
+	template<typename T>
+	Matrix<T> operator+(Matrix<T> lhs, const Matrix<T>& rhs)
 	{
 		lhs += rhs;
 		return lhs;

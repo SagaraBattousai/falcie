@@ -2,6 +2,8 @@
 #include <iostream>
 #include <array>
 #include <algorithm>
+#include <numeric>
+#include <utility>
 
 
 import pulse;
@@ -13,19 +15,9 @@ int x(int& a, int& b)
 
 int main(void)
 {
-	pulse::NeuralNetwork<2, 1, 2> network{ std::array<std::int64_t, 2>{2, 1} };
+	pulse::Matrix<int> m({1,2,3,4,5,6,7,8,9},  { 3, 3 });
 
-	//This will be wrong #BUG
-	pulse::Weights<2> w = network.GetWeights();
-
-	std::cout << w[0][0] << ", " << w[0][1] << "\n" << w[1][0] << std::endl;
-
-	std::vector<int>vec(5, 3);
-	std::cout << vec.size() << std::endl;
-	vec.push_back(7);
-	//constexpr int cs = vec.size();
-	std::cout << vec.size() << std::endl;// ", " << cs << std::endl;
-
+	std::cout << m.TotalElementCount() << std::endl;
 
 	return 0;
 
