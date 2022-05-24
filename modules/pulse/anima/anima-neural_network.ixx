@@ -2,41 +2,30 @@ module;
 
 #include <cstdint>
 #include <algorithm>
+#include <random>
+//#include <iostream>
 
 export module anima:neural_network;
 
 import <array>;
 import <vector>;
 
-//TODO: decide on how to handle weights (array of vectors or array of matrix?)
-// array of matrix is more natural but array of vectors is better for code
-// but ive moved from C to c++ now sooo....
-// NOTE: Dont kill all C code as that is still needed for wrapper.
-//Public api
-export namespace pulse
+import :random;
+
+namespace pulse
 {
-
-
-	using ActivationFunction = float (*)(const float&);
-
-	using ErrorEnergy = float (*)(float *, float *, int64_t);
-
-	//May change to weight ptr, I've forgotten all my stl pointer rules
-	template <int64_t NumberOfLayers>
-	using Weights = std::array<std::vector<float>, NumberOfLayers>;
-
-	template <int64_t Size>
-	using Data = std::array<float, Size>;
-
 	namespace anima
 	{
+		//May change to weight ptr, I've forgotten all my stl pointer rules
+		template <std::int64_t NumberOfLayers>
+		using Weights = std::array<std::vector<float>, NumberOfLayers>;
+
 		/** @c total_layer_count: The number of layers (including the
 		 * input layer). Used primarily to help with freeing memory.
 		 */
-		template <int64_t LayerCount>
+		template <std::int64_t LayerCount>
 		struct FeedForwardTracking
 		{
-			//FeedForwardTracking();
 			/** @c layers: A matrix of the layers through the network. */
 			Weights<LayerCount> layers;
 			/**
@@ -47,6 +36,29 @@ export namespace pulse
 		};
 
 	} //namespace pulse::anima
+}
+
+//TODO: decide on how to handle weights (array of vectors or array of matrix?)
+// array of matrix is more natural but array of vectors is better for code
+// but ive moved from C to c++ now sooo....
+// NOTE: Dont kill all C code as that is still needed for wrapper.
+//Public api
+export namespace pulse
+{
+	using ActivationFunction = float (*)(const float&);
+
+	using ErrorEnergy = float (*)(float *, float *, std::int64_t);
+
+	//May change to weight ptr, I've forgotten all my stl pointer rules
+	template <std::int64_t NumberOfLayers>
+	using Weights = std::array<std::vector<float>, NumberOfLayers>;
+
+	template <std::int64_t Size>
+	using Data = std::array<float, Size>;
+
+	float sigmoid(const float&);
+
+	float delta_sigmoid(const float&);
 
 
 	/** @c input_length: The length of the input array.
@@ -54,11 +66,16 @@ export namespace pulse
 	 * i.e. the total number of layers excluding the input layer (also equal
 	 * to the dimensions of the weight array).
 	 */
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	class NeuralNetwork
 	{
 	public:
-		NeuralNetwork(std::array<int64_t, NumberOfLayers> neuron_dims,
+		NeuralNetwork(std::array<std::int64_t, NumberOfLayers> neuron_dims);// , unsigned* seed);
+
+		NeuralNetwork(std::array<std::int64_t, NumberOfLayers> neuron_dims,
+			float learning_rate);// , unsigned* seed);
+
+		NeuralNetwork(std::array<std::int64_t, NumberOfLayers> neuron_dims,
 			ActivationFunction activation, ActivationFunction delta_activation,
 			float learning_rate);// , unsigned* seed);
 
@@ -91,19 +108,23 @@ export namespace pulse
 
 		//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
 		// batch has size batch size and batch[x] has input size size
-		void TrainNetwork(Data<OutputSize> desired, Data<InputSize>, int64_t epochs);
+		void TrainNetwork(Data<OutputSize> desired, Data<InputSize>, std::int64_t epochs);
 
 		//for now use multy ret by reference but i think well wanna change this //TODO:
 		// batch has size batch size and batch[x] has input size size
-		void train_network_with_stats(Data<OutputSize> desired, Data<InputSize>, int64_t epochs,
-			int64_t *epochs_taken, float *avg_err, float target_err, ErrorEnergy err_func);
+		void train_network_with_stats(Data<OutputSize> desired, Data<InputSize>, std::int64_t epochs,
+			std::int64_t *epochs_taken, float *avg_err, float target_err, ErrorEnergy err_func);
 		/*
 		void print_inferencing_results(neural_network_t *network,
-			float **training_data, int64_t training_data_size, int64_t training_data_dimension,
-			float **desired, int64_t desired_dimension);*/
+			float **training_data, std::int64_t training_data_size, std::int64_t training_data_dimension,
+			float **desired, std::int64_t desired_dimension);*/
+
+		static constexpr float DEFAULT_LEARNING_RATE = 0.9;
 
 	private:
 
+		//TODO: Allow custom random generator and custom preset weights
+		void GenerateWeights();		
 
 		/** @c input: A pointer to the networks inputs. */
 		Data<InputSize> input;
@@ -114,7 +135,7 @@ export namespace pulse
 		 * and structured such that @c neuron_dims[layer - 1] is the number of neurons
 		 * at layer @c layer
 		 */
-		std::array<int64_t, NumberOfLayers> neuron_dims;
+		std::array<std::int64_t, NumberOfLayers> neuron_dims;
 
 		/**
 		* @c weights: An array of weights with @c NumberOfLayers dimensions each of
@@ -143,9 +164,23 @@ export namespace pulse
 
 	};
 
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::NeuralNetwork(
-		std::array<int64_t, NumberOfLayers> neuron_dims,
+		std::array<std::int64_t, NumberOfLayers> neuron_dims)
+		: NeuralNetwork(neuron_dims, DEFAULT_LEARNING_RATE)
+	{}
+
+
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
+	NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::NeuralNetwork(
+		std::array<std::int64_t, NumberOfLayers> neuron_dims, float learning_rate)
+		: NeuralNetwork(neuron_dims, &sigmoid, &delta_sigmoid, learning_rate)
+	{}
+
+
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
+	NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::NeuralNetwork(
+		std::array<std::int64_t, NumberOfLayers> neuron_dims,
 		ActivationFunction activation, ActivationFunction delta_activation,
 		float learning_rate) //, unsigned* seed)
 		: neuron_dims(neuron_dims)
@@ -153,41 +188,77 @@ export namespace pulse
 		, delta_activation(delta_activation)
 		, learning_rate(learning_rate)
 		, tracking()
-	{}
+	{
+		//TODO: clean this
+		//this->weights = 
+		GenerateWeights();
+	}
 
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	void NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::SetInput(Data<InputSize> input)
 	{
 		this->input = input;
 	}
 
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	const Weights<NumberOfLayers>& NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::GetWeights()
 	{
 		return this->weights;
 	}
 
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	void NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::SetWeights(
 		Weights<NumberOfLayers> weights)
 	{
 		this->weights = weights;
 	}
 
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	void NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::UpdateWeights(
 		Weights<NumberOfLayers> delta_weights)
 	{
 		//TODO: Vector sums
 	}
 
-	template <int64_t InputSize, int64_t OutputSize, int64_t NumberOfLayers>
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
 	Data<OutputSize> NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::Output()
 	{
 		Data<OutputSize> output{}; //Do I need to initialize? Doesn't hurt me thinks. TODO: Try it!
 		std::copy_n(this->tracking.layers.begin(), OutputSize, output);
 		return output;
 	}
+
+
+	template <std::int64_t InputSize, std::int64_t OutputSize, std::int64_t NumberOfLayers>
+	void NeuralNetwork<InputSize, OutputSize, NumberOfLayers>::GenerateWeights()
+	{
+		//	using Weights = std::array<std::vector<float>, NumberOfLayers>;
+
+		//Weights initWeights{};
+
+		//TODO: Change
+		std::mt19937 bitgen{ 0x43616c6f };
+
+		logistic_distribution<float> randGen{};
+
+		std::int64_t largest = *std::max_element(this->neuron_dims.begin(), this->neuron_dims.end());
+		std::vector<float> weightLayer{};
+		weightLayer.reserve(largest);
+
+		std::int64_t i = 0;
+		for (auto it = this->neuron_dims.begin(); it != this->neuron_dims.end(); it++)
+		{
+			for (std::int64_t i = 0; i < *it; i++)
+			{
+				weightLayer.push_back(randGen(bitgen));
+			}
+			this->weights[i] = weightLayer;
+			i++;
+			weightLayer.clear();
+		}
+
+	}
+
 
 
 
@@ -229,16 +300,16 @@ export namespace pulse
 
 		//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
 		// batch has size batch size and batch[x] has input size size
-		void TrainNetwork(Data<OutputSize> desired, Data<InputSize>, int64_t epochs);
+		void TrainNetwork(Data<OutputSize> desired, Data<InputSize>, std::std::int64_t epochs);
 
 		//for now use multy ret by reference but i think well wanna change this //TODO:
 		// batch has size batch size and batch[x] has input size size
-		void train_network_with_stats(Data<OutputSize> desired, Data<InputSize>, int64_t epochs,
-			int64_t *epochs_taken, float *avg_err, float target_err, ErrorEnergy err_func);
+		void train_network_with_stats(Data<OutputSize> desired, Data<InputSize>, std::std::int64_t epochs,
+			std::std::int64_t *epochs_taken, float *avg_err, float target_err, ErrorEnergy err_func);
 		*//*
 		void print_inferencing_results(neural_network_t *network,
-			float **training_data, int64_t training_data_size, int64_t training_data_dimension,
-			float **desired, int64_t desired_dimension);*/
+			float **training_data, std::std::int64_t training_data_size, std::std::int64_t training_data_dimension,
+			float **desired, std::std::int64_t desired_dimension);*/
 			/*
 
 				};
@@ -253,8 +324,8 @@ export namespace pulse
 			*/
 
 			/*
-			neural_network_t* new_neural_network(int64_t input_size, int64_t num_layers,
-				int64_t *neuron_dims, activation_t activation,
+			neural_network_t* new_neural_network(std::std::int64_t input_size, std::std::int64_t num_layers,
+				std::std::int64_t *neuron_dims, activation_t activation,
 				activation_t delta_activation, float learning_rate, unsigned* seed)
 			{
 				float **weights;
@@ -287,7 +358,7 @@ export namespace pulse
 				free(network->input);
 				free_tracking(network->tracking);
 
-				for (int64_t i = 0; i < network->num_layers; i++)
+				for (std::std::int64_t i = 0; i < network->num_layers; i++)
 				{
 					free(network->weights[i]);
 				}
@@ -325,11 +396,11 @@ export namespace pulse
 
 			void update_weight(neural_network_t *network, float** deltaweights)
 			{
-				int64_t prev_dimensions = network->input_size + 1;
-				int64_t next_dimensions;
-				int64_t weight_size;
+				std::int64_t prev_dimensions = network->input_size + 1;
+				std::int64_t next_dimensions;
+				std::int64_t weight_size;
 
-				for (int64_t i = 0; i < network->num_layers; i++)
+				for (std::int64_t i = 0; i < network->num_layers; i++)
 				{
 					next_dimensions = network->neuron_dims[i];
 					weight_size = prev_dimensions * next_dimensions;
@@ -342,7 +413,7 @@ export namespace pulse
 
 			}
 
-			void rand_weights(float ***weight_ptr, int64_t no_layers, int64_t no_inputs, int64_t *nd, unsigned *seed)
+			void rand_weights(float ***weight_ptr, std::int64_t no_layers, std::int64_t no_inputs, std::int64_t *nd, unsigned *seed)
 			{
 				if (seed != NULL)
 				{
@@ -356,9 +427,9 @@ export namespace pulse
 				}
 				float **weights = *weight_ptr;
 
-				int64_t prev_dims = no_inputs + 1;
-				int64_t weight_size;
-				for (int64_t i = 0; i < no_layers; i++)
+				std::int64_t prev_dims = no_inputs + 1;
+				std::int64_t weight_size;
+				for (std::int64_t i = 0; i < no_layers; i++)
 				{
 					weight_size = nd[i] * prev_dims;
 					*(weights + i) = (float *)malloc(sizeof(float) * weight_size);
@@ -367,7 +438,7 @@ export namespace pulse
 						exit(-5);
 					}
 
-					for (int64_t j = 0; j < weight_size; j++)
+					for (std::int64_t j = 0; j < weight_size; j++)
 					{
 						*(*(weights + i) + j) = frand(NULL);
 					}
@@ -398,7 +469,7 @@ export namespace pulse
 					return -2;
 				}
 
-				int64_t prev_layer_size = (network->input_size + 1);
+				std::int64_t prev_layer_size = (network->input_size + 1);
 				float *prev_layer = (float *)malloc(sizeof(float) * prev_layer_size);
 				if (prev_layer == NULL)
 				{
@@ -417,9 +488,9 @@ export namespace pulse
 				float *thislayer;
 				float *bthislayer;
 
-				for (int64_t i = 0; i < network->num_layers; i++)
+				for (std::int64_t i = 0; i < network->num_layers; i++)
 				{
-					int64_t num_neurons = network->neuron_dims[i];
+					std::int64_t num_neurons = network->neuron_dims[i];
 
 					thislayer = (float *)malloc(sizeof(float) * num_neurons);
 					if (thislayer == NULL)
@@ -437,7 +508,7 @@ export namespace pulse
 					//Weight Multiplication
 					matrix_multiply(prev_layer, network->weights[i], bthislayer, 1, prev_layer_size, num_neurons);
 
-					for (int64_t j = 0; j < num_neurons; j++)
+					for (std::int64_t j = 0; j < num_neurons; j++)
 					{
 						//msvc doesn't like [i] access with non stack buffers
 						*(thislayer + j) = network->activation(bthislayer[j]);
@@ -458,7 +529,7 @@ export namespace pulse
 				// Output neurons
 				float *output = network->tracking->layers[network->num_layers];
 
-				int64_t curr_neuron_count = network->neuron_dims[network->num_layers - 1];
+				std::int64_t curr_neuron_count = network->neuron_dims[network->num_layers - 1];
 
 				float *delta = (float *)malloc(sizeof(float) * curr_neuron_count);
 				if (delta == NULL)
@@ -466,7 +537,7 @@ export namespace pulse
 					return -1;
 				}
 
-				for (int64_t i = 0; i < curr_neuron_count; i++)
+				for (std::int64_t i = 0; i < curr_neuron_count; i++)
 				{
 					//*(delta + i) = network->delta_activation(output[i]) * (desired[i] - output[i]);
 					*(delta + i) = 2 * output[i] * (1 - output[i]) * (desired[i] - output[i]);
@@ -475,10 +546,10 @@ export namespace pulse
 				// The neuron count for the next layer, which is actually
 				// the previous layer in the network, as we are backtracking.
 				// i.e. back_neurons <- curr_neurons.
-				int64_t back_neuron_count;
-				int64_t weight_size;
+				std::int64_t back_neuron_count;
+				std::int64_t weight_size;
 
-				for (int64_t j = network->num_layers - 1; j >= 0; j--)
+				for (std::int64_t j = network->num_layers - 1; j >= 0; j--)
 				{
 					curr_neuron_count = network->neuron_dims[j];
 
@@ -500,7 +571,7 @@ export namespace pulse
 
 						//delta=aconst*curlayers[l]*(1-curlayers[l])*(np.dot(delta,weights[l]));
 
-						for (int64_t k = 0; k < back_neuron_count; k++)
+						for (std::int64_t k = 0; k < back_neuron_count; k++)
 						{
 							float clayer = *(network->tracking->layers[j] + k);
 							//*(next_delta + k) = network->delta_activation(*(tracking->layers[j] + k));
@@ -528,14 +599,14 @@ export namespace pulse
 				return 0;
 			}
 
-			int train_network(float **desired, float **batch, int64_t batch_size,
-				int64_t epochs, neural_network_t *network)
+			int train_network(float **desired, float **batch, std::int64_t batch_size,
+				std::int64_t epochs, neural_network_t *network)
 			{
 				float **delta_weights = NULL;
 
 				for (int i = 0; i < epochs; i++)
 				{
-					for (int64_t j = 0; j < batch_size; j++)
+					for (std::int64_t j = 0; j < batch_size; j++)
 					{
 						set_input(network, batch[j]);
 						float *desired_output = desired[j];
@@ -557,7 +628,7 @@ export namespace pulse
 						update_weight(network, delta_weights);
 
 						//TODO Clean this up!
-						for (int64_t k = 0; k < network->num_layers; k++)
+						for (std::int64_t k = 0; k < network->num_layers; k++)
 						{
 							free(delta_weights[k]);
 						}
@@ -574,11 +645,11 @@ export namespace pulse
 			}
 
 
-			int train_network_with_stats(float **desired, float **batch, int64_t batch_size,
-				int64_t epochs, neural_network_t *network, int64_t *epochs_taken, float *avg_err, float target_err, error_energy err_func)
+			int train_network_with_stats(float **desired, float **batch, std::int64_t batch_size,
+				std::int64_t epochs, neural_network_t *network, std::int64_t *epochs_taken, float *avg_err, float target_err, error_energy err_func)
 			{
 				float avg_error = 1.f;
-				int64_t epoch = 0;
+				std::int64_t epoch = 0;
 
 				//float **delta_weights;
 
@@ -606,8 +677,8 @@ export namespace pulse
 
 			//TODO: decide wheter to change to string.
 			void print_inferencing_results(neural_network_t *network,
-				float **training_data, int64_t training_data_size, int64_t training_data_dimension,
-				float **desired, int64_t desired_dimension)
+				float **training_data, std::int64_t training_data_size, std::int64_t training_data_dimension,
+				float **desired, std::int64_t desired_dimension)
 			{
 				//printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
 
@@ -616,7 +687,7 @@ export namespace pulse
 
 				float *output = NULL;
 
-				for (int64_t j = 0; j < training_data_size; j++)
+				for (std::int64_t j = 0; j < training_data_size; j++)
 				{
 					set_input(network, training_data[j]);
 					float *desired_output = desired[j];
@@ -627,23 +698,23 @@ export namespace pulse
 
 					printf("input: ( ");
 
-					int64_t all_but_last_training_dim = training_data_dimension - 1;
-					for (int64_t k = 0; k < all_but_last_training_dim; k++)
+					std::int64_t all_but_last_training_dim = training_data_dimension - 1;
+					for (std::int64_t k = 0; k < all_but_last_training_dim; k++)
 					{
 						printf("%f, ", training_data[j][k]);
 					}
 
 					printf("%f ) desired: ( ", training_data[j][all_but_last_training_dim]);
 
-					int64_t all_but_last_output_dim = desired_dimension - 1;
-					for (int64_t k = 0; k < all_but_last_output_dim; k++)
+					std::int64_t all_but_last_output_dim = desired_dimension - 1;
+					for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
 					{
 						printf("%f, ", desired[j][k]);
 					}
 
 					printf("%f ) -> Network Output : ( ", desired[j][all_but_last_output_dim]);
 
-					for (int64_t k = 0; k < all_but_last_output_dim; k++)
+					for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
 					{
 						printf("%f, ", output[k]);
 					}
@@ -661,7 +732,7 @@ export namespace pulse
 					feedforward(network);
 				}
 
-				int64_t output_size = network->neuron_dims[network->num_layers - 1];
+				std::int64_t output_size = network->neuron_dims[network->num_layers - 1];
 
 				*output = (float*)malloc(sizeof(float) * output_size);
 				if (*output == NULL)
@@ -679,7 +750,7 @@ export namespace pulse
 			//since at the moment we cant tell if it wascmalloc'd
 			void free_tracking(feedforward_tracking_t *tracking)
 			{
-				for (int64_t i = 0; i < tracking->total_layer_count; i++)
+				for (std::int64_t i = 0; i < tracking->total_layer_count; i++)
 				{
 
 					free(tracking->layers[i]);
@@ -694,7 +765,7 @@ export namespace pulse
 				free(tracking);
 			}
 
-			int copy_weights(float ***dst, float**src, int64_t num_layers, int64_t input_size, int64_t *neuron_dims)
+			int copy_weights(float ***dst, float**src, std::int64_t num_layers, std::int64_t input_size, std::int64_t *neuron_dims)
 			{
 				*dst = (float**)malloc(sizeof(float*) * num_layers);
 
@@ -703,11 +774,11 @@ export namespace pulse
 					return -2;
 				}
 
-				int64_t prev_dimensions = input_size + 1;
-				int64_t next_dimensions;
-				int64_t weight_size;
+				std::int64_t prev_dimensions = input_size + 1;
+				std::int64_t next_dimensions;
+				std::int64_t weight_size;
 
-				for (int64_t i = 0; i < num_layers; i++)
+				for (std::int64_t i = 0; i < num_layers; i++)
 				{
 					next_dimensions = neuron_dims[i];
 					weight_size = prev_dimensions * next_dimensions;

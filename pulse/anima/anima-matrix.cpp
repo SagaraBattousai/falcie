@@ -18,7 +18,7 @@ namespace pulse
     {
 
 
-#ifdef USE_AVX_INTRIN
+        #ifdef USE_AVX_INTRIN
 
         constexpr int AVX_512_PACK_SIZE = 16;
         constexpr int AVX_512_PACK_SHIFT = 4; //Used for multipying by 16

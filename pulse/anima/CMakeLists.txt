@@ -6,9 +6,13 @@ set(ANIMA_MODULE_ROOT "${PULSE_MODULE_ROOT}/anima")
 
 set(module_partition 
   "${ANIMA_MODULE_ROOT}/anima-matrix.ixx" 
+  "${ANIMA_MODULE_ROOT}/anima-random.ixx" 
   "${ANIMA_MODULE_ROOT}/anima-neural_network.ixx")
 
-set(cpp_files "anima-matrix.cpp")
+set(cpp_files 
+  "anima-matrix.cpp" 
+  "anima-neural_network.cpp"
+  "anima-random.cpp")
 
 set(anima_module "${ANIMA_MODULE_ROOT}/anima.ixx")
 
