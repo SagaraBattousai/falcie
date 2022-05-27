@@ -1,6 +1,0 @@
-
-Cactuar
-========
-
-.. doxygenfile:: cactuar.h
-

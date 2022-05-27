@@ -1,6 +1,0 @@
-
-anima
-===============
-
-.. doxygenfile:: anima.h
-

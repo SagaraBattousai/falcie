@@ -5,7 +5,7 @@ macro(configure_sphinx_and_add_command)
 
   set(SPHINX_CSS 
     "${SPHINX_STATIC_DIR}/css/style.css"
-    "${SPHINX_STATIC_DIR}/css/colour.css"
+    "${SPHINX_STATIC_DIR}/css/colours.css"
     "${SPHINX_STATIC_DIR}/css/defaults.css"
     "${SPHINX_STATIC_DIR}/css/dark.css"
     "${SPHINX_STATIC_DIR}/css/light.css"
@@ -15,7 +15,7 @@ macro(configure_sphinx_and_add_command)
   #Order matters
   set(SPHINX_CSS_FILES_LIST "
   \"css/style.css\",
-  \"css/colour.css\",
+  \"css/colours.css\",
   \"css/defaults.css\",
   \"css/dark.css\",
   \"css/light.css\",
@@ -28,7 +28,10 @@ macro(configure_sphinx_and_add_command)
 
 
   # Now everything should be C++
-  set(BREATHE_DOMAIN_BY_EXTENSION_DICT "\"h\" : \"cpp\",")
+  set(BREATHE_DOMAIN_BY_EXTENSION_DICT 
+    "\"h\"   : \"cpp\",
+     \"ixx\" : \"cpp\",
+     ")
 
   #TODO: Once etro (the C wrapper) is up and running
   # set(BREATHE_DOMAIN_BY_FILE_PATTERN_DICT "
@@ -40,16 +43,46 @@ macro(configure_sphinx_and_add_command)
   set(SPHINX_DOXYGEN_XML_DIR 
     "${CMAKE_CURRENT_SOURCE_DIR}/${DOXYGEN_OUTPUT_DIRECTORY}/xml")
 
-  #Sphinx Top Level rst's
+  set(PULSE_DOC_ROOT   "${SPHINX_ROOT_DIRECTORY}/pulse")
+  set(LINDZEI_DOC_ROOT "${SPHINX_ROOT_DIRECTORY}/lindzei")
+  set(ETRO_DOC_ROOT    "${SPHINX_ROOT_DIRECTORY}/etro")
+
+  # Sphinx rst's Hand wrriten just like source code :P
+  # Listed Hierarchically
   set(SPHINX_RESTRUCTRED_TEXT 
-    "${SPHINX_ROOT_DIRECTORY}/pulse/pulse.rst"
-    "${SPHINX_ROOT_DIRECTORY}/pulse/atomos/atomos.rst"
-    # "${SPHINX_ROOT_DIRECTORY}/pulse/pulse.rst"
-    "${SPHINX_ROOT_DIRECTORY}/pulse/cactuar/cactuar.rst"
-    "${SPHINX_ROOT_DIRECTORY}/pulse/dahaka/dahaka.rst"
+    #Root Index
+    "${SPHINX_ROOT_DIRECTORY}/index.rst"
+    
+    #Libraries
+    "${PULSE_DOC_ROOT}/index.rst"
+    "${ETRO_DOC_ROOT}/index.rst"
+    "${LINDZEI_DOC_ROOT}/index.rst"
+
+    #Pulse Sub-Modules
+    "${PULSE_DOC_ROOT}/anima/index.rst"
+    #"${PULSE_DOC_ROOT}/atomos/index.rst"
+    "${PULSE_DOC_ROOT}/cactuar/index.rst"
+    "${PULSE_DOC_ROOT}/dahaka/index.rst"
+
+    #pulse::anima Modules
+    "${PULSE_DOC_ROOT}/anima/matrix.rst"
+    "${PULSE_DOC_ROOT}/anima/neural_network.rst"
+    "${PULSE_DOC_ROOT}/anima/random.rst"
+
+    #pulse::cactuar Modules
+    "${PULSE_DOC_ROOT}/cactuar/crypto.rst"
+    "${PULSE_DOC_ROOT}/cactuar/encoding.rst"
+    "${PULSE_DOC_ROOT}/cactuar/math.rst"
+
+    #pulse::dahaka
+    "${PULSE_DOC_ROOT}/dahaka/blockchain.rst"
+    "${PULSE_DOC_ROOT}/dahaka/chain.rst"
+    "${PULSE_DOC_ROOT}/dahaka/orderedlist.rst"
+    "${PULSE_DOC_ROOT}/dahaka/tree.rst"
     )
 
   add_custom_command(OUTPUT ${SPHINX_HTML_INDEX_FILE}
+    COMMAND ${CMAKE_COMMAND} -E rm -r ${SPHINX_OUTPUT_DIRECTORY}
     COMMAND
     ${SPHINX_EXECUTABLE} 
     -b html

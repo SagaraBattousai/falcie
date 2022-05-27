@@ -24,6 +24,7 @@ legend,
 .rst-versions {
     /* Use a system font stack for better performance (no Web fonts required) */
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
 }
 
 h1,
@@ -920,6 +921,34 @@ kbd.compound > .kbd,
   color: var(--c-sig-name-color) !important;
 }
 
+
+/* Must use !important :( but since so specific I think it'll be fine */
+.rst-content dl.cpp.class dt.sig.sig-object.cpp[id^='_CPP'] {
+    background-color: var(--highlight-background-color) !important;
+} 
+
+.rst-content dl.cpp.class dt.sig.sig-object.cpp[id^='_CPP'] span {
+    font-family: "Source Code Pro", "Lucida Console", 
+    "Courier New", monospace;
+    font-size: medium;
+}
+
+.rst-content dl.cpp.class dt.sig.sig-object.cpp[id^='_CPP'] span.p{
+    color: var(--highlight-operator-color);
+}
+
+.rst-content dl.cpp.class dt.sig.sig-object.cpp[id^='_CPP'] span.n{
+    color: var(--highlight-type-color);
+}
+
+.rst-content dl.cpp.class dt.sig.sig-object.cpp[id^='_CPP'] span.k{
+    /* background-color: var(--admonition-note-background-color); */
+    color: var(--highlight-keyword-color);
+}
+
+.rst-content dl.cpp.class dt.sig.sig-object.cpp[id^='_CPP'] span.o{
+    color: var(--highlight-operator-color);
+}
 
 
 

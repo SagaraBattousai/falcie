@@ -4,8 +4,8 @@ module;
 
 export module anima;
 
-export import :neural_network;
 export import :matrix;
+export import :neural_network;
 export import :random;
 
 

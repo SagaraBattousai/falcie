@@ -3,10 +3,10 @@
 :root {
   --body-color: rgba(255, 255, 255, 0.85);
   --content-wrap-background-color: #202326;
-  --content-background-color: #2e3236;
+  --content-background-color: #24292E;
   /* Decrease the logo opacity when using the dark theme to be less distracting */
   --logo-opacity: 0.85;
-  --navbar-background-color: #25282b;
+  --navbar-background-color: #20252b;
   --navbar-background-color-hover: #333639;
   --navbar-background-color-active: #111417;
   --navbar-current-background-color: #333639;

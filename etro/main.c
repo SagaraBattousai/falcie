@@ -1,4 +1,4 @@
-
+/*
 #define _CRTDBG_MAP_ALLOC
 
 #include<stdlib.h>
@@ -10,11 +10,12 @@
 #include<stdint.h>
 #include<math.h>
 #include<float.h>
-
+*/
 /*
 #include <pulse/internal/anima/ai.h>
 #include <pulse/internal/anima/linalg.h>
 */
+/*
 #include <pulse/anima.h>
 #include <pulse/cactuar.h>
 
@@ -227,6 +228,7 @@ int main()
 		epoch++;
 	}
 	*/
+/*
 
 	printf("no epochs: %lli averaged error: %f\n", epoch, avg_error);
 
@@ -239,5 +241,10 @@ int main()
 
 	_CrtDumpMemoryLeaks();
 
+	return 0;
+}
+*/
+int main()
+{
 	return 0;
 }

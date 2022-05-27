@@ -13,7 +13,9 @@ function(add_pseudo_module_impl_objects target)
 
   list(TRANSFORM ARGN REPLACE ".*/(.*)\.ixx$" "${INTERMEDIATE_ROOT}/\\1.obj")
 
-  add_custom_command(TARGET ${target} PRE_LINK
+  # Prebuild the dir may not exist but at least it wont override 
+  # existing obj files by accident :)
+  add_custom_command(TARGET ${target} PRE_BUILD # PRE_LINK
     COMMAND ${CMAKE_COMMAND} -E touch ${ARGN}
     COMMENT "Adding pseudo object files for MSVC's build system"
     )

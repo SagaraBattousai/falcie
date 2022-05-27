@@ -1,7 +1,10 @@
 
 
-blockchain
+Blockchain
 ===============
+Blockchain template class
 
-.. .. doxygenfile:: blockchain.h
+.. doxygenclass:: pulse::Blockchain
+   :members:
+   :undoc-members:
 

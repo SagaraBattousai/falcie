@@ -1,4 +1,33 @@
 
+# Set: DOXYGEN_INPUT_FILES based on passed in targets' sources.
+function(set_doxygen_input_files)
+  if(ARGC LESS 2)
+    message(WARNING "Needs additional arguments; namely targets \
+    whos source files require/want documentation.")
+    return()
+  endif()
+
+  foreach(target ${ARGN})
+    get_target_property(target_sources ${target} SOURCES)
+    foreach(source ${target_sources})    
+    # BASE_DIRECTORY unneeded as this file is in the same directory as
+    # Doxygen.in 
+      cmake_path(
+        RELATIVE_PATH source
+        OUTPUT_VARIABLE source_relative_to_doxygen)
+
+      # Space at end is important so that we dont have to use 
+      # list(APPEND ...) and then string(JOIN .....)
+      string(APPEND SOURCE_TO_DOCUMENT "${source_relative_to_doxygen} ")
+    endforeach()
+  endforeach()
+
+  set(DOXYGEN_INPUT_FILES ${SOURCE_TO_DOCUMENT} PARENT_SCOPE)
+
+endfunction()
+
+
+
 
 # The following Variables must be set: 
 # { DOXYGEN_INPUT_FILES, DOXYGEN_OUTPUT_DIRECTORY, DOXYGEN_XML_INDEX_FILE,

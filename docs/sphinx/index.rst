@@ -11,17 +11,26 @@ Welcome to Fal'cie's documentation!
    This project is under active development
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Etro
+   :name: sec-etro
 
-   pulse/pulse
+   etro/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Pulse
+   :name: sec-pulse
+
+   pulse/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Lindzei
+   :name: sec-lindzei
+
+   lindzei/index
 
 
-
-Indices and tables
-==================
 
 * :ref:`genindex`
-  * :ref:`modindex`
-  * :ref:`search`
-

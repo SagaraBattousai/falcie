@@ -28,10 +28,12 @@ set(SPHINX_HTML_INDEX_FILE "${SPHINX_OUTPUT_DIRECTORY}/index.html")
 # This is set to be relative to sphinx's conf.py
 set(SPHINX_RELATIVE_DOXYGEN_XML_DIR "../${DOXYGEN_OUTPUT_DIRECTORY}/xml")
 
+set_doxygen_input_files(pulse anima cactuar dahaka)
 configure_doxygen_and_add_command()
 add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_XML_INDEX_FILE})
 
 configure_sphinx_and_add_command()
 add_custom_target(Sphinx ALL DEPENDS ${SPHINX_HTML_INDEX_FILE})
+add_dependencies(Sphinx Doxygen)
 
 set_target_properties(Doxygen Sphinx PROPERTIES FOLDER Docs)

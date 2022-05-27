@@ -28,8 +28,7 @@ if(MSVC)
   # *.ixx.obj and *.obj
   # In This case however we do have an implementation file for anima-matrix
   # as this stores our avx versions.
-  add_pseudo_module_impl_objects(anima 
-    ${anima_module} "${ANIMA_MODULE_ROOT}/anima-neural_network.ixx")
+  add_pseudo_module_impl_objects(anima ${anima_module})
   #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
 endif()
 

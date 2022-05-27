@@ -16,8 +16,6 @@ namespace pulse
 {
     namespace anima
     {
-
-
         #ifdef USE_AVX_INTRIN
 
         constexpr int AVX_512_PACK_SIZE = 16;

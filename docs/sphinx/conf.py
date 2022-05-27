@@ -55,7 +55,9 @@ breathe_show_include = True
 #breathe_default_members = ('members', 'undoc-members')
 
 breathe_domain_by_extension = {
-    "h" : "cpp",
+    "h"   : "cpp",
+     "ixx" : "cpp",
+     
     }
 
 breathe_domain_by_file_pattern = {
@@ -96,7 +98,7 @@ html_static_path = ['_static']
 html_css_files = [
     
   "css/style.css",
-  "css/colour.css",
+  "css/colours.css",
   "css/defaults.css",
   "css/dark.css",
   "css/light.css",
