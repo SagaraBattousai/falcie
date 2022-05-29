@@ -63,7 +63,7 @@ void mine(blockheader_t* const header, const unsigned char* const prev_hash)
 
 }
 */
-//TODO: decide if hash type is optional
+//TODO: decide if hash hash_type is optional
 //hash_t *hash(const blockheader_t* const header)
 //{
 //	hash_t *hash = (hash_t *)malloc(sizeof(hash_t));

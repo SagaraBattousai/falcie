@@ -86,6 +86,25 @@ namespace pulse
 		return 2.f * sig * (1 - sig);
 	}
 
+	//Copy for outut so we can use as output
+	float TotalSquaredErrorEnergy(std::vector<float> output, const std::vector<float>& desired)
+	{
+		float ret = 0;
+		//TODO: Remove vector sub cheat!!!
+		for (auto i = 0; i < output.size(); i++)
+		{
+			output[i] -= desired[i];
+		}
+
+		for (auto i = 0; i < output.size(); i++)
+		{
+			ret += output[i] * output[i];
+		}
+
+		return ret / 2.f;
+
+	}
+
 	NeuralNetwork::NeuralNetwork(
 		std::vector<std::int64_t> network_structure,
 		ActivationFunction activation,
@@ -269,6 +288,31 @@ namespace pulse
 		return deltaWeights;
 	}
 
+
+
+	//Could return latest update?
+	//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
+	// batch has size batch size and batch[x] has input size size
+	void TrainNetwork(
+		NeuralNetwork& network,
+		const std::vector<std::vector<float>>& desired,
+		const std::vector<std::vector<float>>& input,
+		const std::int64_t& epochs)
+	{
+		//Assert: input.size() == desired.size();
+
+		for (int i = 0; i < epochs; i++)
+		{
+			for (std::int64_t j = 0; j < input.size(); j++)
+			{
+				network.Feedforward(input[j]);
+				NetworkWeights deltaWeights = network.Backpropagation(desired[j]);
+
+				network.UpdateWeights(deltaWeights);
+			}
+		}
+	}
+
 	
 } //namespace pulse
 
@@ -286,84 +330,3 @@ namespace pulse
 		float *average_network_error);
 		*/
 
-		/*
-						int train_network_with_stats(float **desired, float **batch, std::int64_t batch_size,
-							std::int64_t epochs, neural_network_t *network, std::int64_t *epochs_taken, float *avg_err, float target_err, error_energy err_func)
-						{
-							float avg_error = 1.f;
-							std::int64_t epoch = 0;
-
-							//float **delta_weights;
-
-							float *output;
-
-							while (avg_error > target_err && epoch < epochs)
-							{
-
-								for (int j = 0; j < batch_size; j++)
-								{
-									train_network(desired + j, batch + j, 1, 1, network);
-									get_network_output(network, &output);
-
-									avg_error += err_func(output, desired[j], 1);
-									free(output);
-								}
-
-								avg_error /= batch_size;
-
-								epoch++;
-							}
-							*epochs_taken = epoch;
-							*avg_err = avg_error;
-						}
-
-						//TODO: decide wheter to change to string.
-						void print_inferencing_results(neural_network_t *network,
-							float **training_data, std::int64_t training_data_size, std::int64_t training_data_dimension,
-							float **desired, std::int64_t desired_dimension)
-						{
-							//printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
-
-							//printf("--------------------------------\n");
-							printf("Inferencing results:\n--------------------\n");
-
-							float *output = NULL;
-
-							for (std::int64_t j = 0; j < training_data_size; j++)
-							{
-								set_input(network, training_data[j]);
-								float *desired_output = desired[j];
-
-								feedforward(network);
-
-								get_network_output(network, &output);
-
-								printf("input: ( ");
-
-								std::int64_t all_but_last_training_dim = training_data_dimension - 1;
-								for (std::int64_t k = 0; k < all_but_last_training_dim; k++)
-								{
-									printf("%f, ", training_data[j][k]);
-								}
-
-								printf("%f ) desired: ( ", training_data[j][all_but_last_training_dim]);
-
-								std::int64_t all_but_last_output_dim = desired_dimension - 1;
-								for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
-								{
-									printf("%f, ", desired[j][k]);
-								}
-
-								printf("%f ) -> Network Output : ( ", desired[j][all_but_last_output_dim]);
-
-								for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
-								{
-									printf("%f, ", output[k]);
-								}
-
-								printf("%f )\n", output[all_but_last_output_dim]);
-
-								free(output);
-							}
-						}
-		*/

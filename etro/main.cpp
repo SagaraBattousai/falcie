@@ -5,6 +5,8 @@
 #include <numeric>
 #include <utility>
 
+#include<chrono>
+
 
 import pulse;
 
@@ -15,27 +17,83 @@ int x(int& a, int& b)
 
 int main(void)
 {
-	pulse::NeuralNetwork n({ 2, 3, 1 });
+	
+	std::vector<int> veccy{ 1,2,3 };
+	constexpr int veccy_size = 3 * sizeof(int);
 
-	//error somewhere but can't see where!!
-	std::vector<std::vector<float>> desired{ {1.f}, {1.f}, {0.f}, {0.f} };
-	std::vector<std::vector<float>> input{ {0.f,1.f}, {1.f,0.f}, {1.f,1.f}, {0.f, 0.f}};
+	auto start = std::chrono::high_resolution_clock::now();
 
-	pulse::TrainNetwork(n, desired, input, 500);
+	pulse::Hasher<pulse::HashType::SHA256> h{};
 
-	n.Feedforward(input[0]);
-	float out1 = n.Output()[0];
+	auto d = h.Hash(veccy.data(), veccy_size);
 
-	n.Feedforward(input[1]);
-	float out2 = n.Output()[0];
+	auto end = std::chrono::high_resolution_clock::now();
 
-	n.Feedforward(input[2]);
-	float out3 = n.Output()[0];
+	std::chrono::duration<double> diff = end - start;
 
-	n.Feedforward(input[3]);
-	float out4 = n.Output()[0];
+	std::cout << diff << std::endl;
 
-	std::cout << out1 << ", " << out2 << ", " << out3 << ", " << out4 << std::endl;
+	for (const auto& v : d)
+	{
+		std::cout << std::hex << (int)v;
+	}
+
+	std::cout << std::endl;
+
+
+	start = std::chrono::high_resolution_clock::now();
+
+	d = h.Hash(veccy.data(), veccy_size);
+
+	end = std::chrono::high_resolution_clock::now();
+
+	diff = end - start;
+
+	std::cout << diff << std::endl;
+
+	for (const auto& v : d)
+	{
+		std::cout << std::hex << (int)v;
+	}
+
+	std::cout << std::endl << std::endl;
+
+	start = std::chrono::high_resolution_clock::now();
+
+	pulse::Hasher<pulse::HashType::RIPEMD160> r{};
+
+	auto c = r.Hash(veccy.data(), veccy_size);
+
+	end = std::chrono::high_resolution_clock::now();
+
+	diff = end - start;
+
+	std::cout << diff << std::endl;
+
+	for (const auto& v : c)
+	{
+		std::cout << std::hex << (int)v;
+	}
+
+	std::cout << std::endl;
+
+	start = std::chrono::high_resolution_clock::now();
+
+	c = r.Hash(veccy.data(), veccy_size);
+
+	end = std::chrono::high_resolution_clock::now();
+
+	diff = end - start;
+
+	std::cout << diff << std::endl;
+
+	for (const auto& v : c)
+	{
+		std::cout << std::hex << (int)v;
+	}
+
+	std::cout << std::endl;
+
 
 
 	return 0;

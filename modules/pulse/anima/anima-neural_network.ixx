@@ -25,7 +25,7 @@ export namespace pulse
 {
 	using ActivationFunction = float (*)(const float&);
 
-	using ErrorEnergy = float (*)(float *, float *, std::int64_t);
+	using ErrorEnergy = float (*)(std::vector<float>, const std::vector<float>&);
 
 	using NetworkWeights = std::vector<Matrix<float>>;
 
@@ -112,6 +112,11 @@ export namespace pulse
 
 	float delta_sigmoid(const float&);
 
+	float sq_error(float *output, float *desired, int64_t dim);
+
+	//Copy for outut so we can use as output
+	float TotalSquaredErrorEnergy(std::vector<float> output, const std::vector<float>& desired);
+
 	class NeuralNetwork
 	{
 	public:
@@ -134,6 +139,10 @@ export namespace pulse
 
 		const std::vector<float>& Output() const;
 
+		constexpr std::int64_t InputSize() const;
+
+		constexpr std::int64_t OutputSize() const;
+
 		/** A Forward pass through the network. */
 		void Feedforward(const std::vector<float>&);
 
@@ -141,7 +150,7 @@ export namespace pulse
 		NetworkWeights Backpropagation(const std::vector<float>& desired);
 
 
-		
+
 
 		/*
 		void print_inferencing_results(neural_network_t *network,
@@ -183,44 +192,119 @@ export namespace pulse
 		const std::vector<std::vector<float>>& input,
 		const std::int64_t& epochs); //is a ref larger/as large than by value for this??
 
+
+	struct NetworkStats
+	{
+		std::int64_t epochs_taken;
+		float average_network_error;
+	};
+
 	//for now use multy ret by reference but i think well wanna change this //TODO:
 	// batch has size batch size and batch[x] has input size size
-	void train_network_with_stats(
-		NeuralNetwork& network,
-		const std::vector<float>& desired,
-		const std::vector<float>& input,
-		const std::int64_t& epochs,
-		float target_err,
-		ErrorEnergy err_func,
-		std::int64_t *epochs_taken,
-		float *average_network_error);
-
-	
-	//Could return latest update?
-	//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
-	// batch has size batch size and batch[x] has input size size
-	void TrainNetwork(
+	NetworkStats TrainNetworkWithStats(
 		NeuralNetwork& network,
 		const std::vector<std::vector<float>>& desired,
 		const std::vector<std::vector<float>>& input,
-		const std::int64_t& epochs)
+		const std::int64_t& epochs,
+		float target_err,
+		ErrorEnergy err_func
+		);
+
+	constexpr std::int64_t NeuralNetwork::InputSize() const
 	{
-		//Assert: input.size() == desired.size();
+		return this->network_structure.front();
+	}
 
-		for (int i = 0; i < epochs; i++)
+	constexpr std::int64_t NeuralNetwork::OutputSize() const
+	{
+		return this->network_structure.back();
+
+	}
+
+
+	NetworkStats TrainNetworkWithStats(
+		NeuralNetwork& network,
+		const std::vector<std::vector<float>>& desired,
+		const std::vector<std::vector<float>>& input,
+		const std::int64_t& epochs,
+		float target_err,
+		ErrorEnergy err_func = &TotalSquaredErrorEnergy)
+	{
+
+		NetworkStats stats{ .epochs_taken = 0, .average_network_error = 1.f };
+
+		while (stats.average_network_error > target_err && stats.epochs_taken < epochs)
 		{
-			for (std::int64_t j = 0; j < input.size(); j++)
+			for (int j = 0; j < input.size(); j++)
 			{
-				//set_input(network, batch[j]);
-				//float *desired_output = desired[j];
+				TrainNetwork(network, { desired[j] }, { input[j] }, 1);
 
-				network.Feedforward(input[j]);			
-				NetworkWeights deltaWeights = network.Backpropagation(desired[j]);
+				const std::vector<float>& output = network.Output();
 
-				network.UpdateWeights(deltaWeights);
+				stats.average_network_error += err_func(output, desired[j]);
+			}
+
+			stats.average_network_error /= input.size();
+
+			stats.epochs_taken++;
+		}
+		return stats;
+	}
+
+	/*
+		//TODO: decide wheter to change to string.
+		void print_inferencing_results(neural_network_t * network,
+			float **training_data, std::int64_t training_data_size, std::int64_t training_data_dimension,
+			float **desired, std::int64_t desired_dimension)
+		{
+			//printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
+
+			//printf("--------------------------------\n");
+			printf("Inferencing results:\n--------------------\n");
+
+			float *output = NULL;
+
+			for (std::int64_t j = 0; j < training_data_size; j++)
+			{
+				set_input(network, training_data[j]);
+				float *desired_output = desired[j];
+
+				feedforward(network);
+
+				get_network_output(network, &output);
+
+				printf("input: ( ");
+
+				std::int64_t all_but_last_training_dim = training_data_dimension - 1;
+				for (std::int64_t k = 0; k < all_but_last_training_dim; k++)
+				{
+					printf("%f, ", training_data[j][k]);
+				}
+
+				printf("%f ) desired: ( ", training_data[j][all_but_last_training_dim]);
+
+				std::int64_t all_but_last_output_dim = desired_dimension - 1;
+				for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
+				{
+					printf("%f, ", desired[j][k]);
+				}
+
+				printf("%f ) -> Network Output : ( ", desired[j][all_but_last_output_dim]);
+
+				for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
+				{
+					printf("%f, ", output[k]);
+				}
+
+				printf("%f )\n", output[all_but_last_output_dim]);
+
+				free(output);
 			}
 		}
 	}
+	*/
+
+
 
 
 

@@ -297,7 +297,7 @@ export namespace pulse
 		}
 
 		//Zero init output
-		std::vector<T> mout(rhs.dims.second, 0.f); //TODO: Make zero for type (aka int vs float vs ..)
+		std::vector<T> mout(rhs.dims.second, 0.f); //TODO: Make zero for hash_type (aka int vs float vs ..)
 
 		//#ifdef USE_AVX_INTRIN
 			//
@@ -327,7 +327,7 @@ export namespace pulse
 		}
 
 		//Zero init output
-		std::vector<T> mout(lhs.dims.first, 0.f); //TODO: Make zero for type (aka int vs float vs ..)
+		std::vector<T> mout(lhs.dims.first, 0.f); //TODO: Make zero for hash_type (aka int vs float vs ..)
 
 		//#ifdef USE_AVX_INTRIN
 			//

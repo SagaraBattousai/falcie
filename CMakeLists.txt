@@ -70,7 +70,7 @@ if(WIN32)
 endif()
 
 if(MSVC)
-  set(VS_STARTUP_PROJECT etro_c)
+  set(VS_STARTUP_PROJECT etro_cpp)
 endif()
 
 #----------------------------------------------
@@ -134,6 +134,4 @@ if(BUILD_DOCS)
   install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/man/"
     DESTINATION ${CMAKE_INSTALL_MANDIR})
 endif()
-
-
 

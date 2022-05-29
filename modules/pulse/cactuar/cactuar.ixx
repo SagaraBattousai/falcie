@@ -1,27 +1,17 @@
 
 export module cactuar;
 
+export import :crypto;
+//export import :encoding;
+//export import :target;
+
 /*************************************************************
 ************** Cactuar's Public API Header *******************
 **************************************************************/
 
 /*
 
-#include <stdint.h>
 
-/// Value is the size of the type in bytes
-enum hash_type_t {SHA256 = 32,  RIPEMD160 = 20};
-
-typedef uint32_t cactuar_t;
-
-//typedef struct hash hash_t;
-//TODO: Remove, only for debugging!
-//That said, may want to expose as its somewhat useful ....
-typedef struct hash
-{
-    int size;
-    unsigned char *hash;
-} hash_t;
 
 //typedef struct blockheader blockheader_t;
 //TODO: Remove, only for debugging!
@@ -90,52 +80,6 @@ hash_t* hash(const blockheader_t* const header);
 #endif
 #ifndef __PULSE_CACTUAR_CRYPTO_H__
 #define __PULSE_CACTUAR_CRYPTO_H__
-
-//#include <stdint.h>
-
-#include <pulse/cactuar.h>
-
-*/
-/*
-typedef struct sha256_hash {
-	unsigned char hash[SHA256];
-}sha256hash_t;
-
-typedef struct ripemd160_hash {
-	unsigned char size = RIPEMD160;
-	unsigned char hash[RIPEMD160];
-}ripemd160hash_t;
-*/
-
-/*
-typedef struct hash
-{
-	int size;
-	unsigned char *hash;
-} hash_t;
-*/
-
-/*
-typedef struct hasher hasher_t;
-
-
-hasher_t* get_default_sha256_hasher();
-*/
-/** size_t required for compatability with OpenSSL */
-//inline void update_hash(hasher_t* hasher, const void* data, size_t count);
-
-/** unsigned int required for compatability with OpenSSL */
-//inline void output_hash(hasher_t* hasher, unsigned char* dst, unsigned int* size);
-
-
-//Potentiall make inline, combo of the two above sans the func calls.
-/** size_t, unsigned int required for compatability with OpenSSL */
-
-/*
-void hash_data(hasher_t* hasher, const void* src, size_t src_count,
-	unsigned char* dst, unsigned int* dst_size);
-
-void free_hasher(hasher_t* hasher);
 
 
 #endif
@@ -206,7 +150,7 @@ void free_hasher(hasher_t* hasher);
 * 
 * decode_data does almost exactly the same thing as convert data,
 * its primarily for increased code readability, avoids one useless cast and
-* is somewhat more type tidy.
+* is somewhat more hash_type tidy.
 *
 * @param[in,out] encoded must have at least size bytes and its bytes will be
 * translated back into the systems endianness.

@@ -1,6 +1,3 @@
-module;
-
-#include <cstdint>
 
 export module anima;
 
