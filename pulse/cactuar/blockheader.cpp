@@ -46,7 +46,7 @@ void mine(blockheader_t* const header, const unsigned char* const prev_hash)
 	header->prev_hash->hash = prev_hash;
 	//TODO: Remove as a cheat
 	header->prev_hash->size = 0x20;
-	header->timestamp = generate_timestamp();
+	header->timestamp = GenerateTimestamp();
 
 	//TODO: add error for invalid cactaur values
 	unsigned char difficulty_array[32] = { 0 };
@@ -88,7 +88,7 @@ void mine(blockheader_t* const header, const unsigned char* const prev_hash)
 //}
 
 /*
-int64_t generate_timestamp()
+int64_t GenerateTimestamp()
 {
 	struct timespec ts;
 	if (timespec_get(&ts, TIME_UTC) == 0)

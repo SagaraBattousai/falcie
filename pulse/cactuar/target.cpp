@@ -1,40 +1,70 @@
-/*
+module;
 
-#include <cactuar/target.h>
-#include <string.h>
+#include <cstdint>
+
+module cactuar:target;
+
+
+namespace pulse
+{
+
+	constexpr Target::Target(std::uint32_t target)
+		: target(target)
+		, target_array(std::vector<unsigned char>(Target::TargetSize))
+	{
+
+		unsigned char exp = (this->target >> 24) & 255;
+		uint32_t zero_byte_count = exp - Target::CACTUAR_EXP_SHIFTER;
+		uint32_t arr_index = 31 - zero_byte_count;
+
+		this->target_array[arr_index] = (this->target & 255);
+		this->target_array[arr_index - 1] = ((this->target >> 8) & 255);
+		this->target_array[arr_index - 2] = ((this->target >> 16) & 255);
+	}
+
+
+
+} //namespace pulse
+
+
+// Cant ramember why i need this VVVV
+/*
+* float fast_log2(float val);
+
+*
+#include <stdint.h>
 #include <stdlib.h>
-*/
+
+#include <cactuar/math.h>
+#include <cactuar/encoding.h>
 
 
-/*
-cactuar_t base_difficulty()
-{
-	return CACTUAR_BASE_DIFFICULTY
+#define EXPONENT_OFFSET 23
+#define LOWER_BYTE_MASK 255
+#define EXPONENT_BIAS 127
+#define EXPONENT_CLEAR 0x807FFFFF ///< aka 1000 0000 0111 1111 1111 1111 1111 1111 in binary.
+#define EXPONENT_MASK 0x3F800000  ///< aka 0011 1111 1000 0000 0000 0000 0000 0000 in binary.
+
+//Bad names but since they're just polynomial constants that have been
+//calculated with remez they're somewhat arbitary
+#define A_COEFF -0.344845
+#define B_COEFF 2.024658
+#define C_COEFF 1.674873
+
+float fast_log2(float val) {
+	uint32_t *bits = (uint32_t *) convert_data(&val, sizeof(float));
+
+	//Below is the exponent, usually its exponent -1
+	//but this time our mantissa calculation doesn't add 1
+	//implicitly.
+	uint32_t characteristic = (((*bits) >> EXPONENT_OFFSET) & LOWER_BYTE_MASK) - EXPONENT_BIAS;
+
+	*bits &= EXPONENT_CLEAR;
+	*bits += EXPONENT_MASK; // (is this the same as OR (||) since we zeroed it?)
+	//val = (float*) bits;
+	//mantissa = ((-1.0/3)*f+2)*f - 2.0/3 //The +1 version
+	float mantissa = ((A_COEFF * val + B_COEFF) * val - C_COEFF);
+	return characteristic + mantissa;
 }
-*/
-
-//In BigEndian format due to the hash leading zeros style
-//Pre: bytes must be zeroed and (at least) 32 bytes (256 bits)
-/*
-void unravel_cactuar(const cactuar_t *const cactuar, unsigned char* bytes)
-{
-	unsigned char exp = (*cactuar >> 24) & 255;
-	uint32_t zero_byte_count = exp - CACTUAR_EXP_SHIFTER;
-	uint32_t arr_index = 31 - zero_byte_count;
-
-	bytes[arr_index] = (*cactuar & 255);
-	bytes[arr_index - 1] = ((*cactuar >> 8) & 255);
-	bytes[arr_index - 2] = ((*cactuar >> 16) & 255);
-
-}
-
-int targetcmp(const cactuar_t* const cactuar, const unsigned char* const hash)
-{
-	unsigned char bytes[32] = { 0 };
-	unravel_cactuar(cactuar, bytes);
-	
-	return memcmp(hash, bytes, 32);
-}
-
 
 */

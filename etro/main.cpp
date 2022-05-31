@@ -5,94 +5,38 @@
 #include <numeric>
 #include <utility>
 
-#include<chrono>
+#include <chrono>
+#include <span>
+#include <array>
+
+#include <cstddef>
+
+#include <compare>
 
 
 import pulse;
 
-int x(int& a, int& b)
+constexpr std::strong_ordering cmpt()
 {
-	return a < b ? -1 : 1;
+	pulse::Target x(0x1F0FFF1D); //{ pulse::Target::BaseTarget() };
+    //std::vector<unsigned char> y { 1,2,3,4,5,6,7,8,9,10,11,12,13 };
+	pulse::Target y(0x0F0FFF1D); //{ pulse::Target::BaseTarget() };
+	return x <=> y;
+
 }
+
 
 int main(void)
 {
-	
-	std::vector<int> veccy{ 1,2,3 };
-	constexpr int veccy_size = 3 * sizeof(int);
 
-	auto start = std::chrono::high_resolution_clock::now();
+	pulse::Target x(0x1F0FFF1D); //{ pulse::Target::BaseTarget() };
+	//constexpr pulse::Target y(0xFF0FFF1D); //{ pulse::Target::BaseTarget() };
+	std::vector<unsigned char> y { 1,2,3,4,5,6,7,8,9,10,11,12,13 };
 
-	pulse::Hasher<pulse::HashType::SHA256> h{};
+	//constexpr auto z = (x <=> y);
+	//
+	std::cout << (cmpt() == std::strong_ordering::greater) << (x > y) << std::endl;
 
-	auto d = h.Hash(veccy.data(), veccy_size);
-
-	auto end = std::chrono::high_resolution_clock::now();
-
-	std::chrono::duration<double> diff = end - start;
-
-	std::cout << diff << std::endl;
-
-	for (const auto& v : d)
-	{
-		std::cout << std::hex << (int)v;
-	}
-
-	std::cout << std::endl;
-
-
-	start = std::chrono::high_resolution_clock::now();
-
-	d = h.Hash(veccy.data(), veccy_size);
-
-	end = std::chrono::high_resolution_clock::now();
-
-	diff = end - start;
-
-	std::cout << diff << std::endl;
-
-	for (const auto& v : d)
-	{
-		std::cout << std::hex << (int)v;
-	}
-
-	std::cout << std::endl << std::endl;
-
-	start = std::chrono::high_resolution_clock::now();
-
-	pulse::Hasher<pulse::HashType::RIPEMD160> r{};
-
-	auto c = r.Hash(veccy.data(), veccy_size);
-
-	end = std::chrono::high_resolution_clock::now();
-
-	diff = end - start;
-
-	std::cout << diff << std::endl;
-
-	for (const auto& v : c)
-	{
-		std::cout << std::hex << (int)v;
-	}
-
-	std::cout << std::endl;
-
-	start = std::chrono::high_resolution_clock::now();
-
-	c = r.Hash(veccy.data(), veccy_size);
-
-	end = std::chrono::high_resolution_clock::now();
-
-	diff = end - start;
-
-	std::cout << diff << std::endl;
-
-	for (const auto& v : c)
-	{
-		std::cout << std::hex << (int)v;
-	}
-
-	std::cout << std::endl;
 
 
 
