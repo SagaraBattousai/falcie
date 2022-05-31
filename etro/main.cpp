@@ -16,29 +16,21 @@
 
 import pulse;
 
-constexpr std::strong_ordering cmpt()
-{
-	pulse::Target x(0x1F0FFF1D); //{ pulse::Target::BaseTarget() };
-    //std::vector<unsigned char> y { 1,2,3,4,5,6,7,8,9,10,11,12,13 };
-	pulse::Target y(0x0F0FFF1D); //{ pulse::Target::BaseTarget() };
-	return x <=> y;
-
-}
-
-
 int main(void)
 {
 
-	pulse::Target x(0x1F0FFF1D); //{ pulse::Target::BaseTarget() };
-	//constexpr pulse::Target y(0xFF0FFF1D); //{ pulse::Target::BaseTarget() };
-	std::vector<unsigned char> y { 1,2,3,4,5,6,7,8,9,10,11,12,13 };
+	pulse::Blockheader b{};
 
-	//constexpr auto z = (x <=> y);
-	//
-	std::cout << (cmpt() == std::strong_ordering::greater) << (x > y) << std::endl;
+	std::vector<unsigned char> v = b.Hash();
 
+	for (auto &x : v)
+	{
+		std::cout << std::hex << (unsigned)x;
+	}
 
+	std::cout << std::endl;
 
+	std::cout << "acdd44d36dd2ee67a7a390b7393920feb1e1ea4f41fed8c91afbfe6c6de216\n";
 
 	return 0;
 

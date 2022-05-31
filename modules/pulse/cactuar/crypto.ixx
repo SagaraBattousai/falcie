@@ -48,7 +48,7 @@ export namespace pulse
 	template <HashType hash_type>
 	Hasher<hash_type>::Hasher() 
 		: context(cactuar::GetHashContext(hash_type))
-		, hashed_data(std::vector(static_cast<std::vector::size_type>(hash_type)))
+		, hashed_data(std::vector<unsigned char>(static_cast<std::vector<unsigned char>::size_type>(hash_type)))
 	{}
 
 	template <HashType hash_type>
@@ -63,7 +63,8 @@ export namespace pulse
 	{
 		EVP_DigestInit_ex2(this->context, NULL, NULL);
 		EVP_DigestUpdate(this->context, input.data(), input.size());
-		EVP_DigestFinal_ex(this->context, this->hashed_data.data(), NULL);
+		//unsigned int length = static_cast<unsigned int>(hash_type);
+		EVP_DigestFinal_ex(this->context, this->hashed_data.data(), NULL);// &length);
 		return this->hashed_data;
 	}
 

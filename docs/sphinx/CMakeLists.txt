@@ -72,7 +72,7 @@ macro(configure_sphinx_and_add_command)
     #pulse::cactuar Modules
     "${PULSE_DOC_ROOT}/cactuar/crypto.rst"
     "${PULSE_DOC_ROOT}/cactuar/encoding.rst"
-    "${PULSE_DOC_ROOT}/cactuar/math.rst"
+    "${PULSE_DOC_ROOT}/cactuar/target.rst"
 
     #pulse::dahaka
     "${PULSE_DOC_ROOT}/dahaka/blockchain.rst"

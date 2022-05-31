@@ -5,6 +5,9 @@ module;
 #include <memory>
 //#include <cstring>
 
+#include <stdexcept>
+
+
 //#include <pulse/cactuar.h>
 //#include <cactuar/crypto.h>
 
@@ -13,74 +16,82 @@ export module cactuar:target;
 import <vector>;
 import <compare>;
 
-namespace pulse
-{
-	namespace cactuar
-	{
-		constexpr std::uint32_t MULTIPLIER_MASK = 0x00FFFFFF;
-	} //namespace pulse::cactuar
-} //namespace pulse
-
 export namespace pulse
 {
+	//class Target;
+
 	//TODO: try as std::byte as technically thats a far better description
 	// Used to be called Cactuar but I reckon Target is a smarter name.
-	//These may all be able to be constexpr much like stl
+
+	/** Wrapper around std::uint32_t to act as a target for blockchain hash */
 	class Target
 	{
 	public:
 
-		explicit constexpr Target(std::uint32_t);
+		using expanded_target_type = std::vector<unsigned char>;
 
-		static constexpr Target BaseTarget() { return Target(Target::BaseDifficulty); };
+		//Make potentiall implicit.... so we can treat uint32_t's as targets.
+		constexpr Target(std::uint32_t);
 
-		friend inline constexpr std::strong_ordering operator<=>(
-			const Target&, const std::vector<unsigned char>&);
+		static inline constexpr Target BaseTarget() { return Target(Target::BaseDifficulty); };
 
-		friend inline constexpr std::strong_ordering operator<=>(
-			const Target&, const Target&);
+		// Both operators are messy af but are constexp so that's nice right? 
+		// Or expanded target type????
+		constexpr std::strong_ordering operator<=>(const std::vector<unsigned char>&) const;
+		friend constexpr std::strong_ordering operator<=>(const Target&, const Target&);
+
+		static constexpr int TargetSize = 32; //< target array is truly 256 bits
+		static constexpr unsigned char TargetExponentShifter = 4; //because it operates on such
 
 	private:
-		//may move outside ?!? Allowing the rest of cactuar to access
 		static constexpr std::uint32_t BaseDifficulty = 0x1F0FFF1D;
-		static constexpr int TargetSize = 32; //< target array is truly 256 bits
 
-		/**
-		 * Bitcoin uses theta * 2 ^ (8 * (alpha - 3)),
-		 * where the 8 scales bits to bytes. We use
-		 * theta * 2^(8 * (alpha - 4)) which (I think) gives
-		 * us more small numbers.
-		 *
-		 * Bitcoin checks its difficulty every 2016 blocks
-		 * i.e. 8 * (255 - 3). No idea what the rest of what I
-		 * werote means.
-		 * "every 223 * 8 means calculations are for 256 blocks.
-		 * as" etc
-		 */
-		static constexpr std::uint32_t CACTUAR_EXP_SCALAR = 8;
-		static constexpr std::uint32_t CACTUAR_EXP_SHIFTER = 4;
-		static constexpr std::uint32_t CACTUAR_EXP_SCALED_SHIFTER = 32;
-
-		//Could be an example of where std::byte is actually a smart move (since it's literally byte vals)
-		//vector is probably more useable than unique[]
-		//Set size of 32 bytes but vector so that allocation is on the heap.
-		std::vector<unsigned char> target_array;
+		/// Max target value = 0x21_FF_FF_FF, Min target value (obviously) = 0x00_00_00_00
 		const std::uint32_t target;
 
 	};
 
-	inline constexpr std::strong_ordering operator<=>(
-		const Target& target, const std::vector<unsigned char>& hash)
+	constexpr Target::expanded_target_type::size_type ExpandTargetIndex(const std::uint32_t& target);
+
+	//could put in cactuar ns
+	const Target::expanded_target_type ExpandTarget(const std::uint32_t& target);
+
+	constexpr Target::Target(std::uint32_t target) : target(target) {}
+
+	// Both operators are messy af but are constexp so that's nice right? 
+	constexpr std::strong_ordering Target::operator<=>(const std::vector<unsigned char>& hash) const
 	{
-		return target.target_array <=> hash;
+		//constexpr 
+		expanded_target_type target_array(TargetSize);
+
+		auto arr_index = ExpandTargetIndex(this->target);
+
+		target_array[arr_index] = (target & 255);
+		target_array[arr_index - 1] = ((target >> 8) & 255);
+		target_array[arr_index - 2] = ((target >> 16) & 255);
+
+		return target_array <=> hash;
 	}
 
-	inline constexpr std::strong_ordering operator<=>(
-		const Target& lhs, const Target& rhs)
+	constexpr std::strong_ordering operator<=>(const Target& lhs, const Target& rhs)
 	{
-		return lhs.target_array <=> rhs.target_array;
+		Target::expanded_target_type lhs_target_array(Target::TargetSize);
+		Target::expanded_target_type rhs_target_array(Target::TargetSize);
+
+		auto lhs_arr_index = ExpandTargetIndex(lhs.target);
+		auto rhs_arr_index = ExpandTargetIndex(rhs.target);
+
+		lhs_target_array[lhs_arr_index] = (lhs.target & 255);
+		lhs_target_array[lhs_arr_index - 1] = ((lhs.target >> 8) & 255);
+		lhs_target_array[lhs_arr_index - 2] = ((lhs.target >> 16) & 255);
+		
+		rhs_target_array[rhs_arr_index] = (rhs.target & 255);
+		rhs_target_array[rhs_arr_index - 1] = ((rhs.target >> 8) & 255);
+		rhs_target_array[rhs_arr_index - 2] = ((rhs.target >> 16) & 255);
+
+		return lhs_target_array <=> rhs_target_array;
 	}
 
-	
+
 
 } //namespace pulse

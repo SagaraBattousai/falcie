@@ -42,7 +42,7 @@ export namespace pulse
 	 */
 	inline void EncodeData(std::span<unsigned char> data)
 	{
-		if (SystemIsBigEndian)
+		if (SystemIsBigEndian())
 		{
 			std::reverse(data.begin(), data.end());
 		}
@@ -58,7 +58,7 @@ export namespace pulse
 	 */
 	inline void DecodeData(std::span<unsigned char> data)
 	{
-		if (SystemIsBigEndian)
+		if (SystemIsBigEndian())
 		{
 			std::reverse(data.begin(), data.end());
 		}
