@@ -35,20 +35,21 @@ namespace pulse
 		}
 
 
-		EVP_MD_CTX* GetHashContext(HashType hash_type)
+		EVP_MD_CTX* GetHashContext(HashAlgorithm hash_type)
 		{
 			EVP_MD_CTX *context = EVP_MD_CTX_new();
 			const EVP_MD *evp_type; //No one's told me if i need to delete this or not ....
 
 			switch (hash_type)
 			{
-			case HashType::SHA256:
+			case HashAlgorithm::SHA256:
 				LoadDefaultProvider();
 				evp_type = EVP_sha256();
 				break;
-			case HashType::RIPEMD160:
+			case HashAlgorithm::RIPEMD160:
 				LoadLegacyProvider();
-				evp_type = EVP_MD_fetch(NULL, "RIPEMD160", "provider=legacy");; //EVP_ripemd160();
+				evp_type = EVP_ripemd160();
+					//EVP_MD_fetch(NULL, "RIPEMD160", "provider=legacy");; 
 				break;
 			default:
 				EVP_MD_CTX_free(context);

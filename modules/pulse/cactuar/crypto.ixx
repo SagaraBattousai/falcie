@@ -1,36 +1,61 @@
 module;
 
 #include <openssl/evp.h>
+#include <cstddef>
 
 export module cactuar:crypto;
 
 import <vector>;
+import <algorithm>;
 import <span>;
 
+export namespace pulse
+{
+	enum class HashAlgorithm : unsigned char { SHA256 = 32, RIPEMD160 = 20 };
+
+	//constexpr funcs are implicitly inline
+	constexpr unsigned char AsHashSize(HashAlgorithm hash_algo) 
+	{ return static_cast<unsigned char>(hash_algo); };
+
+} // namespace pulse
 
 namespace pulse
 {
-	export enum class HashType : unsigned char { SHA256 = 32, RIPEMD160 = 20 };
-
 	namespace cactuar
 	{
-		EVP_MD_CTX* GetHashContext(HashType hash_type);
+		EVP_MD_CTX* GetHashContext(HashAlgorithm hash_algo);
 
+		void BaseHashFunction(EVP_MD_CTX*, const std::span<std::byte>&, std::span<std::byte>);
+
+		void BaseHashFunction(EVP_MD_CTX *context, const std::span<std::byte>& input, std::span<std::byte> output)
+		{
+			EVP_DigestInit_ex2(context, NULL, NULL);
+			EVP_DigestUpdate(context, input.data(), input.size());
+			EVP_DigestFinal_ex(context, reinterpret_cast<unsigned char *>(output.data()), NULL);
+		}
 	} //namespace pulse::cactuar
 } //namespace pulse
 
 export namespace pulse
 {
-	template <HashType hash_type>
-	class Hasher
+	//Could make singleton and then use mutex's
+	template <HashAlgorithm hash_algo>
+	class HashFunction
 	{
 	public:
-		//Need to understand explicit!!
-		//explicit 
-		Hasher();
-		~Hasher();
+		HashFunction();
+		~HashFunction();
 
-		const std::vector<unsigned char>& Hash(const std::span<unsigned char>& input);
+		using hash_type = std::array<std::byte, AsHashSize(hash_algo)>;
+
+		inline const hash_type operator()(const std::span<std::byte>& input) const
+		//^^changes context though.
+		{
+			//For now, don't use as datamember, could pass as input (bit to c-ish)
+			hash_type hashed_data{};
+			cactuar::BaseHashFunction(context, input, { hashed_data.data(), hashed_data.size() });
+			return hashed_data;
+		};
 
 		/*
 		* void UpdateHash(const void *input_data, size_t count)
@@ -42,30 +67,26 @@ export namespace pulse
 
 	private:
 		EVP_MD_CTX *context;
-		std::vector<unsigned char> hashed_data;
+		//hash_type hashed_data;
 	};
 	
-	template <HashType hash_type>
-	Hasher<hash_type>::Hasher() 
-		: context(cactuar::GetHashContext(hash_type))
-		, hashed_data(std::vector<unsigned char>(static_cast<std::vector<unsigned char>::size_type>(hash_type)))
-	{}
+	template <HashAlgorithm hash_algo>
+	HashFunction<hash_algo>::HashFunction() : context(cactuar::GetHashContext(hash_algo)) {}
 
-	template <HashType hash_type>
-	Hasher<hash_type>::~Hasher()
+	template <HashAlgorithm hash_algo>
+	HashFunction<hash_algo>::~HashFunction()
 	{
 		EVP_MD_CTX_free(this->context);
 	}
-
-	// Won't inline for now as it would force a recompilation and not just a relink. 
-	template <HashType hash_type>
-	const std::vector<unsigned char>& Hasher<hash_type>::Hash(const std::span<unsigned char>& input)
+/*
+	//TODO: make concurrent and make a true pool using things such as "in_use" and locks/seamaphores
+	class HashFunctionPool
 	{
-		EVP_DigestInit_ex2(this->context, NULL, NULL);
-		EVP_DigestUpdate(this->context, input.data(), input.size());
-		//unsigned int length = static_cast<unsigned int>(hash_type);
-		EVP_DigestFinal_ex(this->context, this->hashed_data.data(), NULL);// &length);
-		return this->hashed_data;
-	}
+	public:
+		static 
 
+	private:
+
+	};
+	*/
 } //namespace pulse

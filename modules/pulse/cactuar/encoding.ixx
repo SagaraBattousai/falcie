@@ -8,6 +8,8 @@ module;
 
 #include <span>
 #include <algorithm>
+//Just for now VV
+#include <cstddef>
 
 export module cactuar:encoding;
 
@@ -24,23 +26,29 @@ namespace pulse
 
 export namespace pulse
 {
-	inline constexpr bool SystemIsLittleEndian()
+	constexpr bool SystemIsLittleEndian()
 	{
 		return (*(const char*)&cactuar::endianTest) == cactuar::littleEndianValue;
 	}
 
-	inline constexpr bool SystemIsBigEndian()
+	constexpr bool SystemIsBigEndian()
 	{
 		return (*(const char*)&cactuar::endianTest) == cactuar::bigEndianValue;
 	}
-
-	// Possibly a little ott with the inlining but .. meh
 
 	/**
 	 * Encodes data as little endian (potentially
 	 * overwriting data if the system is not little endian).
 	 */
-	inline void EncodeData(std::span<unsigned char> data)
+	void EncodeData(std::span<unsigned char>& data)
+	{
+		if (SystemIsBigEndian())
+		{
+			std::reverse(data.begin(), data.end());
+		}
+	}
+
+	void EncodeData(std::span<std::byte>& data)
 	{
 		if (SystemIsBigEndian())
 		{
@@ -56,7 +64,7 @@ export namespace pulse
 	 * unchanged.
 	 * Otherwise the data is converted to back into big endian.
 	 */
-	inline void DecodeData(std::span<unsigned char> data)
+	void DecodeData(std::span<unsigned char>& data)
 	{
 		if (SystemIsBigEndian())
 		{

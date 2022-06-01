@@ -18,10 +18,11 @@ import pulse;
 
 int main(void)
 {
+	using hash_type = std::array<std::byte, 32>;
 
-	pulse::Blockheader b{};
+	pulse::Blockheader<pulse::HashAlgorithm::SHA256> b{};
 
-	std::vector<unsigned char> v = b.Hash();
+	hash_type v = b.Hash();
 
 	for (auto &x : v)
 	{
@@ -30,7 +31,27 @@ int main(void)
 
 	std::cout << std::endl;
 
-	std::cout << "acdd44d36dd2ee67a7a390b7393920feb1e1ea4f41fed8c91afbfe6c6de216\n";
+	v = b.Hash();
+
+	for (auto &x : v)
+	{
+		std::cout << std::hex << (unsigned)x;
+	}
+
+	std::cout << std::endl;
+
+	pulse::Blockheader<pulse::HashAlgorithm::SHA256> c{};
+
+	hash_type w = c.Hash();
+
+	for (auto &x : w)
+	{
+		std::cout << std::hex << (unsigned)x;
+	}
+
+	std::cout << std::endl;
+
+	std::cout << "5bc4e3e7d7a4d7a45a3dff0991de3d5cb186f6a25e3798c5e42fde3414c253\n";
 
 	return 0;
 

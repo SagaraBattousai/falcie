@@ -5,33 +5,33 @@ module;
 
 export module dahaka:blockchain;
 
-template<typename Block, typename HashType>
-using MineBlock = void(*)(Block *const, const HashType* const);
+template<typename Block, typename HashAlgorithm>
+using MineBlock = void(*)(Block *const, const HashAlgorithm* const);
 
-template<typename Block, typename HashType>
-using HashBlock = HashType * (*)(const Block *const);
+template<typename Block, typename HashAlgorithm>
+using HashBlock = HashAlgorithm * (*)(const Block *const);
 
 template<typename Block>
 using GetBlockTarget = uint32_t(*)(const Block* const);
 
-template<typename HashType>
-using CheckHashTarget = int(*)(const uint32_t* const, const HashType* const);
+template<typename HashAlgorithm>
+using CheckHashTarget = int(*)(const uint32_t* const, const HashAlgorithm* const);
 
 template<typename T, std::size_t UnrolledElems>
 class Chain;
 
 export namespace pulse {
 
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
 	class Blockchain
 	{
 	public:
 		Blockchain(Block genisis,
-			MineBlock<Block, HashType> mine,
-			HashBlock<Block, HashType> hash,
-			HashBlock<Block, HashType> previous_hash,
+			MineBlock<Block, HashAlgorithm> mine,
+			HashBlock<Block, HashAlgorithm> hash,
+			HashBlock<Block, HashAlgorithm> previous_hash,
 			GetBlockTarget<Block> target,
-			CheckHashTarget<HashType> target_check,
+			CheckHashTarget<HashAlgorithm> target_check,
 			int hash_size);
 
 		void Add(Block elem);
@@ -42,24 +42,24 @@ export namespace pulse {
 
 	private:
 		Chain<Block, UnrolledElems> chain;
-		MineBlock<Block, HashType> mine;
-		HashBlock<Block, HashType> hash;
-		HashBlock<Block, HashType> previous_hash;
+		MineBlock<Block, HashAlgorithm> mine;
+		HashBlock<Block, HashAlgorithm> hash;
+		HashBlock<Block, HashAlgorithm> previous_hash;
 		GetBlockTarget<Block> target;
-		CheckHashTarget<HashType> target_check;
+		CheckHashTarget<HashAlgorithm> target_check;
 
 		int hash_size;
 	};
 
 
 	//Might want an additional temp param for difficulty change ... thinggy ...
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
-	Blockchain<Block, HashType, UnrolledElems>::Blockchain(Block genisis,
-		MineBlock<Block, HashType> mine,
-		HashBlock<Block, HashType> hash,
-		HashBlock<Block, HashType> previous_hash,
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	Blockchain<Block, HashAlgorithm, UnrolledElems>::Blockchain(Block genisis,
+		MineBlock<Block, HashAlgorithm> mine,
+		HashBlock<Block, HashAlgorithm> hash,
+		HashBlock<Block, HashAlgorithm> previous_hash,
 		GetBlockTarget<Block> target,
-		CheckHashTarget<HashType> target_check,
+		CheckHashTarget<HashAlgorithm> target_check,
 		int hash_size)
 		: mine(mine)
 		, hash(hash)
@@ -72,8 +72,8 @@ export namespace pulse {
 		chain.Add(genisis);
 	}
 
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
-	void Blockchain<Block, HashType, UnrolledElems>::Add(Block elem)
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	void Blockchain<Block, HashAlgorithm, UnrolledElems>::Add(Block elem)
 	{
 		Block prev = chain.GetLast();
 		unsigned char *prev_hash = this->hash(&prev);
@@ -88,14 +88,14 @@ export namespace pulse {
 
 	}
 
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
-	Block Blockchain<Block, HashType, UnrolledElems>::GetLast()
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	Block Blockchain<Block, HashAlgorithm, UnrolledElems>::GetLast()
 	{
 		return this->chain.GetLast();
 	}
 
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
-	bool Blockchain<Block, HashType, UnrolledElems>::Validate()
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	bool Blockchain<Block, HashAlgorithm, UnrolledElems>::Validate()
 	{
 		//----------- OLD --------------------------------------------
 		// node: = blockchain.head
@@ -143,14 +143,14 @@ export namespace pulse {
 	}
 
 
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
-	typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashType, UnrolledElems>::begin()
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashAlgorithm, UnrolledElems>::begin()
 	{
 		return this->chain.begin();
 	}
 
-	template<typename Block, typename HashType, std::int64_t UnrolledElems>
-	typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashType, UnrolledElems>::end()
+	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashAlgorithm, UnrolledElems>::end()
 	{
 		return this->chain.end();
 	}
