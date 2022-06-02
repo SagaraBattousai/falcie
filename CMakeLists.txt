@@ -36,7 +36,7 @@ set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/modules")
 
 add_subdirectory(pulse)
-# add_subdirectory(lindzei)
+add_subdirectory(lindzei)
 #add_subdirectory(etro)
 
 if(BUILD_TESTS)

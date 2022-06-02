@@ -9,6 +9,7 @@ import <vector>;
 import <algorithm>;
 import <span>;
 import <memory>;
+import <map>;
 
 export namespace pulse
 {
@@ -52,7 +53,7 @@ export namespace pulse
 		inline const hash_type operator()(const std::span<std::byte>& input) const
 		{
 			hash_type hashed_data{};
-			cactuar::BaseHashFunction(context, input, { hashed_data.data(), hashed_data.size() });
+			cactuar::BaseHashFunction(this->context, input, { hashed_data.data(), hashed_data.size() });
 			return hashed_data;
 		};
 
@@ -84,20 +85,21 @@ export namespace pulse
 	class HashFunctionPool
 	{
 	public:
-		using hash_type = std::array<std::byte, AsHashSize(hash_algo)>;
-
-		static const hash_type Hash(const std::span<std::byte>& input)
+		static const HashFunction<hash_algo>& Instance()
 		{
 			if (instance.get() == nullptr)
 			{
 				instance.reset(new HashFunctionPool<hash_algo>());
 			}
-			return instance->pool[0](input);
+			return (instance->pool)[0];
 		};
 
 	private:
-		HashFunctionPool();
 
+		//Why is the array elems being destructed!!! because you werent passing by ref but by val
+		// Still unsure why that causes deletion as I would expect it to just delete the copy.
+		// I think its because array[] returns a ref
+		// 
 		//TODO: Should be auto initialized, else I'll switch to veccy
 		//make more than 1 once seamaphores implmented.
 		std::array<HashFunction<hash_algo>, 1> pool;	
@@ -106,12 +108,5 @@ export namespace pulse
 			std::unique_ptr<HashFunctionPool>{ nullptr };
 
 	};
-	/*
-	template <HashAlgorithm hash_algo>
-	typename std::unique_ptr<HashFunctionPool<hash_algo>> HashFunctionPool<hash_algo>::instance = std::unique_ptr<HashFunctionPool>{ nullptr };*/
-
-	//Should auto initialize array
-	template <HashAlgorithm hash_algo>
-	HashFunctionPool<hash_algo>::HashFunctionPool() : pool() {};
 
 } //namespace pulse

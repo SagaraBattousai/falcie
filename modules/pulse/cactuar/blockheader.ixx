@@ -128,7 +128,7 @@ export namespace pulse
 
 		//EncodeData(data);
 
-		return HashFunctionPool<hash_algo>::Hash(data);
+		return (HashFunctionPool<hash_algo>::Instance())(data);
 	}
 
 
