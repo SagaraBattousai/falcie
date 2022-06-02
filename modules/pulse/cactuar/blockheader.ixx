@@ -107,10 +107,6 @@ export namespace pulse
 		//header almost certainly less than 2gb in size
 		static constexpr int state_size = sizeof(BlockheaderState);
 	};
-/*
-	template <HashAlgorithm hash_algo>
-	Blockheader<hash_algo>::BlockheaderState::BlockheaderState(uint32_t version) : version(version), nonce(0) {};
-	*/
 
 	template <HashAlgorithm hash_algo>
 	Blockheader<hash_algo>::Blockheader(BlockHashFunction<hash_algo> hashfunc, uint32_t version)
@@ -126,36 +122,13 @@ export namespace pulse
 	template <HashAlgorithm hash_algo>
 	const blockhash_type<hash_algo> PulseHash(const Blockheader<hash_algo>& header)
 	{
-		//hash_array hash(HashAlgorithm::SHA256);
-		//HashFunction<hash_algo> blockheader_hashfunc{};
-
-		//may need to copy due to encoding
-		//std::span<unsigned char, Blockheader<hash_algo>::state_size> data{ header.state.get(), Blockheader<hash_algo>::state_size};
-
-		//std::span<const std::byte, 88> s{ reinterpret_cast<const std::byte*>(header.state.get()), 88 };
-
-
 		std::span<std::byte> data = std::as_writable_bytes(
 			std::span<Blockheader<hash_algo>::BlockheaderState>{header.state.get(), 1}
 		);
-		//std::array<unsigned char, Blockheader<hash_algo>::state_size> data{};
-		
-
-		//std::memcpy(data.data(), header.state.get(), Blockheader<hash_algo>::state_size);
-		//std::memcpy(data.data(), reinterpret_cast<unsigned char*>(bs), Blockheader<hash_algo>::state_size);
-
-		//EncodeData({ data });
-
-		//std::span<unsigned char, Blockheader<hash_algo>::state_size>
-			//data(header.state.get());// , Blockheader<hash_algo>::state_size);
 
 		//EncodeData(data);
 
-
-		//Change to operator() instead of HashFunction ?!!
-		//return  HashFunction<hash_algo>{}({ data.data(), data.size() });
-		return  HashFunction<hash_algo>{}(data);
-		//return  HashFunction<hash_algo>{}({ data.data(), Blockheader<hash_algo>::state_size });
+		return HashFunctionPool<hash_algo>::Hash(data);
 	}
 
 

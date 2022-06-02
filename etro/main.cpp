@@ -51,8 +51,6 @@ int main(void)
 
 	std::cout << std::endl;
 
-	std::cout << "5bc4e3e7d7a4d7a45a3dff0991de3d5cb186f6a25e3798c5e42fde3414c253\n";
-
 	return 0;
 
 }

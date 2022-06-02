@@ -8,6 +8,7 @@ export module cactuar:crypto;
 import <vector>;
 import <algorithm>;
 import <span>;
+import <memory>;
 
 export namespace pulse
 {
@@ -49,9 +50,7 @@ export namespace pulse
 		using hash_type = std::array<std::byte, AsHashSize(hash_algo)>;
 
 		inline const hash_type operator()(const std::span<std::byte>& input) const
-		//^^changes context though.
 		{
-			//For now, don't use as datamember, could pass as input (bit to c-ish)
 			hash_type hashed_data{};
 			cactuar::BaseHashFunction(context, input, { hashed_data.data(), hashed_data.size() });
 			return hashed_data;
@@ -78,15 +77,41 @@ export namespace pulse
 	{
 		EVP_MD_CTX_free(this->context);
 	}
-/*
+
+
 	//TODO: make concurrent and make a true pool using things such as "in_use" and locks/seamaphores
+	template <HashAlgorithm hash_algo>
 	class HashFunctionPool
 	{
 	public:
-		static 
+		using hash_type = std::array<std::byte, AsHashSize(hash_algo)>;
+
+		static const hash_type Hash(const std::span<std::byte>& input)
+		{
+			if (instance.get() == nullptr)
+			{
+				instance.reset(new HashFunctionPool<hash_algo>());
+			}
+			return instance->pool[0](input);
+		};
 
 	private:
+		HashFunctionPool();
+
+		//TODO: Should be auto initialized, else I'll switch to veccy
+		//make more than 1 once seamaphores implmented.
+		std::array<HashFunction<hash_algo>, 1> pool;	
+
+		static inline std::unique_ptr<HashFunctionPool<hash_algo>> instance = 
+			std::unique_ptr<HashFunctionPool>{ nullptr };
 
 	};
-	*/
+	/*
+	template <HashAlgorithm hash_algo>
+	typename std::unique_ptr<HashFunctionPool<hash_algo>> HashFunctionPool<hash_algo>::instance = std::unique_ptr<HashFunctionPool>{ nullptr };*/
+
+	//Should auto initialize array
+	template <HashAlgorithm hash_algo>
+	HashFunctionPool<hash_algo>::HashFunctionPool() : pool() {};
+
 } //namespace pulse
