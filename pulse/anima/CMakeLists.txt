@@ -4,22 +4,23 @@
 
 set(ANIMA_MODULE_ROOT "${PULSE_MODULE_ROOT}/anima")
 
-set(module_partition 
+set(anima_module 
+  "${ANIMA_MODULE_ROOT}/anima.ixx"
   "${ANIMA_MODULE_ROOT}/anima-matrix.ixx" 
+  "${ANIMA_MODULE_ROOT}/anima-neural_network.ixx"
   "${ANIMA_MODULE_ROOT}/anima-random.ixx" 
-  "${ANIMA_MODULE_ROOT}/anima-neural_network.ixx")
+  )
 
 set(cpp_files 
   "anima-matrix.cpp" 
   "anima-neural_network.cpp"
   "anima-random.cpp")
 
-set(anima_module "${ANIMA_MODULE_ROOT}/anima.ixx")
 
 #Can't be Object anymore as add_custom_command for bost build wont work.
 #Static as we want pulse to be the dll and we can statically link the dll to 
 #this library and then only link to dll from client.
-add_library(anima STATIC ${anima_module} ${module_partition} ${cpp_files})
+add_library(anima STATIC ${anima_module} ${cpp_files})
 
 if(MSVC)
   # Required to fix issue with MSVC when using header only style 
@@ -28,7 +29,7 @@ if(MSVC)
   # *.ixx.obj and *.obj
   # In This case however we do have an implementation file for anima-matrix
   # as this stores our avx versions.
-  add_pseudo_module_impl_objects(anima ${anima_module})
+  add_pseudo_module_impl_objects(anima "anima.cpp")
   #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
 endif()
 

@@ -30,7 +30,7 @@ namespace pulse
 	{
 		auto arr_index = ExpandTargetIndex(target);
 
-		Target::expanded_target_type target_array(Target::TargetSize);
+		typename Target::expanded_target_type target_array(Target::TargetSize);
 
 		target_array[arr_index] = (target & 255);
 		target_array[arr_index - 1] = ((target >> 8) & 255);

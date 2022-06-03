@@ -6,12 +6,13 @@
 
 module;
 
-#include <span>
-#include <algorithm>
-//Just for now VV
 #include <cstddef>
 
 export module cactuar:encoding;
+
+import <span>;
+import <algorithm>;
+import <vector>;
 
 namespace pulse
 {
@@ -37,18 +38,31 @@ export namespace pulse
 	}
 
 	/**
+	 * Encodes data as little endian by copying the data either as
+	 * is for little endian or in reverse for big endian.
+	 */
+	std::vector<std::byte> EncodeData(std::span<const std::byte> data)
+	{
+		std::vector<std::byte> encoded(data.size());
+
+		if (SystemIsLittleEndian)
+		{
+			std::copy(data.begin(), data.end(), encoded.begin());
+
+		}
+		else
+		{
+			std::copy(data.rbegin(), data.rend(), encoded.begin());
+		}
+
+		return encoded;
+	}
+
+	/**
 	 * Encodes data as little endian (potentially
 	 * overwriting data if the system is not little endian).
 	 */
-	void EncodeData(std::span<unsigned char>& data)
-	{
-		if (SystemIsBigEndian())
-		{
-			std::reverse(data.begin(), data.end());
-		}
-	}
-
-	void EncodeData(std::span<std::byte>& data)
+	void EncodeData(std::span<std::byte> data)
 	{
 		if (SystemIsBigEndian())
 		{

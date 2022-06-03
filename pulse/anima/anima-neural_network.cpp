@@ -125,7 +125,6 @@ namespace pulse
 		return this->network_structure.size() - 1;
 	}
 
-
 	const NetworkWeights& NeuralNetwork::GetWeights() const
 	{
 		return this->weights;
@@ -151,7 +150,6 @@ namespace pulse
 	{
 		return this->tracking.layers[this->network_structure.size() - 1];
 	}
-
 
 	void NeuralNetwork::Feedforward(const std::vector<float>& input)
 	{
@@ -288,8 +286,6 @@ namespace pulse
 		return deltaWeights;
 	}
 
-
-
 	//Could return latest update?
 	//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
 	// batch has size batch size and batch[x] has input size size
@@ -297,7 +293,7 @@ namespace pulse
 		NeuralNetwork& network,
 		const std::vector<std::vector<float>>& desired,
 		const std::vector<std::vector<float>>& input,
-		const std::int64_t& epochs)
+		const std::int64_t epochs)
 	{
 		//Assert: input.size() == desired.size();
 

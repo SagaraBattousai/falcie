@@ -13,77 +13,35 @@ import <ratio>;
 import <functional>;
 import <memory>;
 
+import :block;
 import :encoding;
 import :crypto;
 import :target;
 
-namespace pulse
-{
-	namespace cactuar
-	{
-		using time_rep = uint64_t;
-		using time_period = std::micro;
-		using time_duration = std::chrono::duration<time_rep, time_period>;
-	} //namespace pulse::cactuar
-
-} //namespace pulse
-
 export namespace pulse
 {
-	cactuar::time_rep GenerateTimestamp()
-	{
-		return std::chrono::duration_cast<cactuar::time_duration>
-			(std::chrono::tai_clock::now().time_since_epoch()).count();
-	}
-
-	template <HashAlgorithm hash_algo>
-	class Blockheader;
-
-	template <HashAlgorithm hash_algo>
-	using blockhash_type = std::array<std::byte, AsHashSize(hash_algo)>;
-	//using blockhash_type = std::array<unsigned char, AsHashSize(hash_algo)>;
-
-	template <HashAlgorithm hash_algo>
-	using BlockHashFunction = std::function<const blockhash_type<hash_algo>(const Blockheader<hash_algo>&)>;
-
-	/**
-	 * @brief Default BlockHashFunction; returns the double hash (of type "hash_algo")
-	 * of the Blockheader's BlockheaderState.
-	 *
-	 */
-	template <HashAlgorithm hash_algo>
-	const blockhash_type<hash_algo> PulseHash(const Blockheader<hash_algo>&);
-
 	template <HashAlgorithm hash_algo>
 	class Blockheader
 	{
 	public:
-		Blockheader(BlockHashFunction<hash_algo> = PulseHash<hash_algo>, uint32_t = 0x01);
+
+		using blockhash_type = std::array<std::byte, AsHashSize(hash_algo)>;
+
+		using BlockHashFunction = std::function<const blockhash_type(const Blockheader&)>;
+
+		Blockheader(uint32_t = 0x01);
+
+		Blockheader(BlockHashFunction, uint32_t = 0x01);
 
 		//Good candidate for inline as just a function call
-		inline const blockhash_type<hash_algo> Hash() const { return this->hashfunc(*this); };
+		inline const blockhash_type Hash() const { return this->hashfunc(*this); };
 
-		//const hash_array& PrevHash() const { return this->prev_hash; };
-		/*
-		void Mine(const hash_array prev_hash)
-		{
-			this->prev_hash = prev_hash;
-			this->timestamp = GenerateTimestamp();
+		const blockhash_type& PrevHash() const { return this->prev_hash; };
 
-			//TODO: add error for invalid cactaur values
-			std::vector<unsigned char> difficulty_array = ExpandTarget(this->target);
+		void Mine(const blockhash_type prev_hash);
 
-			hash_array currHash = this->HashFunction();
+		
 
-			while (currHash > difficulty_array)
-			{
-				this->nonce += 1;
-				currHash = this->HashFunction();
-			}
-		}
-		*/
-		//private:
-			//TODO: ^^handle this differently.
 		struct BlockheaderState
 		{
 			//TODO:add constructor back as way way safer!! aka allows make unique
@@ -91,44 +49,77 @@ export namespace pulse
 			//BlockheaderState(uint32_t version);
 			uint32_t version;
 			int64_t timestamp;
-			blockhash_type<hash_algo> prev_hash;
-			blockhash_type<hash_algo> transaction_hash;
+			blockhash_type prev_hash;
+			blockhash_type transaction_hash;
 			uint32_t target;
-			uint32_t nonce; ///< Need overflow semantics, therefore unsigned.
+			uint32_t nonce;
 		};
 
-		// Works as a raw pointer but not (yet) as unique
-		std::unique_ptr<BlockheaderState> state;
-		//BlockheaderState *state;
-		BlockHashFunction<hash_algo> hashfunc;
+		//or reference return and then get address?
+		const BlockheaderState* const State() const
+		{
+			return this->state.get();
+		};
 
-	public:
-		//TODO: handle this differently. (probably not forward delc in public space)
-		//header almost certainly less than 2gb in size
-		static constexpr int state_size = sizeof(BlockheaderState);
+
+	private:
+		std::unique_ptr<BlockheaderState> state;
+
+		BlockHashFunction hashfunc;
 	};
 
+
+	/**
+	 * @brief Default BlockHashFunction; returns the double hash (of type "hash_algo")
+	 * of the Blockheader's BlockheaderState.
+	 */
 	template <HashAlgorithm hash_algo>
-	Blockheader<hash_algo>::Blockheader(BlockHashFunction<hash_algo> hashfunc, uint32_t version)
-		: hashfunc(hashfunc)
-		//, state(std::make_unique<BlockheaderState>(version))
-		//, state(std::make_unique<BlockheaderState>(BlockheaderState{ .version = version, .nonce = 0 }))
-		, state(std::unique_ptr<BlockheaderState>(new BlockheaderState{ .version = version, .nonce = 0 }))
+	const typename Blockheader<hash_algo>::blockhash_type PulseHash(const Blockheader<hash_algo>&);
+
+	template <HashAlgorithm hash_algo>
+	Blockheader<hash_algo>::Blockheader(uint32_t version)
+		: Blockheader(PulseHash<hash_algo>, version)
 	{
 	}
 
 
-	//may need base ..... One day, remember 80/20 rule //actually don't think I can do base
+
 	template <HashAlgorithm hash_algo>
-	const blockhash_type<hash_algo> PulseHash(const Blockheader<hash_algo>& header)
+	Blockheader<hash_algo>::Blockheader(Blockheader<hash_algo>::BlockHashFunction hashfunc, uint32_t version)
+		: hashfunc(hashfunc)
+		//, state(std::make_unique<BlockheaderState>(version))
+		, state(std::unique_ptr<BlockheaderState>(new BlockheaderState{ .version = version, .nonce = 0 }))
 	{
-		std::span<std::byte> data = std::as_writable_bytes(
-			std::span<Blockheader<hash_algo>::BlockheaderState>{header.state.get(), 1}
-		);
+	}
 
-		//EncodeData(data);
+	template <HashAlgorithm hash_algo>
+	void Blockheader<hash_algo>::Mine(const blockhash_type prev_hash)
+	{
+		this->prev_hash = prev_hash;
+		this->timestamp = Block::GenerateTimestamp();
 
-		return (HashFunctionPool<hash_algo>::Instance())(data);
+		//TODO: add error for invalid cactaur values
+		std::vector<unsigned char> difficulty_array = ExpandTarget(this->target);
+
+		blockhash_type currHash = this->Hash();
+
+		while (currHash > difficulty_array)
+		{
+			this->nonce += 1;
+			currHash = this->Hash();
+		}
+	}
+
+
+	template <HashAlgorithm hash_algo>
+	const typename Blockheader<hash_algo>::blockhash_type PulseHash(
+		const Blockheader<hash_algo>& header)
+	{
+		std::span<const std::byte> bytes = std::as_bytes(std::span{ header.State(), 1});
+
+		std::vector<std::byte> data = EncodeData(bytes);
+
+		return (HashFunctionPool<hash_algo>::Instance())({ data.data(), data.size() });
 	}
 
 

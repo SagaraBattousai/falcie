@@ -2,28 +2,24 @@
 ############ Orphan The Unseen Powerhouse Target ##################
 ###################################################################
 
-set(target_name orphan)
+set(ORPHAN_MODULE_ROOT "${LINDZEI_MODULE_ROOT}/orphan")
 
-set(c_sources "federatedblock.c")
-set(cpp_sources "federated_blockchain.cpp")
+set(cpp_sources 
+  "federated_block.cpp" 
+  "federated_blockchain.cpp"
+  "federated_network.cpp" 
+  )
 
-# set(headers "${LINDZEI_INCLUDE_ROOT}/${target_name}/federated_blockchain.h"
-#             "${LINDZEI_INCLUDE_ROOT}/${target_name}/federatedblock.h"
-#             )
+set(orphan_module 
+  "${ORPHAN_MODULE_ROOT}/orphan.ixx"
+  "${ORPHAN_MODULE_ROOT}/federated_block.ixx"
+  "${ORPHAN_MODULE_ROOT}/federated_blockchain.ixx"
+  "${ORPHAN_MODULE_ROOT}/federated_network.ixx"
+  )
 
-          add_library(${target_name} STATIC ${c_sources} ${cpp_sources})
+add_library(orphan STATIC ${orphan_module} ${cpp_sources})
 
-# target_sources(${target_name} PUBLIC
-#   FILE_SET public_headers 
-#   TYPE HEADERS 
-#   BASE_DIRS "${LINDZEI_INCLUDE_ROOT}"
-#   FILES
-#   ${headers}
-#   )
-
-target_link_libraries(${target_name} PUBLIC pulse)
-
-
-
-
+if(MSVC)
+  add_pseudo_module_impl_objects(orphan "orphan.cpp")
+endif()
 

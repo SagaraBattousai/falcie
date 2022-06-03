@@ -16,8 +16,10 @@ export namespace pulse
 	enum class HashAlgorithm : unsigned char { SHA256 = 32, RIPEMD160 = 20 };
 
 	//constexpr funcs are implicitly inline
-	constexpr unsigned char AsHashSize(HashAlgorithm hash_algo) 
-	{ return static_cast<unsigned char>(hash_algo); };
+	constexpr unsigned char AsHashSize(HashAlgorithm hash_algo)
+	{
+		return static_cast<unsigned char>(hash_algo);
+	};
 
 } // namespace pulse
 
@@ -27,9 +29,9 @@ namespace pulse
 	{
 		EVP_MD_CTX* GetHashContext(HashAlgorithm hash_algo);
 
-		void BaseHashFunction(EVP_MD_CTX*, const std::span<std::byte>&, std::span<std::byte>);
+		void BaseHashFunction(EVP_MD_CTX*, const std::span<std::byte>, std::span<std::byte>);
 
-		void BaseHashFunction(EVP_MD_CTX *context, const std::span<std::byte>& input, std::span<std::byte> output)
+		void BaseHashFunction(EVP_MD_CTX *context, const std::span<std::byte> input, std::span<std::byte> output)
 		{
 			EVP_DigestInit_ex2(context, NULL, NULL);
 			EVP_DigestUpdate(context, input.data(), input.size());
@@ -50,7 +52,7 @@ export namespace pulse
 
 		using hash_type = std::array<std::byte, AsHashSize(hash_algo)>;
 
-		inline const hash_type operator()(const std::span<std::byte>& input) const
+		inline const hash_type operator()(const std::span<std::byte> input) const
 		{
 			hash_type hashed_data{};
 			cactuar::BaseHashFunction(this->context, input, { hashed_data.data(), hashed_data.size() });
@@ -69,7 +71,7 @@ export namespace pulse
 		EVP_MD_CTX *context;
 		//hash_type hashed_data;
 	};
-	
+
 	template <HashAlgorithm hash_algo>
 	HashFunction<hash_algo>::HashFunction() : context(cactuar::GetHashContext(hash_algo)) {}
 
@@ -81,6 +83,7 @@ export namespace pulse
 
 
 	//TODO: make concurrent and make a true pool using things such as "in_use" and locks/seamaphores
+	//template <HashAlgorithm hash_algo>
 	template <HashAlgorithm hash_algo>
 	class HashFunctionPool
 	{
@@ -93,20 +96,14 @@ export namespace pulse
 			}
 			return (instance->pool)[0];
 		};
-
 	private:
 
-		//Why is the array elems being destructed!!! because you werent passing by ref but by val
-		// Still unsure why that causes deletion as I would expect it to just delete the copy.
-		// I think its because array[] returns a ref
-		// 
 		//TODO: Should be auto initialized, else I'll switch to veccy
 		//make more than 1 once seamaphores implmented.
-		std::array<HashFunction<hash_algo>, 1> pool;	
+		std::array<HashFunction<hash_algo>, 1> pool;
 
-		static inline std::unique_ptr<HashFunctionPool<hash_algo>> instance = 
+		static inline std::unique_ptr<HashFunctionPool<hash_algo>> instance =
 			std::unique_ptr<HashFunctionPool>{ nullptr };
-
 	};
 
 } //namespace pulse

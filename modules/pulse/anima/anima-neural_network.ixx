@@ -29,7 +29,6 @@ export namespace pulse
 
 	using NetworkWeights = std::vector<Matrix<float>>;
 
-
 } // namespace pulse
 
 namespace pulse
@@ -38,6 +37,7 @@ namespace pulse
 	{
 		constexpr float DEFAULT_NETWORK_LEARNING_RATE = 0.9;
 
+		//Make class with constructor!!
 		struct FeedForwardTracking
 		{
 			/** The value of every neuron after a pass through the network. */
@@ -49,16 +49,14 @@ namespace pulse
 
 		void ResetTracking(FeedForwardTracking& tracking)
 		{
-			/*
-			tracking.layers[0].clear();
-			tracking.pre_activation_layers[0].clear();
-			tracking.layers[0].push_back(1.f);
-			tracking.pre_activation_layers[0].push_back(1.f);
-			*/
-			tracking.layers[0].erase(tracking.layers[0].begin() + 1, tracking.layers[0].end());
-			tracking.pre_activation_layers[0].erase(
-				tracking.pre_activation_layers[0].begin() + 1, tracking.pre_activation_layers[0].end());
+			tracking.layers[0].erase(
+				tracking.layers[0].begin() + 1,
+				tracking.layers[0].end()
+			);
 
+			tracking.pre_activation_layers[0].erase(
+				tracking.pre_activation_layers[0].begin() + 1, tracking.pre_activation_layers[0].end()
+			);
 
 			for (auto i = 1; i < tracking.layers.size(); i++)
 			{
@@ -97,22 +95,20 @@ namespace pulse
 			tracking.pre_activation_layers[0].push_back(1.f);
 
 
-			return tracking;// FeedForwardTracking{ layers, pre_activation_layers };
+			return tracking;
 		}
 
 	} //namespace pulse::anima
 } //namespace pulse
 
 
-// NOTE: Dont kill all C code as that is still needed for wrapper.
-//Public api
 export namespace pulse
 {
 	float sigmoid(const float&);
 
 	float delta_sigmoid(const float&);
 
-	float sq_error(float *output, float *desired, int64_t dim);
+	float TotalSquaredErrorEnergy(std::vector<float>, const std::vector<float>&);
 
 	//Copy for outut so we can use as output
 	float TotalSquaredErrorEnergy(std::vector<float> output, const std::vector<float>& desired);
@@ -146,11 +142,7 @@ export namespace pulse
 		/** A Forward pass through the network. */
 		void Feedforward(const std::vector<float>&);
 
-
 		NetworkWeights Backpropagation(const std::vector<float>& desired);
-
-
-
 
 		/*
 		void print_inferencing_results(neural_network_t *network,
@@ -180,17 +172,13 @@ export namespace pulse
 
 		anima::FeedForwardTracking tracking;
 
-		//std::uint_fast32_t seed;
-
 	};
 
-	//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
-		// batch has size batch size and batch[x] has input size size
 	void TrainNetwork(
 		NeuralNetwork& network,
 		const std::vector<std::vector<float>>& desired,
 		const std::vector<std::vector<float>>& input,
-		const std::int64_t& epochs); //is a ref larger/as large than by value for this??
+		const std::int64_t epochs);
 
 
 	struct NetworkStats
@@ -205,7 +193,7 @@ export namespace pulse
 		NeuralNetwork& network,
 		const std::vector<std::vector<float>>& desired,
 		const std::vector<std::vector<float>>& input,
-		const std::int64_t& epochs,
+		const std::int64_t epochs,
 		float target_err,
 		ErrorEnergy err_func
 		);
@@ -226,7 +214,7 @@ export namespace pulse
 		NeuralNetwork& network,
 		const std::vector<std::vector<float>>& desired,
 		const std::vector<std::vector<float>>& input,
-		const std::int64_t& epochs,
+		const std::int64_t epochs,
 		float target_err,
 		ErrorEnergy err_func = &TotalSquaredErrorEnergy)
 	{
