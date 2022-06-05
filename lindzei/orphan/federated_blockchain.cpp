@@ -1,4 +1,4 @@
-
+/*
 #include <orphan/federated_blockchain.h>
 #include <pulse/dahaka.h>
 
@@ -34,3 +34,5 @@ bool validate(federated_blockchain_t* const chain)
 {
 	return chain->Validate();
 }
+
+*/

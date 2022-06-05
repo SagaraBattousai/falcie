@@ -1,57 +1,32 @@
 
-#define _CRTDBG_MAP_ALLOC
-
-#include<stdlib.h>
-#include <crtdbg.h>
-
-#include <stdio.h>
-
-#include<time.h>
-#include<string.h>
-#include<stdint.h>
-#include<math.h>
-#include<float.h>
-
-#include <pulse/anima.h>
-#include <pulse/cactuar.h>
-
-#include <orphan/federated_blockchain.h>
-#include <orphan/federatedblock.h>
+#include <cstdint>
+#include <iostream>
 
 
-float sq_error(float *output, float *desired, int64_t dim)
-{
-	float *diff = (float *)malloc(sizeof(float) * dim);
+import <vector>;
 
-	vector_vector_sub(output, desired, diff, dim);
-	float ret = vector_dot(diff, diff, dim);
-	free(diff);
-	return ret;
-}
-
-float totalerr_energy(float *output, float *desired, int64_t dim)
-{
-	return sq_error(output, desired, dim) / 2.f;
-}
-
-float act(float x)
-{
-	return 1.f / (1.f + expf(-2.f * x));
-	//return max(x, 0.001f * x);
-}
-
-float dact(float x)
-{
-	float actx = act(x);
-	return 2 * actx * (1 - actx);
-	//return x < 0 ? 0.001f : 1;
-}
+import pulse;
+import lindzei;
 
 
 int main(void)
 {
-	federatedblock_t genisis = new_federated_block();
+	lindzei::Federatedblock genisis{};
 
+	genisis.Hash();
+
+	//std::uint32_t tb = 0x20FFFFFF;
+
+	pulse::Target t(0x20FFFFFF);
+
+	for (auto& i: t.Expand() )
+		std::cout << std::hex << (int)i;
+
+	std::cout << std::endl;
+
+
+
+	/*
 	federated_blockchain_t *blockchain = new_federated_blockchain(genisis);
 
 	federatedblock_t b1 = new_federated_block();
@@ -152,7 +127,7 @@ int main(void)
 	print_inferencing_results(network_control, training_ptr, 4,
 		2, desired_ptr, 1);
 
-
+		*/
 
 	return 0;
 }

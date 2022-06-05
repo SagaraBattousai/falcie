@@ -6,7 +6,9 @@ set(CACTUAR_MODULE_ROOT "${PULSE_MODULE_ROOT}/cactuar")
 
 set(cpp_sources 
   "block.cpp"
+  "blockheader.cpp"
   "crypto.cpp" 
+  "encoding.cpp" 
   "target.cpp"
   )
 
@@ -24,7 +26,7 @@ add_library(cactuar STATIC ${cpp_sources} ${cactuar_module})
 if(MSVC)
   #Required to fix issue with MSVC Expecting a corresponding
   #.cpp and therefore looks for both *.ixx.obj and *.obj
-  add_pseudo_module_impl_objects(cactuar "cactuar.cpp" "encoding.cpp" "blockheader.cpp")
+  add_pseudo_module_impl_objects(cactuar "cactuar.cpp")
   #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
 endif()
 
@@ -34,6 +36,22 @@ target_compile_definitions(cactuar PRIVATE
 
 target_include_directories(cactuar PRIVATE ${OPENSSL_INCLUDE_DIR})
 target_link_libraries(cactuar PRIVATE OpenSSL::Crypto)
+
+
+if(MSVC)
+  # Add module dir to help intelisense
+  # Irritatingly its global but works well and I think it's better than
+  # target_sources ?!!?
+  set_target_properties(cactuar PROPERTIES 
+    VS_GLOBAL_PublicModuleDirectories 
+    "${CACTUAR_MODULE_ROOT};$(PublicModuleDirectories)")
+endif()
+
+ 
+
+
+
+
 
 # Can't work due to static and modules me thinks.
 #if(MSVC)

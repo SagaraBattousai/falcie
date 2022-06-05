@@ -25,3 +25,11 @@ if(MSVC)
   #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
 endif()
 
+if(MSVC)
+  # Add module dir to help intelisense
+  # Irritatingly its global but works well and I think it's better than
+  # target_sources ?!!?
+  set_target_properties(dahaka PROPERTIES 
+    VS_GLOBAL_PublicModuleDirectories 
+    "${DAHAKA_MODULE_ROOT};$(PublicModuleDirectories)")
+endif()

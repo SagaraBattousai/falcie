@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include <utility>
+#include <memory>
 
 #include <chrono>
 #include <span>
@@ -18,36 +19,43 @@ import pulse;
 
 int main(void)
 {
-	using hash_type = std::array<std::byte, 32>;
+	using hash_type = std::vector<std::byte>;
 
-	pulse::Blockheader<pulse::HashAlgorithm::SHA256> b{};
+	pulse::Blockheader b{};
 
 	hash_type v = b.Hash();
 
-	for (auto &x : v)
+	auto lambda = [](hash_type::pointer v)
 	{
-		std::cout << std::hex << (unsigned)x;
-	}
+		for (auto i = 0; i < 32; i++)
+			std::cout << std::hex << (unsigned)(v[i]);
+	};
+
+	lambda(v.data());
 
 	std::cout << std::endl;
 
-	v = b.Hash();
+	pulse::Blockheader c{};
 
-	for (auto &x : v)
-	{
-		std::cout << std::hex << (unsigned)x;
-	}
-
-	std::cout << std::endl;
-
-	pulse::Blockheader<pulse::HashAlgorithm::SHA256> c{};
+	c.Mine(b.Hash());
 
 	hash_type w = c.Hash();
 
-	for (auto &x : w)
-	{
-		std::cout << std::hex << (unsigned)x;
-	}
+	//lambda(w.data());
+
+	lambda(w.data());
+
+	std::cout << std::endl;
+
+	pulse::Blockheader d{};
+
+
+	d.Mine(b.Hash());
+
+	hash_type x = d.Hash();
+
+	lambda(x.data());
+
 
 	std::cout << std::endl;
 

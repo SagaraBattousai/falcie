@@ -30,6 +30,14 @@ target_link_libraries(pulse PUBLIC anima cactuar dahaka)
 
 set_target_properties(pulse anima cactuar dahaka PROPERTIES FOLDER Pulse)
 
+if(MSVC)
+  # Add module dir to help intelisense
+  # Irritatingly its global but works well and I think it's better than
+  # target_sources ?!!?
+  set_target_properties(pulse PROPERTIES 
+    VS_GLOBAL_PublicModuleDirectories 
+    "${PULSE_MODULE_ROOT};$(PublicModuleDirectories)")
+endif()
 
 
 

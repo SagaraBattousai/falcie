@@ -29,9 +29,11 @@ namespace pulse
 	{
 		EVP_MD_CTX* GetHashContext(HashAlgorithm hash_algo);
 
-		void BaseHashFunction(EVP_MD_CTX*, const std::span<std::byte>, std::span<std::byte>);
+		void BaseHashFunction(EVP_MD_CTX*, 
+			const std::span<const std::byte>, std::span<std::byte>);
 
-		void BaseHashFunction(EVP_MD_CTX *context, const std::span<std::byte> input, std::span<std::byte> output)
+		void BaseHashFunction(EVP_MD_CTX *context, 
+			const std::span<const std::byte> input, std::span<std::byte> output)
 		{
 			EVP_DigestInit_ex2(context, NULL, NULL);
 			EVP_DigestUpdate(context, input.data(), input.size());
@@ -43,19 +45,24 @@ namespace pulse
 export namespace pulse
 {
 	//Could make singleton and then use mutex's
-	template <HashAlgorithm hash_algo>
+	//template <HashAlgorithm hash_algo>
 	class HashFunction
 	{
 	public:
-		HashFunction();
+		HashFunction(HashAlgorithm hash_algo);
 		~HashFunction();
 
-		using hash_type = std::array<std::byte, AsHashSize(hash_algo)>;
+		using hash_type = std::vector<std::byte>;
 
-		inline const hash_type operator()(const std::span<std::byte> input) const
+		//rvo?
+		//inline 
+		//TODO Use context size vs passing 
+		hash_type operator()(const std::span<const std::byte> input)
 		{
-			hash_type hashed_data{};
-			cactuar::BaseHashFunction(this->context, input, { hashed_data.data(), hashed_data.size() });
+			std::span<std::byte>::size_type hashSize = EVP_MD_CTX_size(this->context);
+			std::vector<std::byte> hashed_data(hashSize);
+
+			cactuar::BaseHashFunction(this->context, input, { hashed_data.data(), hashSize });
 			return hashed_data;
 		};
 
@@ -72,16 +79,12 @@ export namespace pulse
 		//hash_type hashed_data;
 	};
 
-	template <HashAlgorithm hash_algo>
-	HashFunction<hash_algo>::HashFunction() : context(cactuar::GetHashContext(hash_algo)) {}
+	HashFunction::HashFunction(HashAlgorithm hash_algo)
+		: context(cactuar::GetHashContext(hash_algo)) {}
 
-	template <HashAlgorithm hash_algo>
-	HashFunction<hash_algo>::~HashFunction()
-	{
-		EVP_MD_CTX_free(this->context);
-	}
+	HashFunction::~HashFunction() { EVP_MD_CTX_free(this->context); }
 
-
+	/*
 	//TODO: make concurrent and make a true pool using things such as "in_use" and locks/seamaphores
 	//template <HashAlgorithm hash_algo>
 	template <HashAlgorithm hash_algo>
@@ -105,5 +108,5 @@ export namespace pulse
 		static inline std::unique_ptr<HashFunctionPool<hash_algo>> instance =
 			std::unique_ptr<HashFunctionPool>{ nullptr };
 	};
-
+	*/
 } //namespace pulse

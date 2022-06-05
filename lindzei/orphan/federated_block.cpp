@@ -1,4 +1,4 @@
-
+/*
 #define _CRTDBG_MAP_ALLOC
 
 #include<stdlib.h>
@@ -14,10 +14,7 @@
 //May need to change 
 //Could make a param but....
 #define LOCAL_UPDATE_INIT_SIZE 64
-/*
-*void mine(blockheader_t * const header);
 
-sha256hash_t hash(const blockheader_t* const header);*/
 
 federatedblock_t new_federated_block()
 {
@@ -37,12 +34,6 @@ federatedblock_t new_federated_block()
 	return block;
 }
 
-
-unsigned char *hash_federated(const federatedblock_t* const block)
-{
-	return hash(block->header)->hash;
-}
-
 void mine_federated(federatedblock_t* const block, const unsigned char* const prev_hash)
 {
 	//TODO: remove cheat, used to spped up testing
@@ -50,17 +41,6 @@ void mine_federated(federatedblock_t* const block, const unsigned char* const pr
 	calculateGlobalUpdate(block);
 
 }
-
-unsigned char *prev_hash_federated(const federatedblock_t* const block)
-{
-	return get_prev_hash(block->header)->hash;
-}
-
-cactuar_t target_federated(const federatedblock_t* const block)
-{
-	return get_target(block->header);
-}
-
 
 int add_local_update(federatedblock_t *block, network_update_t *update)
 {
@@ -147,7 +127,7 @@ federated_block
 	network_update_t **local_updates;
 	network_update_t *global_update;
 	...
-*/
+*//*
 int calculateGlobalUpdate(federatedblock_t * block)
 {
 	//TODO: check this is good!
@@ -213,3 +193,4 @@ int calculateGlobalUpdate(federatedblock_t * block)
 	block->global_update = global_update;
 }
 
+*/

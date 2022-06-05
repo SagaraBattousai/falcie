@@ -23,3 +23,6 @@ if(MSVC)
   add_pseudo_module_impl_objects(orphan "orphan.cpp")
 endif()
 
+#Technically a user doesn't need pulse as this is built on top of pulse ?!??
+target_link_libraries(orphan PRIVATE pulse)
+

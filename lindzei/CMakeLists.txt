@@ -19,6 +19,7 @@ add_library(lindzei STATIC ${lindzei_module})
 #.cpp and therefore looks for both *.ixx.obj and *.obj
 add_pseudo_module_impl_objects(lindzei ${lindzei_module})
 
+#pulse???
 target_link_libraries(lindzei PUBLIC orphan) # eden kujata)
 
 

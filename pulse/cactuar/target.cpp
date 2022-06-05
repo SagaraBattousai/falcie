@@ -1,47 +1,51 @@
 module;
 
 #include <cstdint>
+#include <cstddef>
 #include <stdexcept>
 
 module cactuar:target;
 
 import <vector>;
+import <algorithm>;
 
 namespace pulse
 {
-
-	constexpr Target::expanded_target_type::size_type ExpandTargetIndex(const std::uint32_t& target)
+	constexpr const std::vector<std::byte> Target::Expand() const
 	{
-		unsigned char exp = (target >> 24) & 255;
-		if (exp > 0x21 || exp < 0x04)
+		unsigned char exp = (this->target >> 24) & 255;
+
+		if (exp > Target::ExpMax)
 		{
-			throw std::domain_error(
-				"Target is either too large or too small. The leading byte of \"target\" \
-					 must be less than or equal to 0x21 (33) and greater than or equal to 0x04 (4)"
-			);
+			return std::vector<std::byte>(Target::TargetSize, std::byte{ 0xFF });
+		}
+
+		if (exp < Target::ExpMin)
+		{
+			//I think but since we have -4 .... hmmm Have a think about this
+			return std::vector<std::byte>(Target::TargetSize, std::byte{ 0x00 });
 		}
 
 		auto arr_index = 31 - (exp - Target::TargetExponentShifter);
 
-		return arr_index;
-	}
+		std::vector<std::byte> target_array(Target::TargetSize);
 
-	const Target::expanded_target_type ExpandTarget(const std::uint32_t& target)
-	{
-		auto arr_index = ExpandTargetIndex(target);
-
-		typename Target::expanded_target_type target_array(Target::TargetSize);
-
-		target_array[arr_index] = (target & 255);
-		target_array[arr_index - 1] = ((target >> 8) & 255);
-		target_array[arr_index - 2] = ((target >> 16) & 255);
+		target_array[arr_index] = std::byte{ (target & 255) };
+		target_array[arr_index - 1] = std::byte{((target >> 8) & 255)};
+		target_array[arr_index - 2] = std::byte{((target >> 16) & 255)};
 
 		return target_array;
 	}
+
+	constexpr std::strong_ordering operator<=>(const Target& lhs, const Target& rhs)
+	{
+		return lhs.Expand() <=> rhs.Expand();
+	}
+
 } //namespace pulse
 
 
-	// Cant ramember why i need this VVVV
+	// TODO: For target diff calc 
 	/*
 	* float fast_log2(float val);
 

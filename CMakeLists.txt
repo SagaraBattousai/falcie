@@ -70,7 +70,10 @@ if(WIN32)
 endif()
 
 if(MSVC)
-  set(VS_STARTUP_PROJECT etro_cpp)
+  set_target_properties(etro_cpp PROPERTIES 
+    VS_GLOBAL_PublicModuleDirectories 
+    "${MODULE_ROOT}/pulse;$(PublicModuleDirectories)")
+  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT etro_cpp)
 endif()
 
 #----------------------------------------------

@@ -23,17 +23,17 @@ set(cpp_files
 add_library(anima STATIC ${anima_module} ${cpp_files})
 
 if(MSVC)
-  # Required to fix issue with MSVC when using header only style 
-  # (due to template classes for example). In such cases MSVC 
-  # expects a corresponding .cpp and therefore looks for both
-  # *.ixx.obj and *.obj
-  # In This case however we do have an implementation file for anima-matrix
-  # as this stores our avx versions.
   add_pseudo_module_impl_objects(anima "anima.cpp")
-  #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
 endif()
 
-
+if(MSVC)
+  # Add module dir to help intelisense
+  # Irritatingly its global but works well and I think it's better than
+  # target_sources ?!!?
+  set_target_properties(anima PROPERTIES 
+    VS_GLOBAL_PublicModuleDirectories 
+    "${ANIMA_MODULE_ROOT};$(PublicModuleDirectories)")
+endif()
 
 
 if(x86)

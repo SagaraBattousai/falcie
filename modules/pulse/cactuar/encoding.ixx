@@ -41,11 +41,11 @@ export namespace pulse
 	 * Encodes data as little endian by copying the data either as
 	 * is for little endian or in reverse for big endian.
 	 */
-	std::vector<std::byte> EncodeData(std::span<const std::byte> data)
+	std::vector<std::byte> EncodeData(const std::span<const std::byte> data)
 	{
 		std::vector<std::byte> encoded(data.size());
 
-		if (SystemIsLittleEndian)
+		if (SystemIsLittleEndian())
 		{
 			std::copy(data.begin(), data.end(), encoded.begin());
 
