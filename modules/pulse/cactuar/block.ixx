@@ -60,7 +60,11 @@ export namespace pulse
 		std::vector<std::byte> data =
 			EncodeData(std::span<const std::byte>{ bytes.data(), bytes.size() });
 
-		return HashFunction(hash_algo)(std::span<std::byte>{ data.data(), data.size() });
+		auto hash_func = HashFunction(hash_algo);
+
+		auto firstHash =  hash_func(std::span<std::byte>{ data.data(), data.size() });
+
+		return hash_func(std::span<std::byte>{ firstHash.data(), firstHash.size() });
 	}
 
 
