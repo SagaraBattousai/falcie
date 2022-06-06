@@ -18,9 +18,8 @@ export namespace lindzei
 	class Federatedblock : public pulse::Block
 	{
 	public:
-		//Federatedblock(std::uint32_t = 0x01, pulse::HashAlgorithm = pulse::HashAlgorithm::SHA256);
 
-		Federatedblock(std::uint32_t = 0x01, pulse::Target = {},
+		Federatedblock(std::uint32_t = 0x01, pulse::Target = { 0x21FFFFFF }, //pulse::Target = {},
 			BlockHashFunction = pulse::PulseHash,
 			pulse::HashAlgorithm = pulse::HashAlgorithm::SHA256);
 
@@ -48,7 +47,6 @@ export namespace lindzei
 			return hash < this->header.get()->target;
 		};
 
-
 		virtual void Mine(const blockhash_type&& prev_hash) override;
 
 		virtual inline std::vector<std::byte> State() const override
@@ -56,28 +54,28 @@ export namespace lindzei
 			return pulse::BlockheaderState(this->header.get(), this->hash_algo);
 		};
 
-	
-		//NetworkUpdate new_global_update(int64_t num_layers, int64_t * network_dims); ///<Should probably be hidden;
+		void AddLocalUpdate(NetworkUpdate&& update);
 
-		//int AddLocalUpdate(Federatedblock *block, NetworkUpdate *update);
+		//constexpr
+		template< class... Args >
+		void AddLocalUpdate(Args&&... args);
 
-		//void GetGlobalUpdate(Federatedblock *block, std::vector<NetworkUpdate> update);
+		const NetworkUpdate& GetGlobalUpdate() const;
 
 	private:
 		std::uint32_t magic; //Always 0x43616C6F
 		//std::uint32_t blocksize;
-		//std::unique_ptr<pulse::Blockheader> header;
-		std::shared_ptr<pulse::Blockheader> header;
+		std::shared_ptr<pulse::Blockheader> header; //To allow for passing copy into Blockchain
 		std::vector<NetworkUpdate> local_updates;
-		//std::unique_ptr<NetworkUpdate> global_update;
+		NetworkUpdate global_update;
 
 		pulse::HashAlgorithm hash_algo;
 		BlockHashFunction hash_func;
 
-		//int CalculateGlobalUpdate();
+		void CalculateGlobalUpdate();
 
 	};
-	
+
 	Federatedblock::Federatedblock(std::uint32_t version, pulse::Target target,
 		BlockHashFunction hash_func, pulse::HashAlgorithm hash_algo)
 		: Federatedblock(pulse::Blockheader{
@@ -88,7 +86,8 @@ export namespace lindzei
 			target,
 			0
 			}, hash_func, hash_algo)
-	{}
+	{
+	}
 
 	Federatedblock::Federatedblock(pulse::Blockheader&& header,
 		BlockHashFunction hash_func, pulse::HashAlgorithm hash_algo)
@@ -97,12 +96,12 @@ export namespace lindzei
 		//, header{ std::make_unique<pulse::Blockheader>(std::move(header)) }
 		, header{ std::make_shared<pulse::Blockheader>(std::move(header)) }
 		, local_updates{ std::vector<NetworkUpdate>{} }
-		//, global_update{ std::make_unique<NetworkUpdate>() }
+		, global_update{ }// std::make_unique<NetworkUpdate>() }
 		, hash_algo{ hash_algo }
 		, hash_func{ hash_func }
 	{}
 
-	Federatedblock Federatedblock::Genisis(std::uint32_t version, 
+	Federatedblock Federatedblock::Genisis(std::uint32_t version,
 		BlockHashFunction hash_func, pulse::HashAlgorithm hash_algo)
 	{
 		return Federatedblock(
@@ -127,31 +126,65 @@ export namespace lindzei
 			currHash = this->Hash();
 		}
 
-		//CalculateGlobalUpdate();
+		CalculateGlobalUpdate();
 
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-	NetworkUpdate new_global_update(int64_t num_layers, int64_t *network_dims)
+	//I think this can be rvalue since we dont need it after its added.
+	void Federatedblock::AddLocalUpdate(NetworkUpdate&& update)
 	{
-		return NetworkUpdate{};
+		//TODO: For now, probably init block with network stucture (and possibly builder)
+		//To enfores all updates to be of a compatible network
+		//may need to change to make network_structure part of the block constructor
+		if (this->global_update.network_structure.size() == 0)
+		{
+			this->global_update = GlobalNetworkUpdate(update.network_structure);
+		}
+
+		this->local_updates.push_back(std::move(update));
 	}
 
-	int AddLocalUpdate(Federatedblock *block, NetworkUpdate *update) { return 0; }
+	template< class ...Args >
+	void Federatedblock::AddLocalUpdate(Args&&... args)
+	{
+		this->local_updates.emplace_back(std::move(args));
 
-	void GetGlobalUpdate(Federatedblock *block, std::vector<NetworkUpdate> update) {}
+		//TODO: For now, probably init block with network stucture (and possibly builder)
+		//To enfores all updates to be of a compatible network
+		//may need to change to make network_structure part of the block constructor
+		if (this->global_update.network_structure.size() == 0)
+		{
+			this->global_update = GlobalNetworkUpdate(this->local_updates[0].network_structure);
+		}
 
-	int CalculateGlobalUpdate(Federatedblock *block) { return 0; }
+	}
+
+	const NetworkUpdate& Federatedblock::GetGlobalUpdate() const
+	{
+		return this->global_update;
+	}
+
+	void Federatedblock::CalculateGlobalUpdate()
+	{		
+		for (const NetworkUpdate& update: this->local_updates)
+		{
+			this->global_update.examples_seen += update.examples_seen;
+
+			for (std::int64_t i = 0; 
+				i < static_cast<std::int64_t>(this->global_update.network_structure.size()) - 1;
+				i++)
+			{
+				this->global_update.delta_weights[i] += update.examples_seen * update.delta_weights[i];
+			}
+		}
+
+		for (std::int64_t i = 0; 
+			i < static_cast<std::int64_t>(this->global_update.network_structure.size()) - 1; 
+			i++)
+		{
+			this->global_update.delta_weights[i] *= (1.f / global_update.examples_seen);
+		}
+	}
 
 
 

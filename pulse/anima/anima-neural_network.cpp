@@ -31,9 +31,9 @@ namespace pulse
 		)
 		{
 			NetworkWeights weights{};
-			//TODO: Add this line
-			//weights.reserve
-			// 
+			weights.reserve(network_dimensions.size() - 1);
+			
+
 			//TODO: Change
 			std::mt19937 bitgen{ seed };
 
@@ -66,6 +66,7 @@ namespace pulse
 					weight_values.push_back(randGen(bitgen));
 				}
 
+				//Or do I use move??
 				weights.emplace_back(weight_values, Dimensions{ previous, next });
 				weight_values.clear();
 
@@ -77,7 +78,7 @@ namespace pulse
 
 	float sigmoid(const float& pre_act)
 	{
-		return 1.f / (1 + std::exp(2.f *-pre_act));
+		return 1.f / (1 + std::exp(2.f * -pre_act));
 	}
 
 	float delta_sigmoid(const float& x)
@@ -120,12 +121,7 @@ namespace pulse
 	{
 	}
 
-	constexpr std::vector<std::int64_t>::size_type NeuralNetwork::NumberOfLayers()
-	{
-		return this->network_structure.size() - 1;
-	}
-
-	const NetworkWeights& NeuralNetwork::GetWeights() const
+	NetworkWeights NeuralNetwork::GetWeights() const
 	{
 		return this->weights;
 	}
@@ -151,140 +147,8 @@ namespace pulse
 		return this->tracking.layers[this->network_structure.size() - 1];
 	}
 
-	void NeuralNetwork::Feedforward(const std::vector<float>& input)
-	{
-		anima::ResetTracking(this->tracking);
-		std::int64_t number_of_layers = (this->network_structure[0] + 1); // +1 for bias
 
-		//Assert: input.size() == this->network_structure[0]
-
-		//auto layers_iter = this->tracking.layers[0].begin();
-		//auto pre_activation_layers_iter = this->tracking.pre_activation_layers[0].begin();
-
-
-		//Set first tracking layer to input (bias term already added :) )
-
-		//Assuming I can't do copy as size is only 1
-		//Start at 1 as [0] is bias term
-		for (auto it = input.begin(); it != input.end(); ++it)
-		{
-			//this->tracking.pre_activation_layers[0].emplace_back(*it);
-			this->tracking.layers[0].push_back(*it);
-			this->tracking.pre_activation_layers[0].push_back(*it);
-		}
-
-		//VV USe when using xor_answer_weights
-	//memcpy(prev_layer, network->input, (sizeof(float) * network->input_size));
-	//*(prev_layer + network->input_size) = 1.f; //The bias term
-
-
-	//float *thislayer;
-	//float *bthislayer;
-
-	//-1 as weights has 1 less length than tracking
-		for (std::int64_t i = 0; i < number_of_layers - 1; i++)
-		{
-			//TODO: Check this doesn't die when leaving the function (or does = call copy constructor ?
-			this->tracking.pre_activation_layers[i + 1] =
-				//(Matrix{ this->tracking.pre_activation_layers[i] } *(this->weights[i])).Data();
-				(Matrix{ this->tracking.layers[i] } *(this->weights[i])).Data();
-
-			//How come it worked before but now had compiler err??
-			for (std::int64_t j = 0; j < this->tracking.pre_activation_layers[i + 1].size(); j++)
-			{
-				this->tracking.layers[i + 1].push_back(
-					this->activation(this->tracking.pre_activation_layers[i + 1][j])
-				);
-			}
-		}
-	}
-
-	NetworkWeights NeuralNetwork::Backpropagation(const std::vector<float>& desired)
-	{
-		NetworkWeights deltaWeights{};
-		deltaWeights.reserve(this->network_structure.size() - 1);
-
-
-		std::int64_t largest = *std::max_element(
-			this->network_structure.begin(),
-			this->network_structure.end()
-		);
-
-		std::vector<float> delta{};
-		std::vector<float> nextDelta{};
-		std::vector<float> delta_update{};
-		delta.reserve(largest);
-		nextDelta.reserve(largest);
-		delta_update.reserve(largest);
-
-		//TODO: could use iterators
-		std::vector<float> pre_activation_output = this->tracking.pre_activation_layers.back();
-		std::vector<float> output = this->tracking.layers.back();
-
-		for (std::int64_t i = 0; i < this->network_structure.back(); i++)
-		{
-			// Alpha * output[i] * (1 - output[i]) * (desired[i] - output[i]);
-			delta.push_back(//2 * output[i] * (1 - output[i]) * (desired[i] - output[i]));
-				this->delta_activation(pre_activation_output[i]) * (desired[i] - output[i])
-			);
-		}
-
-		// The neuron count for the next layer, which is actually
-		// the previous layer in the network, as we are backtracking.
-		// i.e. back_neurons <- curr_neurons.
-		std::int64_t back_neuron_count;
-		std::int64_t curr_neuron_count;
-		std::int64_t weight_size;
-
-		for (std::int64_t j = this->network_structure.size() - 1; j > 0; j--)
-		{
-			curr_neuron_count = this->network_structure[j];
-
-			back_neuron_count = this->network_structure[j - 1];
-
-			if (j == 1)
-			{
-				back_neuron_count += 1; //If network_structure is internal could add 1 in constructor.
-			}
-
-			weight_size = (back_neuron_count * curr_neuron_count);
-
-			//weightupdate = curlayers[l] * pdelta.T
-			deltaWeights.insert(deltaWeights.begin(), Broadcast<float, float, float, std::multiplies<float>>(this->tracking.layers[j - 1], delta, std::multiplies<float>()));
-
-			//learning_rate * weight_update
-			//[0] because we keep inserting at the head of the vector
-			deltaWeights[0] *= this->learning_rate;
-
-			if (j != 1) //Because there would be no need to calculte delta @j==1 aka last iter
-			{
-
-				//delta=aconst*curlayers[l]*(1-curlayers[l])*(np.dot(delta,weights[l]));
-				for (std::int64_t i = 0; i < back_neuron_count; i++)
-				{
-					//  = Alpha * output[i] * (1 - output[i])
-					nextDelta.push_back(
-					// 2 * this->tracking.layers[j - 1][i] *
-					//	(1 - this->tracking.layers[j -1][i]));
-						this->delta_activation(
-							this->tracking.pre_activation_layers[j - 1][i]
-						)
-					);
-				}
-
-				delta_update = this->weights[j - 1] * delta;
-
-				//TODO: Probably don't need
-				delta.clear();
-
-				delta = nextDelta * delta_update;
-
-				nextDelta.clear();
-				delta_update.clear();
-			}
-		}
-		return deltaWeights;
-	}
+	
 
 	//Could return latest update?
 	//These three are just convieience (at least the last two are) so maybe make non-member-non friend?
@@ -309,7 +173,7 @@ namespace pulse
 		}
 	}
 
-	
+
 } //namespace pulse
 
 

@@ -29,11 +29,11 @@ export namespace pulse
 	template<typename T>
 	Matrix<T> operator+(Matrix<T>, const Matrix<T>&);
 
-	template<typename T>
-	Matrix<T> operator*(const T&, Matrix<T>);
+	template<typename T, typename U>
+	Matrix<T> operator*(const U&, Matrix<T>);
 
-	template<typename T>
-	Matrix<T> operator+(const T&, Matrix<T>);
+	template<typename T, typename U>
+	Matrix<T> operator+(const U&, Matrix<T>);
 
 	template<typename T>
 	std::vector<T> operator*(const std::vector<T>&, const Matrix<T>&);
@@ -53,6 +53,7 @@ export namespace pulse
 	{
 	public:
 		Matrix(Dimensions init_shape);
+		//make move constructor
 		Matrix(std::vector<T> values);
 		Matrix(std::vector<T> values, Dimensions init_shape);
 
@@ -93,11 +94,14 @@ export namespace pulse
 		//that were unneccisary just to stop it being a friend.
 		friend Matrix operator*<T>(const Matrix&, const Matrix&);
 
-		Matrix& operator*=(const Matrix& rhs);
+		Matrix& operator*=(const Matrix&);
 		Matrix& operator+=(const Matrix&);
 
-		Matrix& operator*=(const T&);
-		Matrix& operator+=(const T&);
+		template<typename U>
+		Matrix& operator*=(const U&);
+
+		template<typename U>
+		Matrix& operator+=(const U&);
 
 		//TODO:
 		//This may be messy and evil
@@ -116,7 +120,6 @@ export namespace pulse
 	private:
 		std::vector<T> data;
 
-		//These are constant so maybe constexpr??
 		Dimensions dims;
 	};
 
@@ -124,8 +127,7 @@ export namespace pulse
 	template <typename T>
 	Matrix<T>::Matrix(Dimensions init_shape)
 		: Matrix(std::vector<T>(init_shape.first * init_shape.second), init_shape)
-	{
-	}
+	{}
 
 	//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
 	// Transpose instead?
@@ -138,8 +140,8 @@ export namespace pulse
 	Matrix<T>::Matrix(std::vector<T> values, Dimensions shape)
 		: data(values)
 		, dims(shape)
-	{
-		this->data.shrink_to_fit(); //Data's size will not change
+	{ 
+		this->data.shrink_to_fit(); //Data's size will not change 
 	}
 
 	template <typename T>
@@ -249,8 +251,10 @@ export namespace pulse
 		return lhs;
 	}
 
+	//May make const lref....
 	template<typename T>
-	Matrix<T>& Matrix<T>::operator*=(const T& scalar)
+	template<typename U>
+	Matrix<T>& Matrix<T>::operator*=(const U& scalar)
 	{
 		for (auto it = this->data.begin(); it != this->data.end(); ++it)
 		{
@@ -261,7 +265,8 @@ export namespace pulse
 	}
 
 	template<typename T>
-	Matrix<T>& Matrix<T>::operator+=(const T& scalar)
+	template<typename U>
+	Matrix<T>& Matrix<T>::operator+=(const U& scalar)
 	{
 		for (auto it = this->data.begin(); it != this->data.end(); ++it)
 		{
@@ -271,16 +276,15 @@ export namespace pulse
 		return *this;
 	}
 
-
-	template<typename T>
-	Matrix<T> operator*(const T& scalar, Matrix<T> vector)
+	template<typename T, typename U>
+	Matrix<T> operator*(const U& scalar, Matrix<T> vector)
 	{
 		vector *= scalar;
 		return vector;
 	}
 
-	template<typename T>
-	Matrix<T> operator+(const T& scalar, Matrix<T> vector)
+	template<typename T, typename U>
+	Matrix<T> operator+(const U& scalar, Matrix<T> vector)
 	{
 		vector += scalar;
 		return vector;

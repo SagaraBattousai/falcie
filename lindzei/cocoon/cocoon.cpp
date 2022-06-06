@@ -12,17 +12,19 @@ import lindzei;
 
 int main(void)
 {
-	//using lindzei::Federatedblock;
+	using lindzei::Federatedblock;
+	using pulse::NeuralNetwork;
+	using lindzei::NetworkUpdate;
 
-	lindzei::Federatedblock genisis  = lindzei::Federatedblock::Genisis();
+	Federatedblock genisis = Federatedblock::Genisis();
 
 	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ std::move(genisis), 32 };
 
-	lindzei::Federatedblock b1{};
+	Federatedblock b1{};
 
 	bc.Add(std::move(b1));
 
-	auto bb1 = std::move(bc.GetLast());
+	auto bb1 = bc.GetLast();
 
 	for (auto i : bb1.Hash())
 	{
@@ -31,102 +33,114 @@ int main(void)
 
 	std::cout << std::endl;
 
-	/*
-	float training_data[4][2] = { { 0.f, 0.f }, {1.f, 0.f }, { 0.f, 1.f }, { 1.f, 1.f } };
-	float *training_ptr[4] = { 	training_data[0],  training_data[1],  training_data[2],  training_data[3] };
 
-	float desired_outputs[4] = { 0.f, 1.f, 1.f, 0.f };
-	float *desired_ptr[4] = { &desired_outputs[0],  &desired_outputs[1],  &desired_outputs[2],  &desired_outputs[3]};
 
-	float *training_data1[2] = { training_ptr[0], training_ptr[1] };
+	const std::vector<std::vector<float>> training_data{
+		{ 0.f, 0.f }, {1.f, 0.f }, { 0.f, 1.f }, { 1.f, 1.f }
+	};
 
-	float *training_data2[2] = { training_ptr[2], training_ptr[3] };
+	const std::vector<std::vector<float>> desired_outputs{
+		{ 0.f }, { 1.f }, { 1.f }, { 0.f }
+	};
 
-	float *desired_outputs1[2] = { desired_ptr[0], desired_ptr[1] };
-	float *desired_outputs2[2] = { desired_ptr[2], desired_ptr[3] };
+	const std::vector<std::vector<float>> training1{ { 0.f, 0.f }, {1.f, 0.f } };
 
+
+	const std::vector<std::vector<float>> desired1{ { 0.f }, { 1.f } };
+
+	const std::vector<std::vector<float>> training2{ { 0.f, 1.f }, { 1.f, 1.f } };
+
+
+	const std::vector<std::vector<float>> desired2{ { 1.f }, { 0.f } };
 
 	float learning_rate = 0.9;
 
 	int max_epochs = 50000;
 	float target_error = 0.00001;
 
-	int64_t no_inputs = 2;
-	int64_t no_output = 1;
-
-	int64_t no_layers = 2;
-	int64_t nd[2] = { 3, 1 };
-
-	int64_t no_training_data = 2; //each
-	int64_t network_dims[3] = { 2, 3, 1 };
+	std::vector<std::int64_t> network_structure{ 2, 3, 1 };
 
 	//unsigned seed = 0x45000000;
 
-	neural_network_t *network1 = 
-		new_neural_network(no_inputs, no_layers, nd,
-			&act, &dact, learning_rate, NULL);
+	NeuralNetwork network1{
+		network_structure,
+		&pulse::sigmoid, &pulse::delta_sigmoid,
+		learning_rate };// , seed };
 
-	neural_network_t *network2 = new_neural_network(no_inputs, no_layers, nd,
-		&act, &dact, learning_rate, NULL);
+	NeuralNetwork network2{
+		network_structure,
+		&pulse::sigmoid, &pulse::delta_sigmoid,
+		learning_rate };// , seed };
 
-	neural_network_t *network_control = new_neural_network(no_inputs, no_layers,
-		nd, &act, &dact, learning_rate, NULL);
+	NeuralNetwork network_control{
+		network_structure,
+		&pulse::sigmoid, &pulse::delta_sigmoid,
+		learning_rate }; // , seed };
 
-	float **weights1;
-	float **weights2;
+	pulse::NetworkWeights weights1;
+	pulse::NetworkWeights weights2;
 
-	network_update_t *combined_update;
 
-	federatedblock_t b2;
+	NetworkUpdate combined_update;
 
-	for (int i = 0; i < 500; i++)
+	Federatedblock b2{};
+
+	for (int i = 0; i < 50000; i++)
 	{
-		train_network(desired_outputs1, training_data1, no_training_data, 1, network1);
-		train_network(desired_outputs2, training_data2, no_training_data, 1, network2);
-		train_network(desired_ptr, training_ptr, 4, 1, network_control);
+		pulse::TrainNetwork(network1, desired1, training1, 1);
 
-		get_weight(network1, &weights1);
-		get_weight(network2, &weights2);
+		pulse::TrainNetwork(network2, desired2, training2, 1);
 
-		network_update_t network1_update = {
-			.num_layers = no_layers,
-			.network_dims = network_dims,
+		pulse::TrainNetwork(network_control, desired_outputs, training_data, 1);
+
+		weights1 = network1.GetWeights();
+		weights2 = network2.GetWeights();
+
+		NetworkUpdate network1_update
+		{
+			.network_structure = network_structure,
 			.delta_weights = weights1,
-			.examples_seen = no_training_data
+			.examples_seen = 2
 		};
 
-		network_update_t network2_update = {
-			.num_layers = no_layers,
-			.network_dims = network_dims,
+		NetworkUpdate network2_update
+		{
+			.network_structure = network_structure,
 			.delta_weights = weights2,
-			.examples_seen = no_training_data
+			.examples_seen = 2
 		};
 
-		b2 = new_federated_block();
+		Federatedblock b2{};
 
-		add_local_update(&b2, &network1_update);
-		add_local_update(&b2, &network2_update);
+		b2.AddLocalUpdate(std::move(network1_update));
+		b2.AddLocalUpdate(std::move(network2_update));
 
-		add(blockchain, b2);
+		bc.Add(std::move(b2));
+		auto last = bc.GetLast();
 
-		federatedblock_t last = get_last(blockchain);
+		auto gu = last.GetGlobalUpdate();
 
-		get_global_update(&last, &combined_update);
-
-		set_weight(network1, combined_update->delta_weights);
-		set_weight(network2, combined_update->delta_weights);
+		network1.SetWeights(gu.delta_weights);
+		network2.SetWeights(gu.delta_weights);
 
 	}
 
-	printf("\nNetwork 1 on all data:\n");
-	print_inferencing_results(network1, training_ptr, 4,
-		2, desired_ptr, 1);
+	std::cout << "\nNetwork 1 on all data:\n";
 
-	printf("\nControl Network on all data:\n");
-	print_inferencing_results(network_control, training_ptr, 4,
-		2, desired_ptr, 1);
+	pulse::print_inferencing_results(network1, training_data, desired_outputs);
 
-		*/
+
+	std::cout << "\nNetwork control on all data:\n";
+
+	pulse::print_inferencing_results(network_control, training_data, desired_outputs);
+
+
+	//print_inferencing_results(network1, training_ptr, 4,
+	//	2, desired_ptr, 1);
+
+	//printf("\nControl Network on all data:\n");
+	//print_inferencing_results(network_control, training_ptr, 4,
+	//	2, desired_ptr, 1);
 
 	return 0;
 }

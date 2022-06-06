@@ -3,16 +3,15 @@ module;
 #include <cstdint>
 #include <algorithm>
 #include <random>
-//#include <iostream>
+#include <iostream>
 
-#include <array>
-#include <vector>
-#include <functional>
+
 
 export module anima:neural_network;
 
-//import <array>;
-//import <vector>;
+import <array>;
+import <vector>;
+import <functional>;
 
 import :matrix;
 import :random;
@@ -124,10 +123,13 @@ export namespace pulse
 			std::uint_fast32_t seed = std::random_device{}());
 
 		/** Returns the number of layers in the network(minus the input layer) */
-		constexpr std::vector<std::int64_t>::size_type NumberOfLayers();
+		constexpr inline std::vector<std::int64_t>::size_type NumberOfLayers()
+		{
+			return this->network_structure.size() - 1;
+		}
 
 		//constexpr ??? NetworkWeights& GetWeights() const;
-		const NetworkWeights& GetWeights() const;
+		NetworkWeights GetWeights() const;
 
 		void SetWeights(NetworkWeights weights);
 
@@ -196,7 +198,7 @@ export namespace pulse
 		const std::int64_t epochs,
 		float target_err,
 		ErrorEnergy err_func
-		);
+	);
 
 	constexpr std::int64_t NeuralNetwork::InputSize() const
 	{
@@ -210,15 +212,131 @@ export namespace pulse
 	}
 
 
-	NetworkStats TrainNetworkWithStats(
-		NeuralNetwork& network,
-		const std::vector<std::vector<float>>& desired,
-		const std::vector<std::vector<float>>& input,
-		const std::int64_t epochs,
-		float target_err,
-		ErrorEnergy err_func = &TotalSquaredErrorEnergy)
+	void NeuralNetwork::Feedforward(const std::vector<float>& input)
 	{
+		anima::ResetTracking(this->tracking);
+		//std::int64_t number_of_layers = (this->network_structure[0] + 1); // +1 for bias
+		//^^ Would never have worked, what the heck is this
 
+		//Assert: input.size() == this->network_structure[0]
+
+		for (auto it = input.begin(); it != input.end(); ++it)
+		{
+			//Remember tracking already has the bias term added in
+			this->tracking.layers[0].push_back(*it);
+			this->tracking.pre_activation_layers[0].push_back(*it);
+		}
+
+		for (std::int64_t i = 0; i < this->NumberOfLayers(); i++)
+		{
+			//TODO: Check this doesn't die when leaving the function (or does = call copy constructor ?
+			this->tracking.pre_activation_layers[i + 1] =
+				(Matrix{ this->tracking.layers[i] } * (this->weights[i])).Data();
+
+			for (std::int64_t j = 0; j < this->tracking.pre_activation_layers[i + 1].size(); j++)
+			{
+				this->tracking.layers[i + 1].push_back(
+					this->activation(this->tracking.pre_activation_layers[i + 1][j])
+				);
+			}
+		}
+	}
+
+	NetworkWeights NeuralNetwork::Backpropagation(const std::vector<float>& desired)
+	{
+		NetworkWeights deltaWeights{};
+		deltaWeights.reserve(this->network_structure.size() - 1);
+
+
+		std::int64_t largest = *std::max_element(
+			this->network_structure.begin(),
+			this->network_structure.end()
+		);
+
+		std::vector<float> delta{};
+		std::vector<float> nextDelta{};
+		std::vector<float> delta_update{};
+		delta.reserve(largest);
+		nextDelta.reserve(largest);
+		delta_update.reserve(largest);
+
+		//TODO: could use iterators
+		std::vector<float> pre_activation_output = this->tracking.pre_activation_layers.back();
+		std::vector<float> output = this->tracking.layers.back();
+
+		for (std::int64_t i = 0; i < this->network_structure.back(); i++)
+		{
+			// Alpha * output[i] * (1 - output[i]) * (desired[i] - output[i]);
+			delta.push_back(//2 * output[i] * (1 - output[i]) * (desired[i] - output[i]));
+				this->delta_activation(pre_activation_output[i]) * (desired[i] - output[i])
+			);
+		}
+
+		// The neuron count for the next layer, which is actually
+		// the previous layer in the network, as we are backtracking.
+		// i.e. back_neurons <- curr_neurons.
+		std::int64_t back_neuron_count;
+		std::int64_t curr_neuron_count;
+		std::int64_t weight_size;
+
+		for (std::int64_t j = this->NumberOfLayers(); j > 0; j--)
+		{
+			curr_neuron_count = this->network_structure[j];
+
+			back_neuron_count = this->network_structure[j - 1];
+
+			if (j == 1)
+			{
+				back_neuron_count += 1; //If network_structure is internal could add 1 in constructor.
+			}
+
+			weight_size = (back_neuron_count * curr_neuron_count);
+
+			//weightupdate = curlayers[l] * pdelta.T
+			deltaWeights.insert(deltaWeights.begin(), 
+				Broadcast<float, float, float, std::multiplies<float>>
+				(this->tracking.layers[j - 1], delta, std::multiplies<float>())
+			);
+
+			//learning_rate * weight_update
+			//[0] because we keep inserting at the head of the vector
+			deltaWeights[0] *= this->learning_rate;
+
+			if (j != 1) //Because there would be no need to calculte delta @j==1 aka last iter
+			{
+
+				//delta=aconst*curlayers[l]*(1-curlayers[l])*(np.dot(delta,weights[l]));
+				for (std::int64_t i = 0; i < back_neuron_count; i++)
+				{
+					//  = Alpha * output[i] * (1 - output[i])
+					nextDelta.push_back(
+						// 2 * this->tracking.layers[j - 1][i] *
+						//	(1 - this->tracking.layers[j -1][i]));
+						this->delta_activation(
+							this->tracking.pre_activation_layers[j - 1][i]
+						)
+					);
+				}
+
+				delta_update = this->weights[j - 1] * delta;
+
+				//TODO: Probably don't need
+				delta.clear();
+
+				delta = nextDelta * delta_update;
+
+				nextDelta.clear();
+				delta_update.clear();
+			}
+		}
+		return deltaWeights;
+	}
+
+
+	NetworkStats TrainNetworkWithStats(NeuralNetwork& network,
+		const std::vector<std::vector<float>>& desired, const std::vector<std::vector<float>>& input,
+		const std::int64_t epochs, float target_err, ErrorEnergy err_func = &TotalSquaredErrorEnergy)
+	{
 		NetworkStats stats{ .epochs_taken = 0, .average_network_error = 1.f };
 
 		while (stats.average_network_error > target_err && stats.epochs_taken < epochs)
@@ -231,7 +349,6 @@ export namespace pulse
 
 				stats.average_network_error += err_func(output, desired[j]);
 			}
-
 			stats.average_network_error /= input.size();
 
 			stats.epochs_taken++;
@@ -239,66 +356,39 @@ export namespace pulse
 		return stats;
 	}
 
-	/*
-		//TODO: decide wheter to change to string.
-		void print_inferencing_results(neural_network_t * network,
-			float **training_data, std::int64_t training_data_size, std::int64_t training_data_dimension,
-			float **desired, std::int64_t desired_dimension)
+	//TODO: decide wheter to change to string.
+	void print_inferencing_results(NeuralNetwork& network,
+		const std::vector<std::vector<float>>& input, const std::vector<std::vector<float>>& desired)
+	{
+		std::cout << "Inferencing results:\n--------------------\n";
+
+		for (std::int64_t i = 0; i < input.size(); i++)
 		{
-			//printf("no epochs: %i averaged error: %f\n", epoch, avg_error);
+			network.Feedforward(input[i]);
+			std::vector<float> output = network.Output();
 
-			//printf("--------------------------------\n");
-			printf("Inferencing results:\n--------------------\n");
+			std::cout << "input: ( ";
 
-			float *output = NULL;
-
-			for (std::int64_t j = 0; j < training_data_size; j++)
+			for (std::int64_t j = 0; j < input[i].size() - 1; j++)
 			{
-				set_input(network, training_data[j]);
-				float *desired_output = desired[j];
-
-				feedforward(network);
-
-				get_network_output(network, &output);
-
-				printf("input: ( ");
-
-				std::int64_t all_but_last_training_dim = training_data_dimension - 1;
-				for (std::int64_t k = 0; k < all_but_last_training_dim; k++)
-				{
-					printf("%f, ", training_data[j][k]);
-				}
-
-				printf("%f ) desired: ( ", training_data[j][all_but_last_training_dim]);
-
-				std::int64_t all_but_last_output_dim = desired_dimension - 1;
-				for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
-				{
-					printf("%f, ", desired[j][k]);
-				}
-
-				printf("%f ) -> Network Output : ( ", desired[j][all_but_last_output_dim]);
-
-				for (std::int64_t k = 0; k < all_but_last_output_dim; k++)
-				{
-					printf("%f, ", output[k]);
-				}
-
-				printf("%f )\n", output[all_but_last_output_dim]);
-
-				free(output);
+				std::cout << input[i][j] << ", ";
 			}
+
+			std::cout << input[i].back() << " ) desired: ( ";
+
+			for (std::int64_t j = 0; j < desired[i].size() - 1; j++)
+			{
+				std::cout << desired[i][j] << ", ";
+			}
+
+			std::cout << desired[i].back() << " ) -> Network Output : ( ";
+
+			for (std::int64_t j = 0; j < output.size() - 1; j++)
+			{
+				std::cout << output[j] << ", ";
+			}
+
+			std::cout << output.back() << " )" << std::endl;
 		}
 	}
-	*/
-
-
-
-
-
-
-
-
-
-
 } //namespace pulse
