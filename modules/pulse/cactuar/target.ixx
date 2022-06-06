@@ -27,6 +27,7 @@ export namespace pulse
 	class Target
 	{
 	public:
+		constexpr Target();
 
 		constexpr Target(std::uint32_t);
 
@@ -51,6 +52,7 @@ export namespace pulse
 		const std::uint32_t target;
 
 	};
+	constexpr Target::Target() : target(Target::BaseDifficulty) {}
 
 	constexpr Target::Target(std::uint32_t target) : target(target) {}
 

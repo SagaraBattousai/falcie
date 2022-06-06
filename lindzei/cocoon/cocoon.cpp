@@ -4,6 +4,7 @@
 
 
 import <vector>;
+import <utility>;
 
 import pulse;
 import lindzei;
@@ -11,28 +12,26 @@ import lindzei;
 
 int main(void)
 {
-	lindzei::Federatedblock genisis{};
+	//using lindzei::Federatedblock;
 
-	genisis.Hash();
+	lindzei::Federatedblock genisis  = lindzei::Federatedblock::Genisis();
 
-	//std::uint32_t tb = 0x20FFFFFF;
+	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ std::move(genisis), 32 };
 
-	pulse::Target t(0x20FFFFFF);
+	lindzei::Federatedblock b1{};
 
-	for (auto& i: t.Expand() )
+	bc.Add(std::move(b1));
+
+	auto bb1 = std::move(bc.GetLast());
+
+	for (auto i : bb1.Hash())
+	{
 		std::cout << std::hex << (int)i;
+	}
 
 	std::cout << std::endl;
 
-
-
 	/*
-	federated_blockchain_t *blockchain = new_federated_blockchain(genisis);
-
-	federatedblock_t b1 = new_federated_block();
-
-	add(blockchain, b1);
-
 	float training_data[4][2] = { { 0.f, 0.f }, {1.f, 0.f }, { 0.f, 1.f }, { 1.f, 1.f } };
 	float *training_ptr[4] = { 	training_data[0],  training_data[1],  training_data[2],  training_data[3] };
 

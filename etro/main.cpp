@@ -19,6 +19,7 @@ import pulse;
 
 int main(void)
 {
+	/*
 	using hash_type = std::vector<std::byte>;
 
 	pulse::Blockheader b{};
@@ -58,6 +59,9 @@ int main(void)
 
 
 	std::cout << std::endl;
+
+	*/
+
 
 	return 0;
 

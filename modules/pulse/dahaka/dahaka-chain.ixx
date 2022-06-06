@@ -6,38 +6,41 @@ module;
 
 export module dahaka:chain;
 
-//How to check if std::uintptr_t is defined?
+import <array>;
 
 export namespace pulse
 {
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	class Chain
 	{
 	public:
 		Chain();
-		virtual ~Chain();
-		void Add(T elem);
-		T GetLast();
+
+		//~Chain();
+
+		void Add(T&& elem);
+
+		const T& GetLast();
 
 	private:
-		typedef struct Node
+		struct Node
 		{
 			std::uintptr_t link;
 			//No point using std::array as I have to keep
 			//track of the current number of elements anyway
-			T elements[UnrolledElems];
-			std::size_t elementCount;
+			std::array<T, UnrolledElems> elements;
+			std::int64_t elementCount;
 
 			Node();
 			explicit Node(std::uintptr_t link);
-			Node(std::uintptr_t link, std::size_t elementCount);
-		} Node_t;
+			Node(std::uintptr_t link, std::int64_t elementCount);
+		};
 
-		Node_t* addNewNode();
+		Node* addNewNode();
 
-		Node_t* head;
-		Node_t* tail;
+		Node* head;
+		Node* tail;
 
 	public:
 		enum class ChainIteratorStartingPoint : unsigned char { Head, Tail };
@@ -55,13 +58,15 @@ export namespace pulse
 			enum class CurrentNodeDirection : unsigned char { Forward, Backward };
 			ChainIterator(const Chain<T, UnrolledElems>& chain); //< private constructor for Chain to use
 
-			Node_t* node;
+			Node* node;
 			std::uintptr_t lastVisitedNode;
-			std::size_t unwrappedIndex;
+			std::int64_t unwrappedIndex;
 			CurrentNodeDirection dir;
 
 		public:
-			ChainIterator(const Chain<T, UnrolledElems>& chain, ChainIteratorStartingPoint startingPoint);
+			ChainIterator(const Chain<T, UnrolledElems>& chain,
+				ChainIteratorStartingPoint startingPoint);
+
 			ChainIterator& operator++();
 			ChainIterator operator++(int);
 			ChainIterator& operator--();
@@ -75,16 +80,18 @@ export namespace pulse
 		ChainIterator end();
 	};
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::Chain()
 	{
-		Node_t* node = new Node_t();
+		Node* node = new Node();
 
 		this->head = node;
 		this->tail = node;
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	//Its worng I just cant remember why
+	/*
+	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::~Chain()
 	{
 		//Semi Safety check
@@ -96,56 +103,57 @@ export namespace pulse
 		//Head and tail must be deleted separatly (aka, outside of the loop)
 		//Might not be the best/most elegant solution but meh, needs must and all.
 
-		Node_t* node = this->head;
+		Node* node = this->head;
 		std::uintptr_t prevAddr = reinterpret_cast<std::uintptr_t>(node);
 		std::uintptr_t nextAddr = prevAddr ^ node->link;
-	std:uintptr_t tmp;
+
+		std:uintptr_t tmp;
 
 		delete node; //< Delete Head
-		node = reinterpret_cast<Node_t*>(nextAddr); //< First node that isn't head
+		node = reinterpret_cast<Node*>(nextAddr); //< First node that isn't head
 
-		while (node != this->tail) {
+		while (node != this->tail)
+		{
 			tmp = prevAddr;
 			prevAddr = nextAddr;
 			nextAddr = tmp ^ node->link;
 
 			delete node;
-			node = reinterpret_cast<Node_t*>(nextAddr);
+			node = reinterpret_cast<Node*>(nextAddr);
 		}
 		delete node; //< Delete Tail
 		//Shouldn't need to set head and tail to nullptr since object is dead/deleted
 	}
-
-	template<typename T, std::size_t UnrolledElems>
-	void Chain<T, UnrolledElems>::Add(T elem)
+	*/
+	template<typename T, std::int64_t UnrolledElems>
+	void Chain<T, UnrolledElems>::Add(T&& elem)
 	{
-		Node_t* node = this->tail;
+		Node* node = this->tail;
 
 		if (node->elementCount == UnrolledElems)
 		{
 			node = this->addNewNode();
 		}
 
-		node->elements[node->elementCount] = elem;
+		node->elements[node->elementCount] = std::forward<T>(elem);
 		node->elementCount++;
 
 	}
 
-	template<typename T, std::size_t UnrolledElems>
-	T Chain<T, UnrolledElems>::GetLast()
+	template<typename T, std::int64_t UnrolledElems>
+	const T& Chain<T, UnrolledElems>::GetLast()
 	{
-		Node_t* last = this->tail;
+		Node* last = this->tail;
 		return last->elements[last->elementCount - 1];
-
 	}
 
-	template<typename T, std::size_t UnrolledElems>
-	typename Chain<T, UnrolledElems>::Node_t* Chain<T, UnrolledElems>::addNewNode()
+	template<typename T, std::int64_t UnrolledElems>
+	typename Chain<T, UnrolledElems>::Node* Chain<T, UnrolledElems>::addNewNode()
 	{
-		Node_t* prev = this->tail;
+		Node* prev = this->tail;
 		std::uintptr_t prev_addr = reinterpret_cast<std::uintptr_t>(prev);
 
-		Node_t* node = new Node_t(prev_addr);
+		Node* node = new Node(prev_addr);
 
 		prev->link ^= reinterpret_cast<std::uintptr_t>(node);
 
@@ -154,37 +162,40 @@ export namespace pulse
 		return node;
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::Node::Node()
 		: link(reinterpret_cast<std::uintptr_t>(this))
 		, elementCount(0)
-	{}
+	{
+	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::Node::Node(std::uintptr_t link)
 		: link(link)
 		, elementCount(0)
-	{}
+	{
+	}
 
-	template<typename T, std::size_t UnrolledElems>
-	Chain<T, UnrolledElems>::Node::Node(std::uintptr_t link, std::size_t elementCount)
+	template<typename T, std::int64_t UnrolledElems>
+	Chain<T, UnrolledElems>::Node::Node(std::uintptr_t link, std::int64_t elementCount)
 		: link(link)
 		, elementCount(elementCount)
-	{}
+	{
+	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::begin()
 	{
 		return ChainIterator(*this, ChainIteratorStartingPoint::Head);
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::end()
 	{
 		return ChainIterator(*this);
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::ChainIterator::ChainIterator(const Chain<T, UnrolledElems>& chain, ChainIteratorStartingPoint startingPoint)
 	{
 		switch (startingPoint)
@@ -207,21 +218,22 @@ export namespace pulse
 		}
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::ChainIterator::ChainIterator(const Chain<T, UnrolledElems>& chain)
 		: node(chain.tail)
 		, lastVisitedNode(reinterpret_cast<std::uintptr_t>(chain.tail))
 		, unwrappedIndex(chain.tail->elementCount)
 		, dir(CurrentNodeDirection::Backward)
-	{}
+	{
+	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	typename Chain<T, UnrolledElems>::ChainIterator& Chain<T, UnrolledElems>::ChainIterator::operator++()
 	{
 		//TODO: Do the increment here
 
 		//First see if we're still within unwrapped node
-		std::size_t nextIndex = this->unwrappedIndex + 1;
+		std::int64_t nextIndex = this->unwrappedIndex + 1;
 		if (nextIndex < this->node->elementCount)
 		{
 			this->unwrappedIndex = nextIndex;
@@ -253,7 +265,7 @@ export namespace pulse
 				break;
 			}
 			this->lastVisitedNode = reinterpret_cast<std::uintptr_t>(this->node);
-			this->node = reinterpret_cast<Node_t*>(nextAddr);
+			this->node = reinterpret_cast<Node*>(nextAddr);
 			this->unwrappedIndex = 0;
 		}
 
@@ -261,7 +273,7 @@ export namespace pulse
 		return *this;
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::ChainIterator::operator++(int unused)
 	{
 		auto tmp = *this;
@@ -269,7 +281,7 @@ export namespace pulse
 		return tmp;
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	typename Chain<T, UnrolledElems>::ChainIterator& Chain<T, UnrolledElems>::ChainIterator::operator--()
 	{
 		//TODO: Do the decrement here
@@ -296,14 +308,14 @@ export namespace pulse
 				break;
 			}
 			this->lastVisitedNode = reinterpret_cast<std::uintptr_t>(this->node);
-			this->node = reinterpret_cast<Node_t*>(nextAddr);
+			this->node = reinterpret_cast<Node*>(nextAddr);
 			this->unwrappedIndex = this->node->elementCount - 1;
 		}
 
 		return *this;
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	typename Chain<T, UnrolledElems>::ChainIterator Chain<T, UnrolledElems>::ChainIterator::operator--(int)
 	{
 		auto tmp = *this;
@@ -311,7 +323,7 @@ export namespace pulse
 		return tmp;
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	bool Chain<T, UnrolledElems>::ChainIterator::operator==(ChainIterator other) const
 	{
 		//Note, direction doesn't matter for equality, nor does last Visited Node
@@ -319,13 +331,13 @@ export namespace pulse
 		return (this->node == other.node) && (this->unwrappedIndex == other.unwrappedIndex);
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	bool Chain<T, UnrolledElems>::ChainIterator::operator!=(ChainIterator other) const
 	{
 		return !(operator==(other));
 	}
 
-	template<typename T, std::size_t UnrolledElems>
+	template<typename T, std::int64_t UnrolledElems>
 	T& Chain<T, UnrolledElems>::ChainIterator::operator*()
 	{
 		return this->node->elements[this->unwrappedIndex];

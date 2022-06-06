@@ -1,71 +1,104 @@
 module;
 
 #include <cstdint>
-#include <cstring>
+#include <cstddef>
 
 export module cactuar:blockheader;
 
 import <vector>;
-//import <functional>;
-//import <memory>;
+import <algorithm>;
+import <utility>;
 
 import :block;
 import :crypto;
+import :encoding;
 import :target;
 
 export namespace pulse
 {
-	class Blockheader : public Block
+	struct Blockheader
 	{
 	public:
-
-		Blockheader(std::uint32_t = 0x01, std::uint32_t = 0x21000000, 
-			HashAlgorithm = HashAlgorithm::SHA256);
-
-		Blockheader(BlockHashFunction, std::uint32_t = 0x01, 
-			std::uint32_t = 0x21000000, HashAlgorithm = HashAlgorithm::SHA256);
-
-		static Blockheader Genisis(std::uint32_t = 0x01, HashAlgorithm = HashAlgorithm::SHA256);
-
-		static Blockheader Genisis(BlockHashFunction hashfunc,
-			std::uint32_t = 0x01, HashAlgorithm = HashAlgorithm::SHA256);
-
-		//Good candidate for inline as just a function call
-		virtual inline blockhash_type Hash() const override 
-		{ return this->hashfunc(hash_algo, *this); };
-
-		virtual const blockhash_type& PrevHash() const override
-		{ return this->prev_hash; };
-
-		virtual void Mine(const blockhash_type&& prev_hash) override;
-
-		virtual std::vector<std::byte> State() const override;
-
-	private:
-
-		Blockheader(BlockHashFunction, 
-			uint32_t, int64_t&&, 
-			blockhash_type&&, blockhash_type&&, 
-			uint32_t&&, uint32_t&&, HashAlgorithm);
-
-		Block::BlockHashFunction hashfunc;
-		HashAlgorithm hash_algo;
-
-		uint32_t version;
-		int64_t timestamp;
-		blockhash_type prev_hash;
-		blockhash_type transaction_hash;
+		std::uint32_t version;
+		std::int64_t timestamp;
+		std::vector<std::byte> prev_hash;
+		std::vector<std::byte> transaction_hash;
 		Target target;
-		uint32_t nonce;
+		std::uint32_t nonce;
 
-		constexpr const int StateSize() const
-		{
-			return sizeof(uint32_t) + sizeof(int64_t) + (2 * AsHashSize(this->hash_algo)) +
-				sizeof(uint32_t) + sizeof(uint32_t);
-		};
+		//I hate giant constructors but somewhat needed for std::make_unique
+		constexpr Blockheader(
+			std::uint32_t version = 0x01,
+			std::int64_t timestamp = -1,
+			std::vector<std::byte> prev_hash = std::vector<std::byte>{},
+			std::vector<std::byte> transaction_hash = std::vector<std::byte>{},
+			Target target = {},
+			std::uint32_t nonce = 0);
 
-		//static constexpr 
+		constexpr Blockheader(Blockheader&&);
+
+		//constexpr 
+		static Blockheader Genisis(HashAlgorithm hash_algo, std::uint32_t version = 0x01);
 	};
 
-} //namespace pulse
+	constexpr Blockheader::Blockheader(std::uint32_t version, std::int64_t timestamp,
+		std::vector<std::byte> prev_hash, std::vector<std::byte> transaction_hash,
+		Target target, std::uint32_t nonce)
+		: version{ version }
+		, timestamp{ timestamp }
+		, prev_hash{ prev_hash }
+		, transaction_hash{ transaction_hash }
+		, target{ target }
+		, nonce{ nonce }
+	{ }
 
+	constexpr Blockheader::Blockheader(Blockheader&& rhs)
+		: version{ std::move(rhs.version) }
+		, timestamp{ std::move(rhs.timestamp) }
+		, prev_hash{ std::move(rhs.prev_hash) }
+		, transaction_hash{ std::move(rhs.transaction_hash) }
+		, target{ std::move(rhs.target) }
+		, nonce{ std::move(rhs.nonce) }
+	{ }
+
+
+	//Change later when you have time to call constructor
+	//constexpr 
+	Blockheader Blockheader::Genisis(HashAlgorithm hash_algo, std::uint32_t version)
+	{
+		return Blockheader{
+			version,
+			Block::GenerateTimestamp(),
+			std::vector<std::byte>(AsHashSize(hash_algo)),
+			std::vector<std::byte>(AsHashSize(hash_algo)),
+			0x00000000,
+			0
+		};
+	}
+
+
+	constexpr const int BlockheaderSize(HashAlgorithm algo)
+	{
+		//return sizeof(Blockheader) + 2 * (AsHashSize(algo) - sizeof(std::vector<std::byte>));
+		return 20 + 2 * AsHashSize(algo);
+		//^^ for some reason I was getting 88 as sizeof(Blockheader) instead of 84
+	}
+
+	std::vector<std::byte> BlockheaderState(const Blockheader* const header, HashAlgorithm algo)
+	{
+		std::vector<std::byte> bytes(BlockheaderSize(algo));
+		auto it = bytes.begin();
+
+		//it = std::copy_n(reinterpret_cast<const std::byte*>(&header.version), sizeof(uint32_t), it);
+		it = CopyDataAsBytes(header->version, it);
+		it = CopyDataAsBytes(header->timestamp, it);
+		//TODO: try overloading with vector or pointer?
+		it = std::copy_n(reinterpret_cast<const std::byte*>(header->prev_hash.data()), AsHashSize(algo), it);
+		it = std::copy_n(reinterpret_cast<const std::byte*>(header->transaction_hash.data()), AsHashSize(algo), it);
+		it = CopyDataAsBytes(header->target, it);
+		it = CopyDataAsBytes(header->nonce, it);
+
+		return bytes;
+	}
+
+} //namespace pulse

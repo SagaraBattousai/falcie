@@ -85,4 +85,13 @@ export namespace pulse
 			std::reverse(data.begin(), data.end());
 		}
 	}
+
+	//std::vector<std::byte>::iterator OutIT should have underlying std::byte
+	template< typename T, typename OutputIt >
+	constexpr OutputIt CopyDataAsBytes(const T& data, OutputIt result)
+	{
+		return std::copy_n(reinterpret_cast<const std::byte*>(&data), sizeof(T), result);
+	}
+
+
 } //namespace pulse

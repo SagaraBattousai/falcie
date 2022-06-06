@@ -3,117 +3,106 @@ module;
 #include <cstdint>
 #include <cstring>
 
+
 export module dahaka:blockchain;
 
-template<typename Block, typename HashAlgorithm>
-using MineBlock = void(*)(Block *const, const HashAlgorithm* const);
+import <vector>;
+import <concepts>;
+import <utility>;
 
-template<typename Block, typename HashAlgorithm>
-using HashBlock = HashAlgorithm * (*)(const Block *const);
+import :chain;
 
-template<typename Block>
-using GetBlockTarget = uint32_t(*)(const Block* const);
+export namespace pulse
+{
+	template<typename T>//, typename U, typename V>
+	concept BlockchainAddable = requires (T block, 
+		const std::vector<std::byte>& l_hash, const std::vector<std::byte>&& r_hash)
+		//, U hash_type, V target_type)
+	{
+		{ block.Mine(std::move(r_hash ) ) };
+		{ block.PrevHash() } -> std::convertible_to<const std::vector<std::byte>&>;
+		{ block.Hash() } -> std::convertible_to<std::vector<std::byte>>;
+		{ block.CompareWithTarget(l_hash) } -> std::convertible_to<bool>;
+	};
 
-template<typename HashAlgorithm>
-using CheckHashTarget = int(*)(const uint32_t* const, const HashAlgorithm* const);
+	/*
+	//template<typename Block, typename HashAlgorithm>
+	//using MineBlock = void(*)(Block *const, const HashAlgorithm* const);
 
-template<typename T, std::size_t UnrolledElems>
-class Chain;
+	//template<typename Block, typename HashAlgorithm>
+	//using HashBlock = HashAlgorithm * (*)(const Block *const);
 
-export namespace pulse {
+	//template<typename Block>
+	//using GetBlockTarget = uint32_t(*)(const Block* const);
 
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
+	//template<typename HashAlgorithm>
+	//using CheckHashTarget = int(*)(const uint32_t* const, const HashAlgorithm* const);
+	*/
+
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
 	class Blockchain
 	{
 	public:
-		Blockchain(Block genisis,
-			MineBlock<Block, HashAlgorithm> mine,
-			HashBlock<Block, HashAlgorithm> hash,
-			HashBlock<Block, HashAlgorithm> previous_hash,
-			GetBlockTarget<Block> target,
-			CheckHashTarget<HashAlgorithm> target_check,
-			int hash_size);
+		Blockchain(T&& genisis, const int hash_size);
 
-		void Add(Block elem);
+		void Add(T&& elem);
+
 		bool Validate();
-		Block GetLast();
-		typename Chain<Block, UnrolledElems>::ChainIterator begin();
-		typename Chain<Block, UnrolledElems>::ChainIterator end();
+
+		const T& GetLast();
+
+		typename Chain<T, UnrolledElems>::ChainIterator begin();
+		typename Chain<T, UnrolledElems>::ChainIterator end();
 
 	private:
-		Chain<Block, UnrolledElems> chain;
-		MineBlock<Block, HashAlgorithm> mine;
-		HashBlock<Block, HashAlgorithm> hash;
-		HashBlock<Block, HashAlgorithm> previous_hash;
-		GetBlockTarget<Block> target;
-		CheckHashTarget<HashAlgorithm> target_check;
+		Chain<T, UnrolledElems> chain;
 
-		int hash_size;
+		const int hash_size;
 	};
 
 
 	//Might want an additional temp param for difficulty change ... thinggy ...
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
-	Blockchain<Block, HashAlgorithm, UnrolledElems>::Blockchain(Block genisis,
-		MineBlock<Block, HashAlgorithm> mine,
-		HashBlock<Block, HashAlgorithm> hash,
-		HashBlock<Block, HashAlgorithm> previous_hash,
-		GetBlockTarget<Block> target,
-		CheckHashTarget<HashAlgorithm> target_check,
-		int hash_size)
-		: mine(mine)
-		, hash(hash)
-		, previous_hash(previous_hash)
-		, target(target)
-		, target_check(target_check)
+	//I (Think I) Can finally use a universal ref :D (since (Some) Blocks are non copyable) 
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	Blockchain<T, UnrolledElems>::Blockchain(T&& genisis, const int hash_size)
+		: chain(Chain<T, UnrolledElems>())
 		, hash_size(hash_size)
-		, chain(Chain<Block, UnrolledElems>())
 	{
-		chain.Add(genisis);
+		this->chain.Add(std::forward<T>(genisis));
 	}
 
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
-	void Blockchain<Block, HashAlgorithm, UnrolledElems>::Add(Block elem)
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	void Blockchain<T, UnrolledElems>::Add(T&& elem)
 	{
-		Block prev = chain.GetLast();
-		unsigned char *prev_hash = this->hash(&prev);
+		const T& prev = chain.GetLast();
+		auto prev_hash = prev.Hash(); //should be a copy
 
 		//TODO:Update Difficulty
 
-		this->mine(&elem, prev_hash);
+		elem.Mine(std::move(prev_hash));
 
 		//TODO:Set everything else required on block
 
-		this->chain.Add(elem);
+		this->chain.Add(std::forward<T>(elem));
 
 	}
 
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
-	Block Blockchain<Block, HashAlgorithm, UnrolledElems>::GetLast()
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	const T& Blockchain<T, UnrolledElems>::GetLast()
 	{
 		return this->chain.GetLast();
 	}
 
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
-	bool Blockchain<Block, HashAlgorithm, UnrolledElems>::Validate()
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	bool Blockchain<T, UnrolledElems>::Validate()
 	{
-		//----------- OLD --------------------------------------------
-		// node: = blockchain.head
-		// var prevBlock, currBlock* FederatedBlock
+		//typename Chain<Block, UnrolledElems>::ChainIterator 
+		auto it = this->chain.begin();
+		++it; ///< Skip Genisis Block
 
-		// var i int = 1 //In order to skip genisis in first chain
-		//------------------------------------------------------------
-
-		typename Chain<Block, UnrolledElems>::ChainIterator it = this->chain.begin();
-		++it; //In order to skip genisis //< I prefer it++ but since I wrote both and it++ calls ++it ... 
-
-		Block prevBlock = *it;
-		Block currBlock;
-		/*
-		* HashBlock<Block> hash;
-		* HashBlock<Block> prev_hash;
-		* GetBlockTarget<Block> target;
-		*/
+		T prevBlock = *it;
+		T currBlock;
+		
 		auto end = this->chain.end();
 		while (++it != end) //< Is it acceptable to inc in the while? Is that defined behavouir?
 		{
@@ -124,14 +113,25 @@ export namespace pulse {
 			// &&
 			//currentBlock'sHash < currentBlocks Target
 
-			uint32_t test = this->target(&currBlock);
+			//auto test = currBlock.Target();
 
-			if (!(
-				std::memcmp(this->hash(&prevBlock),
+			/*
+			std::vector<std::byte> difficulty_array = this->header->target.Expand();
+
+		blockhash_type currHash = this->Hash();
+
+		while (currHash > difficulty_array)
+			*/
+
+			/*
+			std::memcmp(this->hash(&prevBlock),
 					this->previous_hash(&currBlock),
 					sizeof(unsigned char) * this->hash_size) == 0
-				&&
-				this->target_check(&test, this->hash(&currBlock)) < 0
+			*/
+
+			if (!( 
+				prevBlock.Hash() == currBlock.Hash() &&
+				currBlock.CompareWithTarget(currBlock.Hash())
 				))
 			{
 				return false;
@@ -143,19 +143,16 @@ export namespace pulse {
 	}
 
 
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
-	typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashAlgorithm, UnrolledElems>::begin()
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	typename Chain<T, UnrolledElems>::ChainIterator Blockchain<T, UnrolledElems>::begin()
 	{
 		return this->chain.begin();
 	}
 
-	template<typename Block, typename HashAlgorithm, std::int64_t UnrolledElems>
-	typename Chain<Block, UnrolledElems>::ChainIterator Blockchain<Block, HashAlgorithm, UnrolledElems>::end()
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	typename Chain<T, UnrolledElems>::ChainIterator Blockchain<T, UnrolledElems>::end()
 	{
 		return this->chain.end();
 	}
 
 } //namespace pulse
-
-
-

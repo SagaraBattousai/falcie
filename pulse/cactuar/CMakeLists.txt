@@ -6,7 +6,7 @@ set(CACTUAR_MODULE_ROOT "${PULSE_MODULE_ROOT}/cactuar")
 
 set(cpp_sources 
   "block.cpp"
-  "blockheader.cpp"
+  # "blockheader.cpp"
   "crypto.cpp" 
   "encoding.cpp" 
   "target.cpp"
@@ -26,7 +26,7 @@ add_library(cactuar STATIC ${cpp_sources} ${cactuar_module})
 if(MSVC)
   #Required to fix issue with MSVC Expecting a corresponding
   #.cpp and therefore looks for both *.ixx.obj and *.obj
-  add_pseudo_module_impl_objects(cactuar "cactuar.cpp")
+  add_pseudo_module_impl_objects(cactuar "cactuar.cpp" "blockheader.cpp")
   #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
 endif()
 
