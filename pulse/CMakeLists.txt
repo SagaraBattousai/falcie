@@ -4,7 +4,7 @@ set(PULSE_MODULE_ROOT "${MODULE_ROOT}/pulse")
 
 add_subdirectory(anima)
 
-#add_subdirectory(atomos)
+add_subdirectory(atomos)
 
 add_subdirectory(cactuar)
 
@@ -20,23 +20,12 @@ set(pulse_module "${PULSE_MODULE_ROOT}/pulse.ixx")
 add_library(pulse STATIC #SHARED 
   ${pulse_module})
 
-#Required to fix issue with MSVC Expecting a corresponding
-#.cpp and therefore looks for both *.ixx.obj and *.obj
-add_pseudo_module_impl_objects(pulse ${pulse_module})
+target_link_libraries(pulse PUBLIC anima atomos cactuar dahaka)
 
-
-target_link_libraries(pulse PUBLIC anima cactuar dahaka)
-
-
-set_target_properties(pulse anima cactuar dahaka PROPERTIES FOLDER Pulse)
+set_target_properties(pulse anima atomos cactuar dahaka PROPERTIES FOLDER Pulse)
 
 if(MSVC)
-  # Add module dir to help intelisense
-  # Irritatingly its global but works well and I think it's better than
-  # target_sources ?!!?
-  set_target_properties(pulse PROPERTIES 
-    VS_GLOBAL_PublicModuleDirectories 
-    "${PULSE_MODULE_ROOT};$(PublicModuleDirectories)")
+  intelisense_modules(pulse ${PULSE_MODULE_ROOT})
 endif()
 
 

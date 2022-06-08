@@ -20,7 +20,7 @@ set(orphan_module
 add_library(orphan STATIC ${orphan_module} ${cpp_sources})
 
 if(MSVC)
-  add_pseudo_module_impl_objects(orphan "orphan.cpp")
+  intelisense_modules(orphan "${ORPHAN_MODULE_ROOT}")
 endif()
 
 #Technically a user doesn't need pulse as this is built on top of pulse ?!??

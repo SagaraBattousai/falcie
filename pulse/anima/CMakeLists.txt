@@ -23,7 +23,7 @@ set(cpp_files
 add_library(anima STATIC ${anima_module} ${cpp_files})
 
 if(MSVC)
-  add_pseudo_module_impl_objects(anima "anima.cpp")
+  intelisense_modules(anima ${ANIMA_MODULE_ROOT})
 endif()
 
 if(MSVC)

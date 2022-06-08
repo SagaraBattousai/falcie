@@ -1,3 +1,5 @@
 
-export module pulse:atomos;
+export module atomos;
+
+export import :network;
 

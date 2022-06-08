@@ -19,17 +19,5 @@ set(dahaka_module
 add_library(dahaka STATIC ${dahaka_module})
   
 if(MSVC)
-  #Required to fix issue with MSVC Expecting a corresponding
-  #.cpp and therefore looks for both *.ixx.obj and *.obj
-  add_pseudo_module_impl_objects(dahaka ${dahaka_module})
-  #^^ Could've used SOURCES property/gen_expr but meh, we'll see.
-endif()
-
-if(MSVC)
-  # Add module dir to help intelisense
-  # Irritatingly its global but works well and I think it's better than
-  # target_sources ?!!?
-  set_target_properties(dahaka PROPERTIES 
-    VS_GLOBAL_PublicModuleDirectories 
-    "${DAHAKA_MODULE_ROOT};$(PublicModuleDirectories)")
+  intelisense_modules(dahaka ${DAHAKA_MODULE_ROOT})
 endif()
