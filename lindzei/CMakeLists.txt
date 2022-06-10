@@ -21,8 +21,9 @@ target_link_libraries(lindzei PUBLIC orphan) # eden kujata)
 
 set_target_properties(lindzei orphan cocoon PROPERTIES FOLDER Lindzei)
 
-intelisense_modules(lindzei ${LINDZEI_MODULE_ROOT})
-
+if(MSVC)
+  intelisense_modules(lindzei ${LINDZEI_MODULE_ROOT})
+endif()
 
 
 
