@@ -8,22 +8,28 @@ add_subdirectory(orphan)
 
 add_subdirectory(cocoon)
 
-set(lindzei_module "${LINDZEI_MODULE_ROOT}/lindzei.ixx")
+# Will still use the term "Module" but untill compilers catchup we shall use
+# header.
 
-#Currently CMake Can't handle making a dll with C++20 Modules and 
-#setting CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS; therfore, for now, we 
-#shall make it static.
-add_library(lindzei STATIC ${lindzei_module})
+set(lindzei_module "${LINDZEI_MODULE_ROOT}/lindzei.h") #.ixx")
 
-#pulse???
+add_library(lindzei STATIC ${lindzei_module} $<TARGET_OBJECTS:orphan>)
+
 target_link_libraries(lindzei PUBLIC orphan) # eden kujata)
 
 
 set_target_properties(lindzei orphan cocoon PROPERTIES FOLDER Lindzei)
 
-if(MSVC)
-  intelisense_modules(lindzei ${LINDZEI_MODULE_ROOT})
-endif()
+target_sources(lindzei PUBLIC
+  FILE_SET headers 
+  TYPE HEADERS
+  BASE_DIRS ${MODULE_ROOT}
+  FILES ${lindzei_module}
+  )
+
+# if(MSVC)
+#   intelisense_modules(lindzei ${LINDZEI_MODULE_ROOT})
+# endif()
 
 
 

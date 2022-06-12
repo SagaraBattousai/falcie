@@ -2,13 +2,16 @@
 ############### Atomos The Networking Target ######################
 ###################################################################
 
+# Will still use the term "Module" but untill compilers catchup we shall use
+# header.
+
 set(ATOMOS_MODULE_ROOT "${PULSE_MODULE_ROOT}/atomos")
 
 set(atomos_module 
-  "${ATOMOS_MODULE_ROOT}/atomos.ixx"
-  "${ATOMOS_MODULE_ROOT}/atomos-network.ixx" 
-  # "${ATOMOS_MODULE_ROOT}/anima-neural_network.ixx"
-  # "${ATOMOS_MODULE_ROOT}/anima-random.ixx" 
+  "${ATOMOS_MODULE_ROOT}/atomos.h" #ixx"
+  "${ATOMOS_MODULE_ROOT}/atomos-network.h" #ixx" 
+  # "${ATOMOS_MODULE_ROOT}/.ixx"
+  # "${ATOMOS_MODULE_ROOT}/.ixx" 
   )
 
 set(cpp_files 
@@ -16,16 +19,17 @@ set(cpp_files
   "atomos-network_win32.cpp" 
   ) 
 
-#Can't be Object anymore as add_custom_command for bost build wont work.
-#Static as we want pulse to be the dll and we can statically link the dll to 
-#this library and then only link to dll from client.
-add_library(atomos STATIC ${atomos_module} ${cpp_files})
+add_library(atomos OBJECT ${atomos_module} ${cpp_files})
+
+target_sources(atomos PUBLIC
+  FILE_SET headers 
+  TYPE HEADERS
+  BASE_DIRS ${PULSE_MODULE_ROOT}
+  FILES ${atomos_module}
+  )
 
 if(MSVC)
-  intelisense_modules(atomos ${ATOMOS_MODULE_ROOT})
-endif()
-
-if(WIN32)
+  # intelisense_modules(atomos ${ATOMOS_MODULE_ROOT})
   target_link_libraries(atomos PRIVATE Ws2_32)
 endif()
 

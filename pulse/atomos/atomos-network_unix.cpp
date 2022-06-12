@@ -1,4 +1,4 @@
-module;
+//module;
 
 #ifndef _WIN32 
 #include <winsock2.h>
@@ -10,7 +10,9 @@ module;
 #include <memory>
 #include <iostream>
 #endif
-module atomos:network;
+
+//module atomos:network;
+#include <atomos/atomos-network.h>
 
 #ifndef _WIN32
 namespace pulse

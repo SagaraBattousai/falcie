@@ -1,46 +1,19 @@
-module;
+//module;
 
 #include <cstdint>
 #include <cstddef>
 #include <stdexcept>
 
-module cactuar:target;
+//module cactuar:target;
 
-import <vector>;
-import <algorithm>;
+#include <vector> //import <vector>;
+#include <algorithm> //import <algorithm>;
+
+#include <cactuar/cactuar-target.h>
 
 namespace pulse
 {
-	constexpr const std::vector<std::byte> Target::Expand() const
-	{
-		unsigned char exp = (this->target >> 24) & 255;
-
-		if (exp > Target::ExpMax)
-		{
-			return std::vector<std::byte>(Target::TargetSize, std::byte{ 0xFF });
-		}
-
-		if (exp < Target::ExpMin)
-		{
-			//I think but since we have -4 .... hmmm Have a think about this
-			return std::vector<std::byte>(Target::TargetSize, std::byte{ 0x00 });
-		}
-
-		auto arr_index = 31 - (exp - Target::TargetExponentShifter);
-
-		std::vector<std::byte> target_array(Target::TargetSize);
-
-		target_array[arr_index] = std::byte{ (target & 255) };
-		target_array[arr_index - 1] = std::byte{((target >> 8) & 255)};
-		target_array[arr_index - 2] = std::byte{((target >> 16) & 255)};
-
-		return target_array;
-	}
-
-	constexpr std::strong_ordering operator<=>(const Target& lhs, const Target& rhs)
-	{
-		return lhs.Expand() <=> rhs.Expand();
-	}
+	
 
 } //namespace pulse
 

@@ -1,4 +1,4 @@
-module;
+//module;
 
 #include <cstdlib>
 #include <cstdint>
@@ -9,7 +9,7 @@ module;
 #endif // USE_AVX_INTRIN
 
 
-module anima:matrix;
+#include <anima/anima-matrix.h> //module anima:matrix;
 
 
 namespace pulse

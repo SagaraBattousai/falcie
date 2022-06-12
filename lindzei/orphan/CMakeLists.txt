@@ -2,6 +2,9 @@
 ############ Orphan The Unseen Powerhouse Target ##################
 ###################################################################
 
+# Will still use the term "Module" but untill compilers catchup we shall use
+# header.
+
 set(ORPHAN_MODULE_ROOT "${LINDZEI_MODULE_ROOT}/orphan")
 
 set(cpp_sources 
@@ -11,19 +14,27 @@ set(cpp_sources
   )
 
 set(orphan_module 
-  "${ORPHAN_MODULE_ROOT}/orphan.ixx"
-  "${ORPHAN_MODULE_ROOT}/federated_block.ixx"
-  "${ORPHAN_MODULE_ROOT}/federated_blockchain.ixx"
-  "${ORPHAN_MODULE_ROOT}/federated_network.ixx"
+  "${ORPHAN_MODULE_ROOT}/orphan.h" #ixx"
+  "${ORPHAN_MODULE_ROOT}/federated_block.h" #ixx"
+  "${ORPHAN_MODULE_ROOT}/federated_blockchain.h" #ixx"
+  "${ORPHAN_MODULE_ROOT}/federated_network.h" #ixx"
   )
 
-add_library(orphan STATIC ${orphan_module} ${cpp_sources})
+add_library(orphan OBJECT ${orphan_module} ${cpp_sources})
 
-if(MSVC)
-  intelisense_modules(orphan "${ORPHAN_MODULE_ROOT}")
-endif()
+target_sources(orphan PUBLIC
+  FILE_SET headers 
+  TYPE HEADERS
+  BASE_DIRS ${LINDZEI_MODULE_ROOT}
+  FILES ${orphan_module}
+  )
 
-#Technically a user doesn't need pulse as this is built on top of pulse ?!??
-# target_link_libraries(orphan PRIVATE pulse)
+# if(MSVC)
+#   intelisense_modules(orphan "${ORPHAN_MODULE_ROOT}")
+# endif()
+
+# Has to be public to allow passing of HashType etc
 target_link_libraries(orphan PUBLIC pulse)
+
+
 

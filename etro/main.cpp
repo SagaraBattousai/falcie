@@ -15,7 +15,8 @@
 #include <compare>
 
 
-import pulse;
+//import pulse;
+#include <pulse/pulse.h>
 
 int main(void)
 {

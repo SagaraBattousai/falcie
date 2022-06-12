@@ -19,7 +19,7 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(SystemCheck)
 include(LibUtils)
-include(ModuleUtils)
+# include(ModuleUtils)
 
 set_system_check_vars()
 
@@ -32,8 +32,8 @@ endif()
 set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation.")
 set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 
-# set(INCLUDE_ROOT "${PROJECT_SOURCE_DIR}/include")
-set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/modules")
+# set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/modules")
+set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(pulse)
 add_subdirectory(lindzei)
@@ -63,17 +63,14 @@ target_include_directories(etro_c PUBLIC ${INCLUDE_ROOT})
 #DLL's must be in same dir as exe (or added to path but i'd rather
 #avoid that if I can.
 if(WIN32)
-  # symlink_library_to_target(etro_c pulse)
-  # symlink_library_to_target(etro_cpp pulse)
+  symlink_library_to_target(etro_c pulse)
+  symlink_library_to_target(etro_cpp pulse)
   copy_openssl_runtime_lib_to_target(etro_c crypto)
   copy_openssl_runtime_lib_to_target(etro_cpp crypto)
 endif()
 
 if(MSVC)
-  set_target_properties(etro_cpp PROPERTIES 
-    VS_GLOBAL_PublicModuleDirectories 
-    "${MODULE_ROOT}/pulse;$(PublicModuleDirectories)")
-  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT etro_cpp)
+  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cocoon)
 endif()
 
 #----------------------------------------------

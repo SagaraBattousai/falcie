@@ -2,17 +2,15 @@
 #include <cstdint>
 #include <iostream>
 
+#include <vector> //import <vector>;
+#include <utility> //import <utility>;
 
-import <vector>;
-import <utility>;
-
-import pulse;
-import lindzei;
-
+#include <pulse/pulse.h> //import pulse;
+#include <lindzei/lindzei.h> //import lindzei;
 
 int main(void)
 {
-	/*
+	
 	using lindzei::Federatedblock;
 	using pulse::NeuralNetwork;
 	using lindzei::NetworkUpdate;
@@ -128,12 +126,12 @@ int main(void)
 
 	std::cout << "\nNetwork 1 on all data:\n";
 
-	pulse::print_inferencing_results(network1, training_data, desired_outputs);
+	pulse::PrintInferencingResults(network1, training_data, desired_outputs);
 
 
 	std::cout << "\nNetwork control on all data:\n";
 
-	pulse::print_inferencing_results(network_control, training_data, desired_outputs);
+	pulse::PrintInferencingResults(network_control, training_data, desired_outputs);
 
 
 	//print_inferencing_results(network1, training_ptr, 4,
@@ -142,7 +140,6 @@ int main(void)
 	//printf("\nControl Network on all data:\n");
 	//print_inferencing_results(network_control, training_ptr, 4,
 	//	2, desired_ptr, 1);
-	*/
 
 	std::cout << pulse::f() << std::endl;
 
