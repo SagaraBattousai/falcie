@@ -81,8 +81,8 @@ namespace pulse
 		std::vector<std::byte> target_array(Target::TargetSize);
 
 		target_array[arr_index] = std::byte{ (target & 255) };
-		target_array[arr_index - 1] = std::byte{ ((target >> 8) & 255) };
-		target_array[arr_index - 2] = std::byte{ ((target >> 16) & 255) };
+		target_array[static_cast<std::int64_t>(arr_index) - 1] = std::byte{ ((target >> 8) & 255) };
+		target_array[static_cast<std::int64_t>(arr_index) - 2] = std::byte{ ((target >> 16) & 255) };
 
 		return target_array;
 	}

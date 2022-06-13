@@ -11,11 +11,6 @@ Pulse
    :name: pulse-submodules
 
    anima/index
+   atomos/index
    cactuar/index
    dahaka/index
-
-.. atomos/index
-
-..
-   blockheader
-   federatedblock

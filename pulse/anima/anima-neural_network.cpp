@@ -174,9 +174,9 @@ namespace pulse
 		return this->weights;
 	}
 
-	void NeuralNetwork::SetWeights(NetworkWeights weights)
+	void NeuralNetwork::SetWeights(NetworkWeights newWeights)
 	{
-		this->weights = weights;
+		this->weights = newWeights;
 	}
 
 	void NeuralNetwork::UpdateWeights(const NetworkWeights& delta_weights)
@@ -216,7 +216,7 @@ namespace pulse
 			this->tracking.pre_activation_layers[i + 1] =
 				(Matrix{ this->tracking.layers[i] } *(this->weights[i])).Data();
 
-			for (std::int64_t j = 0; j < this->tracking.pre_activation_layers[i + 1].size(); j++)
+			for (auto j = 0; j < this->tracking.pre_activation_layers[i + 1].size(); j++)
 			{
 				this->tracking.layers[i + 1].push_back(
 					this->activation(this->tracking.pre_activation_layers[i + 1][j])
@@ -331,7 +331,7 @@ namespace pulse
 
 		for (int i = 0; i < epochs; i++)
 		{
-			for (std::int64_t j = 0; j < input.size(); j++)
+			for (auto j = 0; j < input.size(); j++)
 			{
 				network.Feedforward(input[j]);
 				NetworkWeights deltaWeights = network.Backpropagation(desired[j]);
@@ -370,28 +370,28 @@ namespace pulse
 	{
 		std::cout << "Inferencing results:\n--------------------\n";
 
-		for (std::int64_t i = 0; i < input.size(); i++)
+		for (auto i = 0; i < input.size(); i++)
 		{
 			network.Feedforward(input[i]);
 			std::vector<float> output = network.Output();
 
 			std::cout << "input: ( ";
 
-			for (std::int64_t j = 0; j < input[i].size() - 1; j++)
+			for (auto j = 0; j < input[i].size() - 1; j++)
 			{
 				std::cout << input[i][j] << ", ";
 			}
 
 			std::cout << input[i].back() << " ) desired: ( ";
 
-			for (std::int64_t j = 0; j < desired[i].size() - 1; j++)
+			for (auto j = 0; j < desired[i].size() - 1; j++)
 			{
 				std::cout << desired[i][j] << ", ";
 			}
 
 			std::cout << desired[i].back() << " ) -> Network Output : ( ";
 
-			for (std::int64_t j = 0; j < output.size() - 1; j++)
+			for (auto j = 0; j < output.size() - 1; j++)
 			{
 				std::cout << output[j] << ", ";
 			}

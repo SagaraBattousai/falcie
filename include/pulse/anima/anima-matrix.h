@@ -328,7 +328,7 @@ namespace pulse
 	template<typename T>
 	std::vector<T> operator*(const Matrix<T>& lhs, const std::vector<T>& rhs)
 	{
-		if (lhs.dims.second != rhs.size())
+		if (lhs.dims.second != static_cast<std::int64_t>(rhs.size()))
 		{
 			throw std::domain_error("The size of the vector must \
 				match the number of columns in the Matrix");
@@ -368,7 +368,7 @@ namespace pulse
 			//
 		//#else
 
-		for (std::int64_t k = 0; k < lhs.size(); k++)
+		for (auto k = 0; k < lhs.size(); k++)
 		{
 			lhs[k] *= rhs[k];
 		}

@@ -36,7 +36,7 @@ namespace pulse
 {
 	namespace anima
 	{
-		constexpr float DEFAULT_NETWORK_LEARNING_RATE = 0.9;
+		constexpr float DEFAULT_NETWORK_LEARNING_RATE = 0.9f;
 
 		//Make class with constructor!!
 		struct FeedForwardTracking
@@ -79,7 +79,7 @@ namespace pulse
 			std::uint_fast32_t seed = std::random_device{}());
 
 		/** Returns the number of layers in the network(minus the input layer) */
-		constexpr inline std::vector<std::int64_t>::size_type NumberOfLayers()
+		constexpr inline std::int64_t NumberOfLayers()
 		{
 			return this->network_structure.size() - 1;
 		}

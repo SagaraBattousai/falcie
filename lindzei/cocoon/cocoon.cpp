@@ -23,7 +23,7 @@ int main(void)
 
 	bc.Add(std::move(b1));
 
-	auto bb1 = bc.GetLast();
+	auto& bb1 = bc.GetLast();
 
 	for (auto i : bb1.Hash())
 	{
@@ -52,10 +52,10 @@ int main(void)
 
 	const std::vector<std::vector<float>> desired2{ { 1.f }, { 0.f } };
 
-	float learning_rate = 0.9;
+	float learning_rate = 0.9f;
 
-	int max_epochs = 50000;
-	float target_error = 0.00001;
+	//int max_epochs = 50000;
+	//float target_error = 0.00001f;
 
 	std::vector<std::int64_t> network_structure{ 2, 3, 1 };
 
@@ -82,7 +82,7 @@ int main(void)
 
 	NetworkUpdate combined_update;
 
-	Federatedblock b2{};
+	//Federatedblock b2{};
 
 	for (int i = 0; i < 50000; i++)
 	{
@@ -115,9 +115,9 @@ int main(void)
 		b2.AddLocalUpdate(std::move(network2_update));
 
 		bc.Add(std::move(b2));
-		auto last = bc.GetLast();
+		auto& last = bc.GetLast();
 
-		auto gu = last.GetGlobalUpdate();
+		auto&gu = last.GetGlobalUpdate();
 
 		network1.SetWeights(gu.delta_weights);
 		network2.SetWeights(gu.delta_weights);

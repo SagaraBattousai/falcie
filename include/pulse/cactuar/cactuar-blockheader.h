@@ -41,7 +41,7 @@ namespace pulse
 			Target target = {},
 			std::uint32_t nonce = 0);
 
-		constexpr Blockheader(Blockheader&&);
+		constexpr Blockheader(Blockheader&&) noexcept;
 
 	  //Can't be constexpr with gcc but totaly chill with msvc :'(
 		static Blockheader Genisis(HashAlgorithm hash_algo, std::uint32_t version = 0x01);
@@ -58,7 +58,7 @@ namespace pulse
 		, nonce{ nonce }
 	{ }
 
-	constexpr Blockheader::Blockheader(Blockheader&& rhs)
+	constexpr Blockheader::Blockheader(Blockheader&& rhs) noexcept
 		: version{ std::move(rhs.version) }
 		, timestamp{ std::move(rhs.timestamp) }
 		, prev_hash{ std::move(rhs.prev_hash) }
