@@ -40,7 +40,7 @@ if(x86)
   else()
     #Risky as I've only check it's accaptable for GCC and Clang.
     # Do I need the specific -mavx512 extension versions?
-    target_compile_options(anima PRIVATE "-mavx2")
+    target_compile_options(anima PRIVATE "-mavx512f")
   endif()
   # I can't trust that __AVX__ is defined. (Or can I?).
   # Leave PUBLIC in case client program wants to test it

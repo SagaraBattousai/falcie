@@ -24,4 +24,20 @@ namespace pulse
 
 		return bytes;
 	}
+
+	//Change later when you have time to call constructor
+	//Can't be constexpr with gcc but totaly chill with msvc :'(
+    Blockheader Blockheader::Genisis(HashAlgorithm hash_algo, std::uint32_t version)
+	{
+		return Blockheader{
+			version,
+			Block::GenerateTimestamp(),
+			std::vector<std::byte>(AsHashSize(hash_algo)),
+			std::vector<std::byte>(AsHashSize(hash_algo)),
+			0x00000000,
+			0
+		};
+	}
+
+
 } // namespace pulse

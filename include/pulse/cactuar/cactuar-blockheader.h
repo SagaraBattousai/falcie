@@ -43,7 +43,8 @@ namespace pulse
 
 		constexpr Blockheader(Blockheader&&);
 
-		constexpr static Blockheader Genisis(HashAlgorithm hash_algo, std::uint32_t version = 0x01);
+	  //Can't be constexpr with gcc but totaly chill with msvc :'(
+		static Blockheader Genisis(HashAlgorithm hash_algo, std::uint32_t version = 0x01);
 	};
 
 	constexpr Blockheader::Blockheader(std::uint32_t version, std::int64_t timestamp,
@@ -66,19 +67,6 @@ namespace pulse
 		, nonce{ std::move(rhs.nonce) }
 	{ }
 
-
-	//Change later when you have time to call constructor
-	constexpr Blockheader Blockheader::Genisis(HashAlgorithm hash_algo, std::uint32_t version)
-	{
-		return Blockheader{
-			version,
-			Block::GenerateTimestamp(),
-			std::vector<std::byte>(AsHashSize(hash_algo)),
-			std::vector<std::byte>(AsHashSize(hash_algo)),
-			0x00000000,
-			0
-		};
-	}
 
 	constexpr const int BlockheaderSize(HashAlgorithm algo)
 	{

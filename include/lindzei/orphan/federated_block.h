@@ -78,7 +78,7 @@ namespace lindzei
 	template< class ...Args >
 	void Federatedblock::AddLocalUpdate(Args&&... args)
 	{
-		this->local_updates.emplace_back(std::move(args));
+		this->local_updates.emplace_back(std::move(args)...);
 
 		//TODO: For now, probably init block with network stucture (and possibly builder)
 		//To enfores all updates to be of a compatible network

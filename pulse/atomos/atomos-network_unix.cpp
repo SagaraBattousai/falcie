@@ -1,20 +1,13 @@
 //module;
 
 #ifndef _WIN32 
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-//#include <iphlpapi.h> //If needed MUST be after winsock2.h
-
 
 #include <memory>
 #include <iostream>
-#endif
 
 //module atomos:network;
 #include <atomos/atomos-network.h>
 
-#ifndef _WIN32
 namespace pulse
 {
 	namespace atomos

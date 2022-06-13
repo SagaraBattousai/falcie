@@ -49,7 +49,8 @@ namespace pulse
 		static time_rep GenerateTimestamp()
 		{
 			return std::chrono::duration_cast<time_duration>
-				(std::chrono::tai_clock::now().time_since_epoch()).count();
+				/* (std::chrono::tai_clock::now().time_since_epoch()).count(); */
+				(std::chrono::system_clock::now().time_since_epoch()).count();
 		};
 	};
 
