@@ -37,7 +37,7 @@ namespace pulse
 			tracking.layers[0].reserve(input_layer_size);
 			tracking.pre_activation_layers[0].reserve(input_layer_size);
 
-			for (auto i = 1; i < network_structure.size(); i++)
+			for (std::int64_t i = 1; i < static_cast<std::int64_t>(network_structure.size()); i++)
 			{
 				tracking.layers[i].reserve(*(it + i));
 				tracking.pre_activation_layers[i].reserve(*(it + i));
@@ -66,7 +66,7 @@ namespace pulse
 				tracking.pre_activation_layers[0].begin() + 1, tracking.pre_activation_layers[0].end()
 			);
 
-			for (auto i = 1; i < tracking.layers.size(); i++)
+			for (std::int64_t i = 1; i < static_cast<std::int64_t>(tracking.layers.size()); i++)
 			{
 				tracking.layers[i].clear();
 				tracking.pre_activation_layers[i].clear();
@@ -140,12 +140,12 @@ namespace pulse
 	{
 		float ret = 0;
 		//TODO: Remove vector sub cheat!!!
-		for (auto i = 0; i < output.size(); i++)
+		for (std::int64_t i = 0; i < static_cast<std::int64_t>(output.size()); i++)
 		{
 			output[i] -= desired[i];
 		}
 
-		for (auto i = 0; i < output.size(); i++)
+		for (std::int64_t i = 0; i < static_cast<std::int64_t>(output.size()); i++)
 		{
 			ret += output[i] * output[i];
 		}
@@ -184,7 +184,7 @@ namespace pulse
 		auto weights_iter = this->weights.begin();
 		auto delta_iter = delta_weights.begin();
 		//Assert delta_weights.size == this->weights.size
-		for (auto i = 0; i < delta_weights.size(); i++)
+		for (std::int64_t i = 0; i < static_cast<std::int64_t>(delta_weights.size()); i++)
 		{
 			*(weights_iter + i) += *(delta_iter + i);
 		}
@@ -216,7 +216,9 @@ namespace pulse
 			this->tracking.pre_activation_layers[i + 1] =
 				(Matrix{ this->tracking.layers[i] } *(this->weights[i])).Data();
 
-			for (auto j = 0; j < this->tracking.pre_activation_layers[i + 1].size(); j++)
+			for (std::int64_t j = 0;
+				j < static_cast<std::int64_t>(this->tracking.pre_activation_layers[i + 1].size());
+				j++)
 			{
 				this->tracking.layers[i + 1].push_back(
 					this->activation(this->tracking.pre_activation_layers[i + 1][j])
@@ -260,21 +262,15 @@ namespace pulse
 		// the previous layer in the network, as we are backtracking.
 		// i.e. back_neurons <- curr_neurons.
 		std::int64_t back_neuron_count;
-		std::int64_t curr_neuron_count;
-		std::int64_t weight_size;
 
 		for (std::int64_t j = this->NumberOfLayers(); j > 0; j--)
 		{
-			curr_neuron_count = this->network_structure[j];
-
 			back_neuron_count = this->network_structure[j - 1];
 
 			if (j == 1)
 			{
 				back_neuron_count += 1; //If network_structure is internal could add 1 in constructor.
 			}
-
-			weight_size = (back_neuron_count * curr_neuron_count);
 
 			//weightupdate = curlayers[l] * pdelta.T
 			deltaWeights.insert(deltaWeights.begin(),
@@ -329,9 +325,9 @@ namespace pulse
 	{
 		//Assert: input.size() == desired.size();
 
-		for (int i = 0; i < epochs; i++)
+		for (std::int64_t i = 0; i < epochs; i++)
 		{
-			for (auto j = 0; j < input.size(); j++)
+			for (std::int64_t j = 0; j < static_cast<std::int64_t>(input.size()); j++)
 			{
 				network.Feedforward(input[j]);
 				NetworkWeights deltaWeights = network.Backpropagation(desired[j]);
@@ -349,7 +345,7 @@ namespace pulse
 
 		while (stats.average_network_error > target_err && stats.epochs_taken < epochs)
 		{
-			for (int j = 0; j < input.size(); j++)
+			for (std::int64_t j = 0; j < static_cast<std::int64_t>(input.size()); j++)
 			{
 				TrainNetwork(network, { desired[j] }, { input[j] }, 1);
 
@@ -370,28 +366,28 @@ namespace pulse
 	{
 		std::cout << "Inferencing results:\n--------------------\n";
 
-		for (auto i = 0; i < input.size(); i++)
+		for (std::int64_t i = 0; i < static_cast<std::int64_t>(input.size()); i++)
 		{
 			network.Feedforward(input[i]);
 			std::vector<float> output = network.Output();
 
 			std::cout << "input: ( ";
 
-			for (auto j = 0; j < input[i].size() - 1; j++)
+			for (std::int64_t j = 0; j < static_cast<std::int64_t>(input[i].size()) - 1; j++)
 			{
 				std::cout << input[i][j] << ", ";
 			}
 
 			std::cout << input[i].back() << " ) desired: ( ";
 
-			for (auto j = 0; j < desired[i].size() - 1; j++)
+			for (std::int64_t j = 0; j < static_cast<std::int64_t>(desired[i].size()) - 1; j++)
 			{
 				std::cout << desired[i][j] << ", ";
 			}
 
 			std::cout << desired[i].back() << " ) -> Network Output : ( ";
 
-			for (auto j = 0; j < output.size() - 1; j++)
+			for (std::int64_t j = 0; j < static_cast<std::int64_t>(output.size()) - 1; j++)
 			{
 				std::cout << output[j] << ", ";
 			}

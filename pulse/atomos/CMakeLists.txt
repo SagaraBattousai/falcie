@@ -15,6 +15,7 @@ set(atomos_module
   )
 
 set(cpp_files 
+  "atomos-network.cpp" 
   "atomos-network_unix.cpp" 
   "atomos-network_win32.cpp" 
   ) 

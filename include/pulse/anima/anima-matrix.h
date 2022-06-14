@@ -368,7 +368,7 @@ namespace pulse
 			//
 		//#else
 
-		for (auto k = 0; k < lhs.size(); k++)
+		for (std::int64_t k = 0; k < static_cast<std::int64_t>(lhs.size()); k++)
 		{
 			lhs[k] *= rhs[k];
 		}

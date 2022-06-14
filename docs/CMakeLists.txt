@@ -36,4 +36,4 @@ configure_sphinx_and_add_command()
 add_custom_target(Sphinx ALL DEPENDS ${SPHINX_HTML_INDEX_FILE})
 add_dependencies(Sphinx Doxygen)
 
-set_target_properties(Doxygen Sphinx PROPERTIES FOLDER Docs)
+set_target_properties(Doxygen Sphinx PROPERTIES FOLDER Docs EXCLUDE_FROM_ALL ON)

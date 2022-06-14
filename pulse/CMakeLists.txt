@@ -18,7 +18,7 @@ set(pulse_module "${PULSE_MODULE_ROOT}/pulse.h") # ixx")
 #Currently CMake Can't handle making a dll with C++20 Modules and 
 #setting CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS; therfore, for now, we 
 #shall make it static.
-add_library(pulse STATIC #SHARED #STATIC  
+add_library(pulse SHARED #STATIC  
   ${pulse_module}
   $<TARGET_OBJECTS:anima>
   $<TARGET_OBJECTS:atomos>

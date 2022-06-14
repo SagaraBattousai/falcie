@@ -13,7 +13,7 @@ add_subdirectory(cocoon)
 
 set(lindzei_module "${LINDZEI_MODULE_ROOT}/lindzei.h") #.ixx")
 
-add_library(lindzei STATIC ${lindzei_module} $<TARGET_OBJECTS:orphan>)
+add_library(lindzei SHARED ${lindzei_module} $<TARGET_OBJECTS:orphan>)
 
 target_link_libraries(lindzei PUBLIC orphan) # eden kujata)
 

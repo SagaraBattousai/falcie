@@ -1,6 +1,7 @@
 //module;
 
 #ifdef _WIN32 
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -9,17 +10,14 @@
 
 #include <memory>
 #include <iostream>
-#endif
 
 //module atomos:network;
 #include <atomos/atomos-network.h>
 
-#ifdef _WIN32
 namespace pulse
 {
 	namespace atomos
 	{
-	#ifdef _WIN32
 		//Could be singelton init now that I think of it ....
 		class InitWinsock
 		{
@@ -52,15 +50,8 @@ namespace pulse
 			}
 		}
 
-	#endif
-
 		struct Socket
 		{
-		#ifdef _WIN32
-
-		#else
-
-		#endif
 		};
 
 	} //namespace pulse::anima
@@ -75,12 +66,8 @@ namespace pulse
 	{
 		std::unique_ptr soc = std::make_unique<atomos::Socket>();
 
-	#ifdef _WIN32
 		atomos::InitWinsock::Init();
 
-	#else
-
-	#endif
 
 		return soc;
 	}
