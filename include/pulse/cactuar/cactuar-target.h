@@ -39,6 +39,8 @@ namespace pulse
 
 		constexpr const std::vector<std::byte> Expand() const;
 
+		constexpr operator std::uint32_t() const { return target; };
+
 		constexpr inline std::strong_ordering operator<=>(const std::vector<std::byte>& hash)
 		{ return this->Expand() <=> hash; };
 

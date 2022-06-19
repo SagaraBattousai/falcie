@@ -20,15 +20,24 @@
 //export 
 namespace pulse
 {
+	/**
+	 * @brief Interface for blocks that can be added to the blockchain. 
+	 *
+	 * Note, it is not essential to implement this inorder to add to the blockchain;
+	 * however, by implementing this interface, it is garunteed to be addable to the blockchain.
+	 * 
+	*/
 	class Block
 	{
 	public:
 
 		using blockhash_type = std::vector<std::byte>;
 
-		using time_rep = std::int64_t;
-		using time_period = std::micro;
+		using time_rep = std::int64_t; //Maybe make private
+		using time_period = std::micro; //Maybe make private
 		using time_duration = std::chrono::duration<time_rep, time_period>;
+		using time_clock = std::chrono::system_clock; //std::chrono::tai_clock;
+		using time_point = std::chrono::time_point<time_clock, time_duration>;
 
 		//may make universal ref but for now...
 		using BlockHashFunction =
@@ -49,9 +58,16 @@ namespace pulse
 		static time_rep GenerateTimestamp()
 		{
 			return std::chrono::duration_cast<time_duration>
-				/* (std::chrono::tai_clock::now().time_since_epoch()).count(); */
-				(std::chrono::system_clock::now().time_since_epoch()).count();
+				(time_clock::now().time_since_epoch()).count();
 		};
+
+		//TODO: May need optimising
+		static time_point AsTimePoint(const std::int64_t& timestamp)
+		{
+			return time_point(time_duration(timestamp));
+		}
+
+
 	};
 
 	/**

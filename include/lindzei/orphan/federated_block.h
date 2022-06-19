@@ -10,6 +10,7 @@
 #include <vector> //import <vector>;
 #include <memory> //import <memory>;
 #include <utility> //import <utility>;
+#include <ostream>
 
 #include <pulse/pulse.h> //import pulse;
 
@@ -18,6 +19,7 @@
 //export 
 namespace lindzei
 {
+
 	class Federatedblock : public pulse::Block
 	{
 	public:
@@ -58,6 +60,8 @@ namespace lindzei
 		void AddLocalUpdate(Args&&... args);
 
 		const NetworkUpdate& GetGlobalUpdate() const;
+
+		friend std::ostream& operator<<(std::ostream& os, const Federatedblock& block);
 
 	private:
 		std::uint32_t magic; //Always 0x43616C6F

@@ -14,6 +14,7 @@
 #include <span> //import <span>;
 #include <memory> //import <memory>;
 #include <map> //import <map>;
+#include <ostream>
 
 typedef struct evp_md_ctx_st EVP_MD_CTX;
 
@@ -27,6 +28,8 @@ namespace pulse
 	{
 		return static_cast<unsigned char>(hash_algo);
 	};
+
+	std::ostream& operator<<(std::ostream&, const HashAlgorithm);
 
 } // namespace pulse
 

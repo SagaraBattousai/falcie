@@ -29,7 +29,7 @@ if (MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
   # warning level 4 and all warnings as errors
   #Give Wall a try and see if the ones that are turned off are okay
-  add_compile_options(/Wall) # /W4 ) # /WX)
+  add_compile_options(/W4) # /WX)
 else()
     # lots of warnings and all warnings as errors
     add_compile_options(-Wall -Wextra -pedantic) # -Werror)

@@ -62,10 +62,26 @@ namespace pulse
 
 	} //namespace pulse::cactuar
 
+	std::ostream& operator<<(std::ostream& os, const HashAlgorithm hashAlgo)
+	{
+		switch (hashAlgo)
+		{
+		case HashAlgorithm::SHA256:
+			os << "SHA256";
+			break;
+		case HashAlgorithm::RIPEMD160:
+			os << "RIPEMD160";
+			break;
+		default:
+			os << "UNKNOWN HASH ALGORITHM";
+		}
+
+		return os;
+	}
+
 	HashFunction::HashFunction(HashAlgorithm hash_algo)
 		: context(cactuar::GetHashContext(hash_algo))
-	{
-	}
+	{}
 
 	HashFunction::~HashFunction() { EVP_MD_CTX_free(this->context); }
 
@@ -88,6 +104,7 @@ namespace pulse
 			void OutputHash()
 			{ EVP_DigestFinal_ex(context, data, NULL); }
 		*/
+
 
 
 } //namespace pulse

@@ -17,7 +17,7 @@ function(copy_library_to_target target lib)
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:${lib}>
-    $<TARGET_FILE_DIR:${target}>
+    $<TARGET_FILE_DIR:${target}>/$<TARGET_FILE_NAME:${lib}>
     USES_TERMINAL #Guess I dont need :D (Is it better without?)
     COMMENT "Copying ${lib} to Target ${target}'s directory")
 endfunction()

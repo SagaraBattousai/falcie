@@ -19,20 +19,13 @@ int main(void)
 
 	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ std::move(genisis), 32 };
 
-	Federatedblock b1{};
+	std::cout << "Genisis:\n" << genisis << "\n";
 
-	bc.Add(std::move(b1));
+	Federatedblock block{};
 
-	auto& bb1 = bc.GetLast();
+	bc.Add(std::move(block));
 
-	for (auto i : bb1.Hash())
-	{
-		std::cout << std::hex << (int)i;
-	}
-
-	std::cout << std::endl;
-
-
+	std::cout << bc.GetLast() << std::endl;
 
 	const std::vector<std::vector<float>> training_data{
 		{ 0.f, 0.f }, {1.f, 0.f }, { 0.f, 1.f }, { 1.f, 1.f }
@@ -82,9 +75,7 @@ int main(void)
 
 	NetworkUpdate combined_update;
 
-	//Federatedblock b2{};
-
-	for (int i = 0; i < 50000; i++)
+	for (int i = 0; i < 500; i++)
 	{
 		pulse::TrainNetwork(network1, desired1, training1, 1);
 
@@ -122,7 +113,12 @@ int main(void)
 		network1.SetWeights(gu.delta_weights);
 		network2.SetWeights(gu.delta_weights);
 
+
 	}
+
+		
+		std::cout << bc.GetLast() << std::endl;
+
 
 	std::cout << "\nNetwork 1 on all data:\n";
 
@@ -141,7 +137,6 @@ int main(void)
 	//print_inferencing_results(network_control, training_ptr, 4,
 	//	2, desired_ptr, 1);
 
-	std::cout << pulse::f() << std::endl;
 
 	return 0;
 }

@@ -13,6 +13,7 @@
 #include <vector> //import <vector>;
 #include <algorithm> //import <algorithm>;
 #include <utility> //import <utility>;
+#include <ostream>
 
 #include <cactuar/cactuar-block.h> //import :block;
 #include <cactuar/cactuar-crypto.h> //import :crypto;
@@ -22,6 +23,13 @@
 //export 
 namespace pulse
 {
+	struct Blockheader;
+
+	std::vector<std::byte> BlockheaderState(const Blockheader* const header, HashAlgorithm algo);
+
+	std::ostream& operator<<(std::ostream& os, const Blockheader& header);
+
+
 	struct Blockheader
 	{
 	public:
@@ -75,8 +83,7 @@ namespace pulse
 		//^^ for some reason I was getting 88 as sizeof(Blockheader) instead of 84
 	}
 
-	std::vector<std::byte> BlockheaderState(const Blockheader* const header, HashAlgorithm algo);
-
+	
 } //namespace pulse
 
 #endif

@@ -1,5 +1,6 @@
 
-#include <vector>
+//#include <vector>
+//#include <ostream>
 
 #include <cactuar/cactuar-blockheader.h>
 #include <cactuar/cactuar-crypto.h>
@@ -37,6 +38,34 @@ namespace pulse
 			0x00000000,
 			0
 		};
+	}
+
+	std::ostream& operator<<(std::ostream& os, const Blockheader& header)
+	{
+		os << "Version:          " <<std::dec << header.version << "\n"
+			  "Timestamp:        " << Block::AsTimePoint(header.timestamp) << "\n"
+			  "Previous Hash:    ";
+
+		//std::Hex in loop incase something happens to IO ??
+		for (const std::byte& x : header.prev_hash)
+		{
+			os << std::hex << static_cast<int>(x);
+		}
+
+		os << "\nTransaction Hash: ";
+
+		for (const std::byte& x : header.transaction_hash)
+		{
+			os << std::hex << static_cast<int>(x);
+		}
+
+		os << "\nTarget:           ";
+
+		os << std::hex << header.target << "\n";
+
+		os << "Nonce:            " << header.nonce << std::endl;
+
+		return os;
 	}
 
 
