@@ -195,6 +195,34 @@ namespace pulse
 		return this->tracking.layers[this->network_structure.size() - 1];
 	}
 
+	//Todo: make feedforward and this function call private base function that does both
+	/** A Forward pass through the network without tracking. */
+	std::vector<float> NeuralNetwork::operator()(const std::vector<float>& input)
+	{
+		this->Feedforward(input);
+
+		return this->Output();
+	}
+
+	//Todo: make feedforward and this function call private base function that does both
+	/** A Forward pass through the network without tracking for a set of inputs. */
+	std::vector<std::vector<float>> NeuralNetwork::operator()(
+		const std::vector<std::vector<float>>& inputs)
+	{
+
+		std::vector<std::vector<float>> inference_pass{};
+		inference_pass.reserve(inputs.size());
+
+		for (const auto& input : inputs)
+		{
+			this->Feedforward(input);
+
+			inference_pass.push_back(this->Output());
+		}
+
+		return inference_pass;
+	}
+
 	void NeuralNetwork::Feedforward(const std::vector<float>& input)
 	{
 		anima::ResetTracking(this->tracking);
@@ -358,6 +386,25 @@ namespace pulse
 			stats.epochs_taken++;
 		}
 		return stats;
+	}
+
+	std::vector<float> GetInferenceError(NeuralNetwork& network,
+		const std::vector<std::vector<float>>& desired, const std::vector<std::vector<float>>& input,
+		ErrorEnergy err_func)
+	{
+		std::vector<float> inference_error{};
+		inference_error.reserve(input.size());
+
+		for (std::int64_t i = 0; i < static_cast<std::int64_t>(input.size()); i++)
+		{
+			network.Feedforward(input[i]);
+
+			const std::vector<float>& output = network.Output();
+
+			inference_error.push_back(err_func(output, desired[i]));
+		}
+
+		return inference_error;
 	}
 
 	//TODO: decide wheter to change to string.

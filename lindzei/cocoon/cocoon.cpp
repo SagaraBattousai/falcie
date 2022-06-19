@@ -19,13 +19,13 @@ int main(void)
 
 	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ std::move(genisis), 32 };
 
-	std::cout << "Genisis:\n" << genisis << "\n";
+	//std::cout << "Genisis:\n" << genisis << "\n";
 
 	Federatedblock block{};
 
 	bc.Add(std::move(block));
 
-	std::cout << bc.GetLast() << std::endl;
+	//std::cout << bc.GetLast() << std::endl;
 
 	const std::vector<std::vector<float>> training_data{
 		{ 0.f, 0.f }, {1.f, 0.f }, { 0.f, 1.f }, { 1.f, 1.f }
@@ -75,6 +75,12 @@ int main(void)
 
 	NetworkUpdate combined_update;
 
+	//0 & 0 & 0 & 0.0246 & 0.0452 \\
+	//0 & 1 & 1 & 0.952 & 0.925 \\
+	//1 & 0 & 1 & 0.950 & 0.931 \\
+	//1 & 1 & 0 & 0.205 & 0.0813 \\[1ex]
+
+
 	for (int i = 0; i < 500; i++)
 	{
 		pulse::TrainNetwork(network1, desired1, training1, 1);
@@ -117,7 +123,7 @@ int main(void)
 	}
 
 		
-		std::cout << bc.GetLast() << std::endl;
+		//std::cout << bc.GetLast() << std::endl;
 
 
 	std::cout << "\nNetwork 1 on all data:\n";
@@ -129,14 +135,17 @@ int main(void)
 
 	pulse::PrintInferencingResults(network_control, training_data, desired_outputs);
 
+	std::vector<std::vector<float>> t = network_control(training_data);
 
-	//print_inferencing_results(network1, training_ptr, 4,
-	//	2, desired_ptr, 1);
+	for (const auto &i : t)
+	{
+		for (const auto& j : i)
+		{
+			std::cout << j;
+		}
 
-	//printf("\nControl Network on all data:\n");
-	//print_inferencing_results(network_control, training_ptr, 4,
-	//	2, desired_ptr, 1);
-
+		std::cout << std::endl;
+	}
 
 	return 0;
 }

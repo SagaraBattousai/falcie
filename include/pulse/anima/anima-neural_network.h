@@ -91,14 +91,22 @@ namespace pulse
 
 		void UpdateWeights(const NetworkWeights& delta_weights);
 
+		/** A Forward pass through the network with tracking. */
+		void Feedforward(const std::vector<float>&);
+
+		//doesn't need to be member yet but will once we move Output (below)
+		//Could make universal ref ....
+		/** A Forward pass through the network without tracking. */
+		std::vector<float> operator()(const std::vector<float>&);
+
+		/** A Forward pass through the network without tracking for a set of inputs. */
+		std::vector<std::vector<float>> operator()(const std::vector<std::vector<float>>&);
+
 		const std::vector<float>& Output() const;
 
 		constexpr std::int64_t InputSize() const;
 
 		constexpr std::int64_t OutputSize() const;
-
-		/** A Forward pass through the network. */
-		void Feedforward(const std::vector<float>&);
 
 		NetworkWeights Backpropagation(const std::vector<float>& desired);
 
@@ -170,6 +178,12 @@ namespace pulse
 	NetworkStats TrainNetworkWithStats(NeuralNetwork& network,
 		const std::vector<std::vector<float>>& desired, const std::vector<std::vector<float>>& input,
 		const std::int64_t epochs, float target_err, ErrorEnergy err_func = &TotalSquaredErrorEnergy);
+
+
+	std::vector<float> GetInferenceError(NeuralNetwork& network,
+		const std::vector<std::vector<float>>& desired, const std::vector<std::vector<float>>& input,
+		ErrorEnergy err_func);
+
 
 	//TODO: decide wheter to change to string.
 	void PrintInferencingResults(NeuralNetwork& network,
