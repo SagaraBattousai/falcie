@@ -1,5 +1,6 @@
+find_package(Python3 COMPONENTS Development NumPy REQUIRED)
 
-add_subdirectory(python)
+add_python_extension(ps "t.c")
 
 #set(src_files1 "matrix.c" 
 #  "blockchain.cpp" "federated_blockchain.cpp" 

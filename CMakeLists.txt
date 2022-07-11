@@ -15,11 +15,15 @@ set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} CACHE PATH
   "Path to the root directory of an OpenSSL installation.")
 find_package(OpenSSL 3 REQUIRED)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH 
+  "${PROJECT_SOURCE_DIR}/cmake"
+  ${CMAKE_MODULE_PATH}
+  )
 
 include(SystemCheck)
 include(LibUtils)
 # include(ModuleUtils)
+include(PythonUtils)
 
 set_system_check_vars()
 
@@ -43,7 +47,7 @@ set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(pulse)
 add_subdirectory(lindzei)
-#add_subdirectory(etro)
+add_subdirectory(etro)
 
 if(BUILD_TESTS)
   # enable_testing()

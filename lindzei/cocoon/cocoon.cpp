@@ -80,72 +80,113 @@ int main(void)
 	//1 & 0 & 1 & 0.950 & 0.931 \\
 	//1 & 1 & 0 & 0.205 & 0.0813 \\[1ex]
 
+	std::vector<float> n1_avg(training_data.size());
+	std::vector<float> nc_avg(training_data.size());
 
-	for (int i = 0; i < 500; i++)
+	for (int avg_count = 0; avg_count < 97; avg_count++)
 	{
-		pulse::TrainNetwork(network1, desired1, training1, 1);
-
-		pulse::TrainNetwork(network2, desired2, training2, 1);
-
-		pulse::TrainNetwork(network_control, desired_outputs, training_data, 1);
-
-		weights1 = network1.GetWeights();
-		weights2 = network2.GetWeights();
-
-		NetworkUpdate network1_update
+		for (int i = 0; i < 500; i++)
 		{
-			.network_structure = network_structure,
-			.delta_weights = weights1,
-			.examples_seen = 2
-		};
+			pulse::TrainNetwork(network1, desired1, training1, 1);
 
-		NetworkUpdate network2_update
+			pulse::TrainNetwork(network2, desired2, training2, 1);
+
+			pulse::TrainNetwork(network_control, desired_outputs, training_data, 1);
+
+			weights1 = network1.GetWeights();
+			weights2 = network2.GetWeights();
+
+			NetworkUpdate network1_update
+			{
+				.network_structure = network_structure,
+				.delta_weights = weights1,
+				.examples_seen = 2
+			};
+
+			NetworkUpdate network2_update
+			{
+				.network_structure = network_structure,
+				.delta_weights = weights2,
+				.examples_seen = 2
+			};
+
+			Federatedblock b2{};
+
+			b2.AddLocalUpdate(std::move(network1_update));
+			b2.AddLocalUpdate(std::move(network2_update));
+
+			bc.Add(std::move(b2));
+			auto& last = bc.GetLast();
+
+			auto&gu = last.GetGlobalUpdate();
+
+			network1.SetWeights(gu.delta_weights);
+			network2.SetWeights(gu.delta_weights);
+
+
+		}
+
+		std::vector<std::vector<float>> n1_inference = network1(training_data);
+		for (int k = 0; k < n1_avg.size(); k++)
 		{
-			.network_structure = network_structure,
-			.delta_weights = weights2,
-			.examples_seen = 2
-		};
+			const auto &i = n1_inference[k];
 
-		Federatedblock b2{};
-
-		b2.AddLocalUpdate(std::move(network1_update));
-		b2.AddLocalUpdate(std::move(network2_update));
-
-		bc.Add(std::move(b2));
-		auto& last = bc.GetLast();
-
-		auto&gu = last.GetGlobalUpdate();
-
-		network1.SetWeights(gu.delta_weights);
-		network2.SetWeights(gu.delta_weights);
+			for (const auto& j : i) //Only 1 elem
+			{
+				n1_avg[k] += j;
+			}
+		}
 
 
+		std::vector<std::vector<float>> nc_inference = network_control(training_data);
+		for (int k = 0; k < nc_avg.size(); k++)
+		{
+			const auto &i = nc_inference[k];
+
+			for (const auto& j : i) //Only 1 elem
+			{
+				nc_avg[k] += j;
+			}
+		}
 	}
+
+	///////add old runs
+	n1_avg[0] += (0.065025 + 0.020389 + 0.050252);
+	n1_avg[1] += (0.941512 + 0.934605 + 0.897963);
+	n1_avg[2] += (0.936504 + 0.932636 + 0.922550);
+	n1_avg[3] += (0.065485 + 0.076678 + 0.101760);
+
+
+	nc_avg[0] += (0.021932 + 0.011712 + 0.040020);
+	nc_avg[1] += (0.954518 + 0.958125 + 0.942102);
+	nc_avg[2] += (0.949580 + 0.956799 + 0.942347);
+	nc_avg[3] += (0.055183 + 0.049161 + 0.511960);
+
+
+	for (auto& n1_a : n1_avg)
+	{
+		std::cout << n1_a << ", " << n1_a / 100 << std::endl;
+	}
+
+	for (auto& nc_a : nc_avg)
+	{
+		std::cout <<nc_a << ", " << nc_a / 100 << std::endl;
+	}
+
+
 
 		
 		//std::cout << bc.GetLast() << std::endl;
 
 
-	std::cout << "\nNetwork 1 on all data:\n";
+	//std::cout << "\nNetwork 1 on all data:\n";
 
-	pulse::PrintInferencingResults(network1, training_data, desired_outputs);
+	//pulse::PrintInferencingResults(network1, training_data, desired_outputs);
 
 
-	std::cout << "\nNetwork control on all data:\n";
+	//std::cout << "\nNetwork control on all data:\n";
 
-	pulse::PrintInferencingResults(network_control, training_data, desired_outputs);
-
-	std::vector<std::vector<float>> t = network_control(training_data);
-
-	for (const auto &i : t)
-	{
-		for (const auto& j : i)
-		{
-			std::cout << j;
-		}
-
-		std::cout << std::endl;
-	}
+	//pulse::PrintInferencingResults(network_control, training_data, desired_outputs);
 
 	return 0;
 }

@@ -92,15 +92,15 @@ namespace pulse
 		void UpdateWeights(const NetworkWeights& delta_weights);
 
 		/** A Forward pass through the network with tracking. */
-		void Feedforward(const std::vector<float>&);
+		void Feedforward(const std::vector<float>& input);
 
 		//doesn't need to be member yet but will once we move Output (below)
 		//Could make universal ref ....
 		/** A Forward pass through the network without tracking. */
-		std::vector<float> operator()(const std::vector<float>&);
+		std::vector<float> operator()(const std::vector<float>& input);
 
 		/** A Forward pass through the network without tracking for a set of inputs. */
-		std::vector<std::vector<float>> operator()(const std::vector<std::vector<float>>&);
+		std::vector<std::vector<float>> operator()(const std::vector<std::vector<float>>& inputs);
 
 		const std::vector<float>& Output() const;
 
