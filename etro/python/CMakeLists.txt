@@ -1,46 +1,39 @@
 find_package(Python3 COMPONENTS Development NumPy REQUIRED)
 
-add_python_extension(ps "t.c")
+set(FALPY_MODULE_ROOT "${ETRO_MODULE_ROOT}/python/falpy")
 
-#set(src_files1 "matrix.c" 
-#  "blockchain.cpp" "federated_blockchain.cpp" 
-#  "blockheader.c" "federatedblock.c")
+set(sources "falpy.c" "tf_model_matrix.c")
 
-#set(src_files2
-#  "crypto.c" "encoding.c" "endianness_check.cpp"
-#  "cactuar.c" "math.c")
+set(falpy_module 
+  "${FALPY_MODULE_ROOT}/tf_model_matrix.h" # ixx"
+  )
 
-#file(GLOB public_headder_files "${INCLUDE_ROOT}/etro/*.h")
-#file(GLOB private_headder_files *.h)
+add_library(falpy SHARED ${sources})
 
-#add_library(etro SHARED
-#  ${src_files1}
-#  ${public_headder_files}
-#  ${private_headder_files})
+as_python_extension(falpy)
 
-#add_library(pulse OBJECT
-#  ${src_files2}
-#  ${public_headder_files}
-#  ${private_headder_files})
+target_sources(falpy PRIVATE
+  FILE_SET headers
+  TYPE HEADERS
+  BASE_DIRS "${ETRO_MODULE_ROOT}/python"
+  FILES ${falpy_module} "${FALPY_MODULE_ROOT}/_falpyconfig.h"
+  )
 
 
-#if(MSVC)
-#  #For matrix mult
-#  target_compile_options(etro PUBLIC "/arch:AVX512")
+target_include_directories(falpy PUBLIC
+  ${Python3_INCLUDE_DIRS}
+  ${Python3_NumPy_INCLUDE_DIRS}
+  )
 
-#  #For openssl TODO?: Uncomment Cant find applink :O Maybe because precomiled?
-#  #target_link_libraries(etro PRIVATE OpenSSL::applink)
-#endif()
+target_link_libraries(falpy ${Python3_LIBRARIES} pulse)
 
-#target_compile_definitions(etro PRIVATE 
-#  "OPENSSL_API_COMPAT=30000" 
-#  "OPENSSL_NO_DEPRECATED")
+if (MSVC)
+  set_property(TARGET falpy PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+  target_compile_definitions(falpy PRIVATE FALPY_BUILD_DLL)
+endif()
 
-#target_include_directories(etro PUBLIC ${INCLUDE_ROOT} ${OPENSSL_INCLUDE_DIR})
-#target_include_directories(pulse PUBLIC ${INCLUDE_ROOT} ${OPENSSL_INCLUDE_DIR})
-#target_link_libraries(etro PUBLIC OpenSSL::Crypto pulse)
 
-#add_executable(buh main.cpp ${public_headder_files})
-#target_include_directories(buh PUBLIC ${INCLUDE_ROOT} ${OPENSSL_INCLUDE_DIR})
 
-#target_link_libraries(buh PUBLIC etro OpenSSL::Crypto)
+
+
+

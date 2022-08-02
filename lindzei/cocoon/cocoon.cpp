@@ -15,11 +15,7 @@ int main(void)
 	using pulse::NeuralNetwork;
 	using lindzei::NetworkUpdate;
 
-	Federatedblock genisis = Federatedblock::Genisis();
-
-	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ std::move(genisis), 32 };
-
-	//std::cout << "Genisis:\n" << genisis << "\n";
+	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ Federatedblock::Genisis(), 32 };
 
 	Federatedblock block{};
 

@@ -19,27 +19,36 @@ import :chain;
 #include <concepts>
 #include <utility>
 
-//TODO: VV May not like using <>
 #include <dahaka/dahaka-chain.h>
 
 //export 
 namespace pulse
 {
-	template<typename T>//, typename U, typename V>
-	concept BlockchainAddable = requires (T block, 
-		const std::vector<std::byte>& l_hash, std::vector<std::byte>&& r_hash)
-		//, U hash_type, V target_type)
+	template<typename T>
+	concept BlockchainAddable = requires (T block,
+		const std::vector<std::byte>&l_hash, std::vector<std::byte> && r_hash)
 	{
-		{ block.Mine(std::move(r_hash ) ) };
+		{ block.Mine(std::move(r_hash)) };
 		{ block.PrevHash() } -> std::convertible_to<const std::vector<std::byte>&>;
 		{ block.Hash() } -> std::convertible_to<std::vector<std::byte>>;
 		{ block.CompareWithTarget(l_hash) } -> std::convertible_to<bool>;
 	};
 
+	/*
+	template<typename G>
+	concept GenisisCreatable = BlockchainAddable<G> && requires (G x)
+	{
+		{ G::Genisis() } ->std::convertible_to<G>;
+	};
+	*/
+
+
+
 	template<BlockchainAddable T, std::int64_t UnrolledElems>
 	class Blockchain
 	{
 	public:
+		
 		Blockchain(T&& genisis, const int hash_size);
 
 		void Add(T&& elem);
@@ -56,7 +65,6 @@ namespace pulse
 
 		const int hash_size;
 	};
-
 
 	//Might want an additional temp param for difficulty change ... thinggy ...
 	//I (Think I) Can finally use a universal ref :D (since (Some) Blocks are non copyable) 
@@ -99,7 +107,7 @@ namespace pulse
 
 		T prevBlock = *it;
 		T currBlock;
-		
+
 		auto end = this->chain.end();
 		while (++it != end) //< Is it acceptable to inc in the while? Is that defined behavouir?
 		{
@@ -126,7 +134,7 @@ namespace pulse
 					sizeof(unsigned char) * this->hash_size) == 0
 			*/
 
-			if (!( 
+			if (!(
 				prevBlock.Hash() == currBlock.Hash() &&
 				currBlock.CompareWithTarget(currBlock.Hash())
 				))
