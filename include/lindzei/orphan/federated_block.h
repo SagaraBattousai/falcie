@@ -24,7 +24,8 @@ namespace lindzei
 	{
 	public:
 
-		Federatedblock(std::uint32_t = 0x01, pulse::Target = { 0x21FFFFFF }, //pulse::Target = {},
+		Federatedblock(std::uint32_t = 0x01,
+			pulse::Target = { 0x21FFFFFF }, //pulse::Target = {},
 			BlockHashFunction = pulse::PulseHash,
 			pulse::HashAlgorithm = pulse::HashAlgorithm::SHA256);
 

@@ -15,6 +15,7 @@ set(anima_module
   )
 
 set(cpp_files 
+  "anima-matrix.c" 
   "anima-matrix.cpp" 
   "anima-neural_network.cpp"
   "anima-random.cpp")

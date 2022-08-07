@@ -242,7 +242,7 @@ namespace pulse
 		{
 			//TODO: Check this doesn't die when leaving the function (or does = call copy constructor ?
 			this->tracking.pre_activation_layers[i + 1] =
-				(Matrix{ this->tracking.layers[i] } *(this->weights[i])).Data();
+				this->tracking.layers[i] *(this->weights[i]);// .Data();
 
 			for (std::int64_t j = 0;
 				j < static_cast<std::int64_t>(this->tracking.pre_activation_layers[i + 1].size());

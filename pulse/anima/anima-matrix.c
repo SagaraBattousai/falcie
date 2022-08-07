@@ -1,250 +1,191 @@
 
-//module;
-#ifndef __ANIMA_MATRIX__
-#define __ANIMA_MATRIX__
-
-
-#ifdef __cplusplus 
-extern "C" {
-#endif
-
+#include <stdlib.h>
 #include <stdint.h>
-
-	typedef struct dimensions
-	{
-		int64_t dim1;
-		int64_t dim2;
-	} dimensions_t;
-
-	int64_t dimension_area(const dimensions_t* const);
-
-	typedef struct matrix matrix_t;
-
-	matrix_t* new_matrix_from_shape(dimensions_t init_shape, size_t data_element_size);
-
-	matrix_t* new_column_matrix(void *data, int64_t count);
-
-	matrix_t* new_matrix(void *data, dimensions_t shape);
-
-	void delete_matrix(matrix_t *matrix);
-
-	void* const matrix_get(const matrix_t *matrix, dimensions_t index, size_t element_size);
-
-	//void* const matrix_get_flat(const matrix_t *matrix, int64_t flat_index, size_t element_size);
-	void* matrix_get_flat(const matrix_t *matrix, int64_t flat_index, size_t element_size);
-
-	const void* const matrix_get_data(const matrix_t *matrix);
-
-	const dimensions_t* const matrix_get_shape(const matrix_t *matrix);
-
-	int64_t matrix_total_element_count(const matrix_t *matrix);
-
-	int64_t matrix_row_count(const matrix_t *matrix);
-
-	int64_t matrix_column_count(const matrix_t *matrix);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#ifdef __cplusplus
-
-#include <cstdint>
-#include <stdexcept>
+#include <string.h>
 
 #ifdef USE_AVX_INTRIN
 #include <immintrin.h>
 #endif // USE_AVX_INTRIN
 
-//export module anima:matrix;
+#include <anima/anima-matrix.h>
 
-#include <vector> //import <vector>;
-#include <initializer_list> //import <initializer_list>;
-#include <utility> //import <utility>;
+/*
+#ifdef USE_AVX_INTRIN
 
-//export
-namespace pulse
+constexpr int AVX_512_PACK_SIZE = 16;
+constexpr int AVX_512_PACK_SHIFT = 4; //Used for multipying by 16
+
+//Overflow if not mult of 16
+static inline void inner_intrin_matrix_mult(__m512 sv, float *rowB, float *rowC)
 {
-	using Dimensions = std::pair<std::int64_t, std::int64_t>;
+	//Can I assume aligned? i.e. do I need to use the u versions (loadu storeu etc)
+	__m512 cv = _mm512_load_ps(rowC);
+	__m512 bv = _mm512_load_ps(rowB);
+	cv = _mm512_fmadd_ps(bv, sv, cv);
+	_mm512_store_ps(rowC, cv);
+}
 
-	template <typename T>
-	class Matrix;
+void matrix_multiply(float *in1, float *in2, float *out,
+	const int64_t dim1, const int64_t dim2, const int64_t dim3)
+{
+	const int64_t packed_width = dim3 >> AVX_512_PACK_SHIFT; //i.e. /16
 
-	//template<typename T>
-	//Matrix<T> operator*(const Matrix<T>&, const Matrix<T>&);
-
-	//template<typename T>
-	//Matrix<T> operator+(Matrix<T>, const Matrix<T>&);
-
-	//template<typename T, typename U>
-	//Matrix<T> operator*(const U&, Matrix<T>);
-
-	//template<typename T, typename U>
-	//Matrix<T> operator+(const U&, Matrix<T>);
-
-	//template<typename T>
-	//std::vector<T> operator*(const std::vector<T>&, const Matrix<T>&);
-
-	//for now we'll cheat but next iteration TODO: add reference to transpose data
-	//(which will index differently) aka from whiteboard!
-	//template<typename T>
-	//std::vector<T> operator*(const Matrix<T>& lhs, const std::vector<T>& rhs);
-
-
-	//void broadcast_vectors(const float *in1, const float *in2,
-		//float *out, const int64_t dim1, const int64_t dim2, combinator_ptr combinator);
-
-
-	template <typename T>
-	class Matrix
+	for (int64_t i = 0; i < dim1; i++)
 	{
-	public:
-		Matrix(Dimensions init_shape);
+		int64_t out_row_start = i * dim3;
 
-		Matrix(std::vector<T>& values);
-		Matrix(std::vector<T>& values, Dimensions init_shape);
-
-		Matrix(std::vector<T>&& values);
-		Matrix(std::vector<T>&& values, Dimensions init_shape);
-
-		virtual ~Matrix();
-
-		constexpr std::int64_t TotalElementCount();
-
-		constexpr std::int64_t RowCount();
-		constexpr std::int64_t ColumnCount();
-
-
-		//??? T(); Want ref to self but dims are swapped so .... Coud carry .T ref to self?
-
-		//As much as I hate defining in class declaration it seems MSVC has a bug
-		//that requires it when const overriding and operator :'(
-
-		const T& operator[](Dimensions index) const
+		for (int64_t j = 0; j < dim2; j++)
 		{
-			return *((T*)matrix_get(this->data, { index.first, index.second }, sizeof(T)));
-		};
+			__m512 sv = _mm512_set1_ps(in1[i * dim2 + j]); //A_ij
+			int64_t in_row_start = j * dim3;
 
-		//Writeable version
-		T& operator[](Dimensions index)
+			//Can only work on 16 elements per row at a time
+			for (int64_t packed_segment = 0; packed_segment < packed_width; packed_segment++)
+			{
+				int64_t packed_offset = packed_segment << AVX_512_PACK_SHIFT; //i.e. * 16
+
+				inner_intrin_matrix_mult(
+					sv,
+					&in2[in_row_start + packed_offset],
+					&out[out_row_start + packed_offset]
+				);
+			}
+
+			// Handle remaining coloumns when the number of elements is not a multiple of
+			// The packing size. In this case 16.
+			int64_t columns_remaining = dim3 % AVX_512_PACK_SIZE;
+			if (columns_remaining != 0)
+			{
+				int64_t remaining_offset = dim3 - columns_remaining;
+				// Don't want the possibility of reading from bad location so we
+				// pad the input row too.
+				float in_padded_row[AVX_512_PACK_SIZE] = { 0 };
+				float out_padded_row[AVX_512_PACK_SIZE] = { 0 };
+
+				memcpy(in_padded_row, &in2[in_row_start + remaining_offset],
+					sizeof(float) * columns_remaining);
+				memcpy(out_padded_row, &out[out_row_start + remaining_offset],
+					sizeof(float) * columns_remaining);
+
+				inner_intrin_matrix_mult(sv, in_padded_row, out_padded_row);
+
+				memcpy(&out[out_row_start + remaining_offset], out_padded_row,
+					sizeof(float) * columns_remaining);
+			}
+		}
+	}
+}
+
+#endif
+*/
+
+typedef struct matrix
+{
+	void *data;
+	dimensions_t dims;
+} matrix_t;
+
+int64_t dimension_area(const dimensions_t* const dims)
+{
+	return dims->dim1 * dims->dim2;
+}
+
+void delete_matrix(matrix_t *matrix)
+{
+	if (matrix != NULL)
+	{
+/*		if (matrix->data != NULL)
 		{
-			return *((T*)matrix_get(this->data, { index.first, index.second }, sizeof(T)));
-		};
-
-		const T& operator[](std::int64_t i) const
-		{
-			return *((T*)matrix_get_flat(this->data, i, sizeof(T)));
-
-		};
-
-		//Writeable version
-		T& operator[](std::int64_t i)
-		{
-			return *((T*)matrix_get_flat(this->data, i, sizeof(T)));
-		};
-
-		//non-friend non-member are better but...I was making functions
-		//that were unneccisary just to stop it being a friend.
-		friend Matrix operator*<T>(const Matrix&, const Matrix&);
-		friend std::vector<T> operator*<T>(const std::vector<T>&, const Matrix&);
-		friend std::vector<T> operator*<T>(const Matrix&, const std::vector<T>&);
-
-		Matrix& operator*=(const Matrix&);
-		Matrix& operator+=(const Matrix&);
-
-		template<typename U>
-		Matrix& operator*=(const U&);
-		template<typename U>
-		Matrix& operator+=(const U&);
-
-		
-
-
-		//for now we'll cheat but next iteration TODO: add reference to transpose data
-	//(which will index differently) aka from whiteboard!
-
-		//I think this'll cause an issue (constexpr could be safer?
-		const matrix_t* Data() const;
-		//const matrix_t* const Data() const;
-
-		const Dimensions& Shape();
-
-	private:
-		matrix_t *data;
-
-		Dimensions dims;
-	};
-
-
-	template <typename T>
-	Matrix<T>::Matrix(Dimensions init_shape)
-		: Matrix(std::vector<T>(init_shape.first * init_shape.second), init_shape)
-	{
+			free(matrix->data);
+		}*/
+		free(matrix);
 	}
+}
 
-	//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
-	// Transpose instead?
-	//BUGS in constructure im gessing
-	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>&& values) : Matrix(std::move(values), { 1, (std::int64_t)values.size() }) {}
-
-
-	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>&& values, Dimensions shape)
-		: data(new_matrix(values.data(), { .dim1 = shape.first, .dim2 = shape.second }))
-		, dims(shape)
+matrix_t* new_matrix_from_shape(dimensions_t init_shape, size_t data_element_size)
+{
+	matrix_t *matrix = (matrix_t*)malloc(sizeof(matrix_t));
+	if (matrix == NULL)
 	{
-	}	
-	
-	//moving a copy?
-	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>& values) : Matrix(std::move(values), { 1, (std::int64_t)values.size() }) {}
-
-
-	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>& values, Dimensions shape)
-		: data(new_matrix(values.data(), {.dim1 = shape.first, .dim2= shape.second }))
-		, dims(shape)
-	{
+		return NULL;
 	}
-	template <typename T>
-	Matrix<T>::~Matrix()
-	{
-		delete_matrix(this->data);
-	}
+	matrix->dims = init_shape;
+	matrix->data = malloc(data_element_size * dimension_area(&init_shape));
 
+	return matrix;
+}
 
-	template <typename T>
-	const matrix_t* Matrix<T>::Data() const
+//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
+// Transpose instead?
+matrix_t* new_column_matrix(void *data, int64_t count)
+{
+	matrix_t *matrix = (matrix_t*)malloc(sizeof(matrix_t));
+	if (matrix == NULL)
 	{
-		return this->data;
+		return NULL;
 	}
+	dimensions_t dims = { .dim1 = 1, .dim2 = count };
+	matrix->dims = dims;
+	matrix->data = data;
 
-	template <typename T>
-	const Dimensions& Matrix<T>::Shape()
-	{
-		return this->dims;
-	}
+	return matrix;
+}
 
-	//TODO: Potential bug constexpr
-	template <typename T>
-	constexpr std::int64_t Matrix<T>::TotalElementCount()
+matrix_t* new_matrix(void *data, dimensions_t shape)
+{
+	matrix_t *matrix = (matrix_t*)malloc(sizeof(matrix_t));
+	if (matrix == NULL)
 	{
-		return dimension_area(matrix_get_shape(this->data));
+		return NULL;
 	}
+	matrix->dims = shape;
+	matrix->data = data;
 
-	template <typename T>
-	constexpr std::int64_t Matrix<T>::RowCount()
-	{
-		return this->dims.first;
-	}
+	return matrix;
+}
 
-	template <typename T>
-	constexpr std::int64_t Matrix<T>::ColumnCount()
-	{
-		return this->dims.second;
-	}
+void* const matrix_get(const matrix_t *matrix, dimensions_t index, size_t element_size)
+{
+	int64_t flat_index = ((index.dim1 * matrix->dims.dim2) + index.dim2) * element_size;
+	return (void *)(((char *)matrix->data) + flat_index);
+}
+
+//void* const matrix_get_flat(const matrix_t *matrix, int64_t flat_index, size_t element_size)
+void* matrix_get_flat(const matrix_t *matrix, int64_t flat_index, size_t element_size)
+{
+	return (void *)(((char *)matrix->data) + (flat_index * element_size));
+}
+
+const void* const matrix_get_data(const matrix_t *matrix)
+{
+	return matrix->data;
+}
+
+const dimensions_t* const matrix_get_shape(const matrix_t *matrix)
+{
+	return &(matrix->dims);
+}
+
+int64_t matrix_total_element_count(const matrix_t *matrix)
+{
+	return dimension_area(&(matrix->dims));
+}
+
+int64_t matrix_row_count(const matrix_t *matrix)
+{
+	return matrix->dims.dim1;
+}
+
+int64_t matrix_column_count(const matrix_t *matrix)
+{
+	return matrix->dims.dim2;
+}
+
+//VV Don't need the rest of these now, especially since the base C side won't use it! 
+// It will however, be implemented for floats in etro.
+
+/*
+
 
 	template<typename T>
 	Matrix<T>& pulse::Matrix<T>::operator*=(const Matrix<T>& rhs)
@@ -290,7 +231,7 @@ namespace pulse
 
 		//#endif
 
-		return Matrix<T>(std::move(mout), { newRowCount, newColumnCount });
+		return Matrix<T>(mout, { newRowCount, newColumnCount });
 	}
 
 	template<typename T>
@@ -325,9 +266,9 @@ namespace pulse
 	template<typename U>
 	Matrix<T>& Matrix<T>::operator*=(const U& scalar)
 	{
-		for (int64_t i = 0; i < this->TotalElementCount(); ++i)
+		for (auto it = this->data.begin(); it != this->data.end(); ++it)
 		{
-			*((T*)matrix_get_flat(this->data, i, sizeof(T))) *= scalar;
+			*it *= scalar;
 		}
 
 		return *this;
@@ -363,7 +304,7 @@ namespace pulse
 	template<typename T>
 	std::vector<T> operator*(const std::vector<T>& lhs, const Matrix<T>& rhs)
 	{
-		if ((std::int64_t) lhs.size() != rhs.dims.first)
+		if (lhs.size() != rhs.dims.first)
 		{
 			throw std::domain_error("The size of the vector must \
 				match the number of rows in the Matrix");
@@ -678,7 +619,9 @@ namespace pulse
 
 	 */
 
-} //namespace pulse
+	 //} //namespace pulse
 
-#endif
-#endif //End of header
+
+
+
+

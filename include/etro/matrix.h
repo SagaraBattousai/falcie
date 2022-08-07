@@ -1,95 +1,46 @@
 
 //module;
-#ifndef __ANIMA_MATRIX__
-#define __ANIMA_MATRIX__
+#ifndef __ETRO_MATRIX__
+#define __ETRO_MATRIX__
 
-
-#ifdef __cplusplus 
-extern "C" {
-#endif
-
-#include <stdint.h>
-
-	typedef struct dimensions
-	{
-		int64_t dim1;
-		int64_t dim2;
-	} dimensions_t;
-
-	int64_t dimension_area(const dimensions_t* const);
-
-	typedef struct matrix matrix_t;
-
-	matrix_t* new_matrix_from_shape(dimensions_t init_shape, size_t data_element_size);
-
-	matrix_t* new_column_matrix(void *data, int64_t count);
-
-	matrix_t* new_matrix(void *data, dimensions_t shape);
-
-	void delete_matrix(matrix_t *matrix);
-
-	void* const matrix_get(const matrix_t *matrix, dimensions_t index, size_t element_size);
-
-	//void* const matrix_get_flat(const matrix_t *matrix, int64_t flat_index, size_t element_size);
-	void* matrix_get_flat(const matrix_t *matrix, int64_t flat_index, size_t element_size);
-
-	const void* const matrix_get_data(const matrix_t *matrix);
-
-	const dimensions_t* const matrix_get_shape(const matrix_t *matrix);
-
-	int64_t matrix_total_element_count(const matrix_t *matrix);
-
-	int64_t matrix_row_count(const matrix_t *matrix);
-
-	int64_t matrix_column_count(const matrix_t *matrix);
-
-
-#ifdef __cplusplus
-}
-#endif
+#include <anima/anima-matrix.h>
 
 #ifdef __cplusplus
 
-#include <cstdint>
-#include <stdexcept>
 
-#ifdef USE_AVX_INTRIN
-#include <immintrin.h>
-#endif // USE_AVX_INTRIN
+#else
 
-//export module anima:matrix;
 
-#include <vector> //import <vector>;
-#include <initializer_list> //import <initializer_list>;
-#include <utility> //import <utility>;
+#endif
 
-//export
-namespace pulse
-{
+
+
+
+/*
 	using Dimensions = std::pair<std::int64_t, std::int64_t>;
 
 	template <typename T>
 	class Matrix;
 
-	//template<typename T>
-	//Matrix<T> operator*(const Matrix<T>&, const Matrix<T>&);
+	template<typename T>
+	Matrix<T> operator*(const Matrix<T>&, const Matrix<T>&);
 
-	//template<typename T>
-	//Matrix<T> operator+(Matrix<T>, const Matrix<T>&);
+	template<typename T>
+	Matrix<T> operator+(Matrix<T>, const Matrix<T>&);
 
-	//template<typename T, typename U>
-	//Matrix<T> operator*(const U&, Matrix<T>);
+	template<typename T, typename U>
+	Matrix<T> operator*(const U&, Matrix<T>);
 
-	//template<typename T, typename U>
-	//Matrix<T> operator+(const U&, Matrix<T>);
+	template<typename T, typename U>
+	Matrix<T> operator+(const U&, Matrix<T>);
 
-	//template<typename T>
-	//std::vector<T> operator*(const std::vector<T>&, const Matrix<T>&);
+	template<typename T>
+	std::vector<T> operator*(const std::vector<T>&, const Matrix<T>&);
 
-	//for now we'll cheat but next iteration TODO: add reference to transpose data
+	//for now we'll cheat but next iteration TODO: add reference to transpose data 
 	//(which will index differently) aka from whiteboard!
-	//template<typename T>
-	//std::vector<T> operator*(const Matrix<T>& lhs, const std::vector<T>& rhs);
+	template<typename T>
+	std::vector<T> operator*(const Matrix<T>& lhs, const std::vector<T>& rhs);
 
 
 	//void broadcast_vectors(const float *in1, const float *in2,
@@ -101,14 +52,9 @@ namespace pulse
 	{
 	public:
 		Matrix(Dimensions init_shape);
-
-		Matrix(std::vector<T>& values);
-		Matrix(std::vector<T>& values, Dimensions init_shape);
-
-		Matrix(std::vector<T>&& values);
-		Matrix(std::vector<T>&& values, Dimensions init_shape);
-
-		virtual ~Matrix();
+		//make move constructor
+		Matrix(std::vector<T> values);
+		Matrix(std::vector<T> values, Dimensions init_shape);
 
 		constexpr std::int64_t TotalElementCount();
 
@@ -123,55 +69,53 @@ namespace pulse
 
 		const T& operator[](Dimensions index) const
 		{
-			return *((T*)matrix_get(this->data, { index.first, index.second }, sizeof(T)));
+			return this->data[index.first * this->dims.second + index.second];
 		};
 
 		//Writeable version
 		T& operator[](Dimensions index)
 		{
-			return *((T*)matrix_get(this->data, { index.first, index.second }, sizeof(T)));
+			return this->data[index.first * this->dims.second + index.second];
 		};
 
 		const T& operator[](std::int64_t i) const
 		{
-			return *((T*)matrix_get_flat(this->data, i, sizeof(T)));
-
+			return this->data[i];
 		};
 
 		//Writeable version
 		T& operator[](std::int64_t i)
 		{
-			return *((T*)matrix_get_flat(this->data, i, sizeof(T)));
+			return this->data[i];
 		};
 
 		//non-friend non-member are better but...I was making functions
 		//that were unneccisary just to stop it being a friend.
 		friend Matrix operator*<T>(const Matrix&, const Matrix&);
-		friend std::vector<T> operator*<T>(const std::vector<T>&, const Matrix&);
-		friend std::vector<T> operator*<T>(const Matrix&, const std::vector<T>&);
 
 		Matrix& operator*=(const Matrix&);
 		Matrix& operator+=(const Matrix&);
 
 		template<typename U>
 		Matrix& operator*=(const U&);
+
 		template<typename U>
 		Matrix& operator+=(const U&);
 
-		
-
-
-		//for now we'll cheat but next iteration TODO: add reference to transpose data
+		//TODO:
+		//This may be messy and evil
+		friend std::vector<T> operator*<T>(const std::vector<T>&, const Matrix&);
+		//for now we'll cheat but next iteration TODO: add reference to transpose data 
 	//(which will index differently) aka from whiteboard!
+		friend std::vector<T> operator*<T>(const Matrix&, const std::vector<T>&);
 
 		//I think this'll cause an issue (constexpr could be safer?
-		const matrix_t* Data() const;
-		//const matrix_t* const Data() const;
+		const std::vector<T>& Data() const;
 
 		const Dimensions& Shape();
 
 	private:
-		matrix_t *data;
+		std::vector<T> data;
 
 		Dimensions dims;
 	};
@@ -185,38 +129,21 @@ namespace pulse
 
 	//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
 	// Transpose instead?
-	//BUGS in constructure im gessing
+	//BUGS in constructure im gessing 
 	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>&& values) : Matrix(std::move(values), { 1, (std::int64_t)values.size() }) {}
+	Matrix<T>::Matrix(std::vector<T> values) : Matrix(values, { 1, (std::int64_t)values.size() }) {}
 
 
 	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>&& values, Dimensions shape)
-		: data(new_matrix(values.data(), { .dim1 = shape.first, .dim2 = shape.second }))
+	Matrix<T>::Matrix(std::vector<T> values, Dimensions shape)
+		: data(values)
 		, dims(shape)
 	{
-	}	
-	
-	//moving a copy?
-	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>& values) : Matrix(std::move(values), { 1, (std::int64_t)values.size() }) {}
-
-
-	template <typename T>
-	Matrix<T>::Matrix(std::vector<T>& values, Dimensions shape)
-		: data(new_matrix(values.data(), {.dim1 = shape.first, .dim2= shape.second }))
-		, dims(shape)
-	{
-	}
-	template <typename T>
-	Matrix<T>::~Matrix()
-	{
-		delete_matrix(this->data);
+		this->data.shrink_to_fit(); //Data's size will not change 
 	}
 
-
 	template <typename T>
-	const matrix_t* Matrix<T>::Data() const
+	const std::vector<T>& Matrix<T>::Data() const
 	{
 		return this->data;
 	}
@@ -231,7 +158,7 @@ namespace pulse
 	template <typename T>
 	constexpr std::int64_t Matrix<T>::TotalElementCount()
 	{
-		return dimension_area(matrix_get_shape(this->data));
+		return this->data.size();
 	}
 
 	template <typename T>
@@ -245,6 +172,8 @@ namespace pulse
 	{
 		return this->dims.second;
 	}
+
+
 
 	template<typename T>
 	Matrix<T>& pulse::Matrix<T>::operator*=(const Matrix<T>& rhs)
@@ -290,7 +219,7 @@ namespace pulse
 
 		//#endif
 
-		return Matrix<T>(std::move(mout), { newRowCount, newColumnCount });
+		return Matrix<T>(mout, { newRowCount, newColumnCount });
 	}
 
 	template<typename T>
@@ -325,9 +254,9 @@ namespace pulse
 	template<typename U>
 	Matrix<T>& Matrix<T>::operator*=(const U& scalar)
 	{
-		for (int64_t i = 0; i < this->TotalElementCount(); ++i)
+		for (auto it = this->data.begin(); it != this->data.end(); ++it)
 		{
-			*((T*)matrix_get_flat(this->data, i, sizeof(T))) *= scalar;
+			*it *= scalar;
 		}
 
 		return *this;
@@ -363,7 +292,7 @@ namespace pulse
 	template<typename T>
 	std::vector<T> operator*(const std::vector<T>& lhs, const Matrix<T>& rhs)
 	{
-		if ((std::int64_t) lhs.size() != rhs.dims.first)
+		if (lhs.size() != rhs.dims.first)
 		{
 			throw std::domain_error("The size of the vector must \
 				match the number of rows in the Matrix");
@@ -388,7 +317,7 @@ namespace pulse
 		return mout;
 	}
 
-	//for now we'll cheat but next iteration TODO: add reference to transpose data
+	//for now we'll cheat but next iteration TODO: add reference to transpose data 
 	//(which will index differently) aka from whiteboard!
 	template<typename T>
 	std::vector<T> operator*(const Matrix<T>& lhs, const std::vector<T>& rhs)
@@ -455,7 +384,7 @@ namespace pulse
 	//in1 is [m * 1] and  in2 is [1 * n]. out is [m * n]
 	//Can't be mutable as in1 nd in2 are reused (double looped) therefore
 	//overwriting would change values.
-	//
+	// 
 	// Should bin op be a functional object?????
 	template<typename T, typename U, typename V, typename BinOp>
 	Matrix<T> Broadcast(const Matrix<U>& lhs, const Matrix<V>& rhs, BinOp binary_op)
@@ -678,7 +607,4 @@ namespace pulse
 
 	 */
 
-} //namespace pulse
-
 #endif
-#endif //End of header
