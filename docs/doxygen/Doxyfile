@@ -874,7 +874,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../include/pulse/pulse.h    ../include/pulse/anima/anima.h ../include/pulse/anima/anima-matrix.h ../include/pulse/anima/anima-neural_network.h ../include/pulse/anima/anima-random.h         ../include/pulse/cactuar/cactuar.h ../include/pulse/cactuar/cactuar-block.h ../include/pulse/cactuar/cactuar-blockheader.h ../include/pulse/cactuar/cactuar-crypto.h ../include/pulse/cactuar/cactuar-encoding.h ../include/pulse/cactuar/cactuar-target.h ../include/pulse/dahaka/dahaka.h ../include/pulse/dahaka/dahaka-chain.h ../include/pulse/dahaka/dahaka-blockchain.h ../include/pulse/dahaka/dahaka-orderedlist.h ../include/pulse/dahaka/dahaka-tree.h 
+INPUT                  = ../include/pulse/pulse.h    ../include/pulse/anima/anima.h ../include/pulse/anima/anima-dimensions.h ../include/pulse/anima/anima-matrix.h ../include/pulse/anima/anima-matrix_old.h ../include/pulse/anima/anima-neural_network.h ../include/pulse/anima/anima-neural_network_old.h ../include/pulse/anima/anima-random.h            ../include/pulse/cactuar/cactuar.h ../include/pulse/cactuar/cactuar-block.h ../include/pulse/cactuar/cactuar-blockheader.h ../include/pulse/cactuar/cactuar-crypto.h ../include/pulse/cactuar/cactuar-encoding.h ../include/pulse/cactuar/cactuar-target.h ../include/pulse/dahaka/dahaka.h ../include/pulse/dahaka/dahaka-chain.h ../include/pulse/dahaka/dahaka-blockchain.h ../include/pulse/dahaka/dahaka-orderedlist.h ../include/pulse/dahaka/dahaka-tree.h 
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

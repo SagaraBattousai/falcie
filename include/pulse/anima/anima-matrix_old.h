@@ -5,132 +5,186 @@
 
 #include <cstdint>
 #include <stdexcept>
-#include <vector>
-#include <initializer_list>
+
+#ifdef USE_AVX_INTRIN
+#include <immintrin.h>
+#endif // USE_AVX_INTRIN
+
+
+//export module anima:matrix;
+
+//import <array>;
+#include <vector> //import <vector>;
+#include <initializer_list> //import <initializer_list>;
+#include <utility> //import <utility>;
 #include <memory>
-#include <span>
-#include <utility>
-#include <cstring>
 
-#include <anima/anima-dimensions.h>
 
-//TODO: Clean up Matrix Operations!!
 //export 
 namespace pulse
 {
+	using Dimensions = std::pair<std::int64_t, std::int64_t>;
+
+	template <typename T>
+	class Matrix;
+
+	template<typename T>
+	Matrix<T> operator*(const Matrix<T>&, const Matrix<T>&);
+
+	template<typename T>
+	Matrix<T> operator+(Matrix<T>, const Matrix<T>&);
+
+	template<typename T, typename U>
+	Matrix<T> operator*(const U&, Matrix<T>);
+
+	template<typename T, typename U>
+	Matrix<T> operator+(const U&, Matrix<T>);
+
+	template<typename T>
+	std::vector<T> operator*(const std::vector<T>&, const Matrix<T>&);
+
+	//for now we'll cheat but next iteration TODO: add reference to transpose data 
+	//(which will index differently) aka from whiteboard!
+	template<typename T>
+	std::vector<T> operator*(const Matrix<T>& lhs, const std::vector<T>& rhs);
+
+
 	//void broadcast_vectors(const float *in1, const float *in2,
 		//float *out, const int64_t dim1, const int64_t dim2, combinator_ptr combinator);
+
 
 	template <typename T>
 	class Matrix
 	{
 	public:
+		Matrix(Dimensions init_shape);
+		//make move constructor
+		Matrix(std::vector<T> values);
+		Matrix(std::vector<T> values, Dimensions init_shape);
 
-		using index_type = Dimensions::value_type;
+		constexpr std::int64_t TotalElementCount();
 
-		Matrix(Dimensions shape);
-		Matrix(std::span<T> values);
-		Matrix(std::span<T> values, Dimensions shape);
+		constexpr std::int64_t RowCount();
+		constexpr std::int64_t ColumnCount();
+
 
 		//??? T(); Want ref to self but dims are swapped so .... Coud carry .T ref to self?
 
+		//As much as I hate defining in class declaration it seems MSVC has a bug
+		//that requires it when const overriding and operator :'(
+
 		const T& operator[](Dimensions index) const
 		{
-			return this->data[FlattenIndex(index, this->dims)];
+			return this->data[index.first * this->dims.second + index.second];
 		};
 
 		//Writeable version
 		T& operator[](Dimensions index)
 		{
-			return this->data[FlattenIndex(index, this->dims)];
+			return this->data[index.first * this->dims.second + index.second];
 		};
 
-		const T& operator[](index_type i) const
+		const T& operator[](std::int64_t i) const
 		{
 			return this->data[i];
 		};
 
 		//Writeable version
-		T& operator[](index_type i)
+		T& operator[](std::int64_t i)
 		{
 			return this->data[i];
 		};
 
+		//non-friend non-member are better but...I was making functions
+		//that were unneccisary just to stop it being a friend.
+		friend Matrix operator*<T>(const Matrix&, const Matrix&);
 
-		T* Data() const;
+		Matrix& operator*=(const Matrix&);
+		Matrix& operator+=(const Matrix&);
+
+		template<typename U>
+		Matrix& operator*=(const U&);
+
+		template<typename U>
+		Matrix& operator+=(const U&);
+
+		//TODO:
+		//This may be messy and evil
+		friend std::vector<T> operator*<T>(const std::vector<T>&, const Matrix&);
+		//for now we'll cheat but next iteration TODO: add reference to transpose data 
+	//(which will index differently) aka from whiteboard!
+		friend std::vector<T> operator*<T>(const Matrix&, const std::vector<T>&);
+
+
+
+		//I think this'll cause an issue (constexpr could be safer?
+		//const std::vector<T>& Data() const;
+		const std::vector<T>& Data() const;
 
 		const Dimensions& Shape();
 
-		constexpr const Dimensions::value_type& TotalSize()
-		{
-			return this->total_size;
-		}
-
 	private:
+		std::vector<T> data;
 
-		//Turns out order does matter as it's reflected in the constructor and destructor 
-		//init-list order!
-		//1)
-		const Dimensions::value_type total_size;
-
-		//2)
 		Dimensions dims;
-
-		//We'll use Unique_ptr over shared_ptr because it's doable as unique because we can bind the
-		//lifetime of this class to the object that "shares it" by binding them in a struct 
-		//(for the C interop)
-		//3)
-		std::unique_ptr<T[]> data; //Scott Mayers agrees that this is the right move :D
-
-		
-
 	};
 
+
 	template <typename T>
-	Matrix<T>::Matrix(Dimensions shape)
-		: total_size(shape.TotalSize())
-		, dims(std::move(shape))
-		, data(std::make_unique<T[]>(this->total_size))
-	{	}
+	Matrix<T>::Matrix(Dimensions init_shape)
+		: Matrix(std::vector<T>(init_shape.first * init_shape.second), init_shape)
+	{}
 
 	//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
 	// Transpose instead?
 	//BUGS in constructure im gessing 
 	template <typename T>
-	Matrix<T>::Matrix(std::span<T> values) 
-		//Can I move because not "last" use
-		: Matrix(std::move(values), { 1, (std::int64_t)values.size() }) 
-	{}
+	Matrix<T>::Matrix(std::vector<T> values) : Matrix(values, { 1, (std::int64_t)values.size() }) {}
 
 
 	template <typename T>
-	Matrix<T>::Matrix(std::span<T> values, Dimensions shape)
-		: total_size(shape.TotalSize())
-		, dims(std::move(shape))
-		, data(std::make_unique_for_overwrite<T[]>(this->total_size))
+	Matrix<T>::Matrix(std::vector<T> values, Dimensions shape)
+		: data(values)
+		, dims(shape)
 	{ 
-		std::memcpy(this->data.get(), values.data(), sizeof(T) * this->total_size);
-
-		//Do I need to do anything here?? //TODO: Optimize?
-		if (index_type diff = this->total_size - values.size(); diff > 0)
-		{
-			std::memset(this->data.get() + values.size(),
-				0, sizeof(T) * (this->total_size - values.size()));
-		}
+		this->data.shrink_to_fit(); //Data's size will not change 
 	}
 
+	
 	template <typename T>
-	T* Matrix<T>::Data() const
+	const std::vector<T>& Matrix<T>::Data() const
 	{
-		return this->data.get();
+		return this->data;
 	}
+	
 
 	template <typename T>
 	const Dimensions& Matrix<T>::Shape()
 	{
 		return this->dims;
 	}
-	/*
+
+	//TODO: Potential bug constexpr
+	template <typename T>
+	constexpr std::int64_t Matrix<T>::TotalElementCount()
+	{
+		return this->data.size();
+	}
+
+	template <typename T>
+	constexpr std::int64_t Matrix<T>::RowCount()
+	{
+		return this->dims.first;
+	}
+
+	template <typename T>
+	constexpr std::int64_t Matrix<T>::ColumnCount()
+	{
+		return this->dims.second;
+	}
+
+
+
 	template<typename T>
 	Matrix<T>& pulse::Matrix<T>::operator*=(const Matrix<T>& rhs)
 	{

@@ -9,14 +9,20 @@ set(ANIMA_MODULE_ROOT "${PULSE_MODULE_ROOT}/anima")
 
 set(anima_module 
   "${ANIMA_MODULE_ROOT}/anima.h" # ixx"
+  "${ANIMA_MODULE_ROOT}/anima-dimensions.h" # ixx"
   "${ANIMA_MODULE_ROOT}/anima-matrix.h" # ixx" 
+  "${ANIMA_MODULE_ROOT}/anima-matrix_old.h" # ixx" 
   "${ANIMA_MODULE_ROOT}/anima-neural_network.h" # ixx"
+  "${ANIMA_MODULE_ROOT}/anima-neural_network_old.h" # ixx"
   "${ANIMA_MODULE_ROOT}/anima-random.h" # ixx" 
   )
 
 set(cpp_files 
   "anima-matrix.cpp" 
+  "anima-dimensions.cpp" 
+  "anima-matrix_old.cpp" 
   "anima-neural_network.cpp"
+  "anima-neural_network_old.cpp"
   "anima-random.cpp")
 
 add_library(anima OBJECT ${anima_module} ${cpp_files})
