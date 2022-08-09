@@ -1,16 +1,19 @@
 
 #include <vector>
 
+#include <anima/anima-matrix.h>
 #include <orphan/federated_network.h>
 
 //export
 namespace lindzei
 {
-	NetworkUpdate GlobalNetworkUpdate(const std::vector<std::int64_t>& network_structure)
+	/*
+	NetworkUpdate GlobalNetworkUpdate(std::int64_t weight_count)
 	{
+		std::vector<pulse::Matrix>
+
 		//Copies network_structure I hope
-		NetworkUpdate globalUpdate{ .network_structure = network_structure,
-									 .delta_weights = pulse::NetworkWeights{},
+		NetworkUpdate globalUpdate{ delta_weights = pulse::NetworkWeights{},
 									 .examples_seen = 0
 		};
 
@@ -34,4 +37,5 @@ namespace lindzei
 
 		return globalUpdate;
 	}
+	*/
 } // namespace lindzei

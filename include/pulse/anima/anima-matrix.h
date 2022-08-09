@@ -10,6 +10,8 @@
 #include <memory>
 #include <span>
 #include <utility>
+#include <concepts>
+#include <algorithm>
 #include <cstring>
 
 #include <anima/anima-dimensions.h>
@@ -32,39 +34,39 @@ namespace pulse
 		Matrix(std::span<T> values);
 		Matrix(std::span<T> values, Dimensions shape);
 
+		Matrix(const Matrix<T>&);
+
 		//??? T(); Want ref to self but dims are swapped so .... Coud carry .T ref to self?
 
-		const T& operator[](Dimensions index) const
-		{
-			return this->data[FlattenIndex(index, this->dims)];
-		};
-
+		const T& operator[](Dimensions index) const;
 		//Writeable version
-		T& operator[](Dimensions index)
-		{
-			return this->data[FlattenIndex(index, this->dims)];
-		};
+		T& operator[](Dimensions index);
 
-		const T& operator[](index_type i) const
-		{
-			return this->data[i];
-		};
-
+		const T& operator[](index_type i) const;
 		//Writeable version
-		T& operator[](index_type i)
-		{
-			return this->data[i];
-		};
+		T& operator[](index_type i);
 
+		T* Data() const noexcept;
 
-		T* Data() const;
+		const Dimensions& Shape() const;
 
-		const Dimensions& Shape();
-
-		constexpr const Dimensions::value_type& TotalSize()
+		constexpr const Dimensions::value_type& TotalSize() const //Is constexpr good??
 		{
 			return this->total_size;
 		}
+
+		//The following two are just for now (i think it'll allow me to be a range)
+		T* begin() const
+		{
+			return data.get();
+		};
+
+		//The following two are just for now (i think it'll allow me to be a range)
+		T* end() const
+		{
+			return data.get() + this->total_size;
+		};
+
 
 	private:
 
@@ -81,16 +83,15 @@ namespace pulse
 		//(for the C interop)
 		//3)
 		std::unique_ptr<T[]> data; //Scott Mayers agrees that this is the right move :D
-
-		
-
+		//^^Disables copy ctor
 	};
+
 
 	template <typename T>
 	Matrix<T>::Matrix(Dimensions shape)
 		: total_size(shape.TotalSize())
 		, dims(std::move(shape))
-		, data(std::make_unique<T[]>(this->total_size))
+		, data(std::make_unique<T[]>(this->total_size)) //Maybe don't want to zero here either
 	{	}
 
 	//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
@@ -102,7 +103,6 @@ namespace pulse
 		: Matrix(std::move(values), { 1, (std::int64_t)values.size() }) 
 	{}
 
-
 	template <typename T>
 	Matrix<T>::Matrix(std::span<T> values, Dimensions shape)
 		: total_size(shape.TotalSize())
@@ -111,6 +111,7 @@ namespace pulse
 	{ 
 		std::memcpy(this->data.get(), values.data(), sizeof(T) * this->total_size);
 
+		//Maybe I don't want to zero out!
 		//Do I need to do anything here?? //TODO: Optimize?
 		if (index_type diff = this->total_size - values.size(); diff > 0)
 		{
@@ -120,16 +121,87 @@ namespace pulse
 	}
 
 	template <typename T>
-	T* Matrix<T>::Data() const
+	Matrix<T>::Matrix(const Matrix<T>& matrix)
+		: total_size(matrix.total_size)
+		, dims(matrix.dims)
+		, data(std::make_unique_for_overwrite<T[]>(matrix.total_size))
+	{
+		std::memcpy(this->data.get(), matrix.data.get(), sizeof(T) * matrix.total_size);
+	}
+
+
+	template <typename T>
+	T* Matrix<T>::Data() const noexcept
 	{
 		return this->data.get();
 	}
 
 	template <typename T>
-	const Dimensions& Matrix<T>::Shape()
+	const Dimensions& Matrix<T>::Shape() const
 	{
 		return this->dims;
 	}
+
+	template <typename T>
+	const T& Matrix<T>::operator[](Dimensions index) const
+	{
+		return this->data[FlattenIndex(index, this->dims)];
+	};
+
+	//Writeable version
+	template <typename T>
+	T& Matrix<T>::operator[](Dimensions index)
+	{
+		return this->data[FlattenIndex(index, this->dims)];
+	};
+
+	template <typename T>
+	const T& Matrix<T>::operator[](index_type i) const
+	{
+		return this->data[i];
+	};
+
+
+	//Writeable version
+	template <typename T>
+	T& Matrix<T>::operator[](index_type i)
+	{
+		return this->data[i];
+	};
+
+
+	//May make convertable too T?. Really just want to say addable to T and return T
+	template<typename T, typename U> requires std::floating_point<U> || std::integral<U> 
+	Matrix<T>& operator*=(Matrix<T>& matrix, const U& scalar)
+	{
+		std::ranges::for_each(matrix, [&scalar](T& value) { value *= scalar; });
+
+		return matrix;
+	}
+
+	template<typename T, typename U> requires std::floating_point<U> || std::integral<U>
+	Matrix<T> operator*(Matrix<T> matrix, const U& scalar)
+	{
+		matrix *= scalar;
+		return std::move(matrix);
+	}
+
+	//May make convertable too T?. Really just want to say addable to T and return T
+	template<typename T, typename U> requires std::floating_point<U> || std::integral<U>
+	Matrix<T>&operator+=(Matrix<T>&matrix, const U & scalar)
+	{
+		std::ranges::for_each(matrix, [&scalar](T& value) { value += scalar; });
+
+		return matrix;
+	}
+
+	template<typename T, typename U>
+	Matrix<T> operator+(const U& scalar, Matrix<T> vector)
+	{
+		vector += scalar;
+		return vector;
+	}
+
 	/*
 	template<typename T>
 	Matrix<T>& pulse::Matrix<T>::operator*=(const Matrix<T>& rhs)
@@ -205,44 +277,9 @@ namespace pulse
 		return lhs;
 	}
 
-	//May make const lref....
-	template<typename T>
-	template<typename U>
-	Matrix<T>& Matrix<T>::operator*=(const U& scalar)
-	{
-		for (auto it = this->data.begin(); it != this->data.end(); ++it)
-		{
-			*it *= scalar;
-		}
+	
 
-		return *this;
-	}
 
-	template<typename T>
-	template<typename U>
-	Matrix<T>& Matrix<T>::operator+=(const U& scalar)
-	{
-		for (auto it = this->data.begin(); it != this->data.end(); ++it)
-		{
-			*it += scalar;
-		}
-
-		return *this;
-	}
-
-	template<typename T, typename U>
-	Matrix<T> operator*(const U& scalar, Matrix<T> vector)
-	{
-		vector *= scalar;
-		return vector;
-	}
-
-	template<typename T, typename U>
-	Matrix<T> operator+(const U& scalar, Matrix<T> vector)
-	{
-		vector += scalar;
-		return vector;
-	}
 
 
 	template<typename T>

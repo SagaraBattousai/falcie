@@ -31,6 +31,9 @@ namespace pulse
 	class Target
 	{
 	public:
+
+		static constexpr std::uint32_t MinimumDifficulty = 0x21FFFFFF; //At least I think it's the min
+
 		constexpr Target();
 
 		constexpr Target(std::uint32_t);
@@ -55,7 +58,7 @@ namespace pulse
 		static constexpr unsigned char TargetExponentShifter = 4; //because it operates on such
 
 		/// Max target value = 0x21_FF_FF_FF, Min target value (obviously) = 0x00_00_00_00
-		const std::uint32_t target;
+		std::uint32_t target;
 
 	};
 	constexpr Target::Target() : target(Target::BaseDifficulty) {}

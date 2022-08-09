@@ -24,6 +24,12 @@ import :chain;
 //export 
 namespace pulse
 {
+	//Am I going ott with concepts, would probably be easier with inheritance especially since 
+	//block is super generic. That said this decouples modules and also does compiler checks :D
+
+	//Should the BlockchainAddable have a static Genisis function or the builder?
+	//Lets try builder for now.
+
 	template<typename T>
 	concept BlockchainAddable = requires (T block,
 		const std::vector<std::byte>&l_hash, std::vector<std::byte> && r_hash)
@@ -34,15 +40,17 @@ namespace pulse
 		{ block.CompareWithTarget(l_hash) } -> std::convertible_to<bool>;
 	};
 
+	//TODO: add V later or maybe leave concepts alone and do blockchain in cactuar etc
+
 	/*
-	template<typename G>
-	concept GenisisCreatable = BlockchainAddable<G> && requires (G x)
+	template<typename T>
+	concept BlockchainAddableBuilder = requires (T builder)
 	{
-		{ G::Genisis() } ->std::convertible_to<G>;
+		{ builder.Build() } -> BlockchainAddable;
+		{ builder.Genisis() } -> BlockchainAddable;
+
 	};
 	*/
-
-
 
 	template<BlockchainAddable T, std::int64_t UnrolledElems>
 	class Blockchain

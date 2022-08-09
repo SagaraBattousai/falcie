@@ -39,7 +39,7 @@ namespace pulse
 
 		//By using indicies for begining and end it allows shorter indicies since dims includes all dims ...
 		return std::inner_product(indicies.begin(), indicies.end(),
-			dimensionIndexer.begin(), 0);
+			dimensionIndexer.begin(), (value_type) 0);
 
 	}
 	/*

@@ -1,6 +1,8 @@
 #ifndef __DAHAKA_CHAIN__
 #define __DAHAKA_CHAIN__
 
+//TODO: Redesign! Remove the unrolled template (or atleast only as a child)
+
 //module;
 #include <iterator>
 #include <stdexcept>

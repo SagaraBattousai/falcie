@@ -66,8 +66,6 @@ namespace pulse
 		{
 			return time_point(time_duration(timestamp));
 		}
-
-
 	};
 
 	/**

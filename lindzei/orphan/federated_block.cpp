@@ -1,6 +1,8 @@
 
 #include <vector> //import <vector>;
 #include <string>
+#include <numeric>
+#include <execution>
 
 #include <pulse/pulse.h> //import pulse;
 #include <cactuar/cactuar-target.h>
@@ -10,6 +12,8 @@
 //export
 namespace lindzei
 {
+	//TODO: Decide, Probably could leave default constructors....
+
 	Federatedblock::Federatedblock(std::uint32_t version, pulse::Target target,
 		BlockHashFunction hash_func, pulse::HashAlgorithm hash_algo)
 		: Federatedblock(pulse::Blockheader{
@@ -23,12 +27,13 @@ namespace lindzei
 	{
 	}
 
-	Federatedblock::Federatedblock(pulse::Blockheader&& header,
-		BlockHashFunction hash_func, pulse::HashAlgorithm hash_algo)
-		: magic{ 0x43616C6F }
+	//VV Actually does it make anysence to pass in a header?
+	Federatedblock::Federatedblock(pulse::Blockheader&& header, BlockHashFunction hash_func,
+		pulse::HashAlgorithm hash_algo)
 		//, header{ std::move(header) }
 		//, header{ std::make_unique<pulse::Blockheader>(std::move(header)) }
-		, header{ std::make_shared<pulse::Blockheader>(std::move(header)) }
+		: header{ std::make_shared<pulse::Blockheader>(std::move(header)) }
+		// ^^^may beable to go back to unique, we'll see
 		, local_updates{ std::vector<NetworkUpdate>{} }
 		, global_update{ }// std::make_unique<NetworkUpdate>() }
 		, hash_algo{ hash_algo }
@@ -68,11 +73,12 @@ namespace lindzei
 		//TODO: For now, probably init block with network stucture (and possibly builder)
 		//To enfores all updates to be of a compatible network
 		//may need to change to make network_structure part of the block constructor
+		/*
 		if (this->global_update.network_structure.size() == 0)
 		{
 			this->global_update = GlobalNetworkUpdate(update.network_structure);
 		}
-
+		*/
 		this->local_updates.push_back(std::move(update));
 	}
 
@@ -94,23 +100,40 @@ namespace lindzei
 
 	void Federatedblock::CalculateGlobalUpdate()
 	{
-		for (const NetworkUpdate& update : this->local_updates)
-		{
-			this->global_update.examples_seen += update.examples_seen;
 
-			for (std::int64_t i = 0;
-				i < static_cast<std::int64_t>(this->global_update.network_structure.size()) - 1;
-				i++)
-			{
-				this->global_update.delta_weights[i] += update.examples_seen * update.delta_weights[i];
-			}
+		if (this->local_updates.size() == 0)
+		{
+			return;
 		}
 
-		for (std::int64_t i = 0;
-			i < static_cast<std::int64_t>(this->global_update.network_structure.size()) - 1;
-			i++)
+		this->global_update.delta_weights.reserve(this->local_updates.size());
+
+		this->global_update.examples_seen =
+			std::reduce(std::execution::par,
+				this->local_updates.begin(), this->local_updates.end(), (std::int64_t)0,
+				[](std::int64_t acc, const NetworkUpdate& elem) {return std::move(acc) + elem.examples_seen; }
+		);
+
+		//TODO: RedoALL
+
+		
+		for (const pulse::Matrix<float>& weight : this->local_updates[0].delta_weights)
 		{
-			this->global_update.delta_weights[i] *= (1.f / global_update.examples_seen);
+			global_update.delta_weights.push_back(
+				weight * (float(this->local_updates[0].examples_seen) / global_update.examples_seen));
+		}
+		
+
+
+		for (std::size_t ui = 1; ui < local_updates.size(); ui++)
+		{
+			const NetworkUpdate& update = local_updates[ui];
+
+			for (std::int64_t wi = 0; wi < update.delta_weights.size(); wi++)
+			{
+				this->global_update.delta_weights[wi] += 
+					update.delta_weights[wi] * ( float(update.examples_seen) / this->global_update.examples_seen);
+			}
 		}
 	}
 

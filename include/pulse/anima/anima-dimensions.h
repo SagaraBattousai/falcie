@@ -22,7 +22,7 @@ namespace pulse
 
 		constexpr value_type TotalSize() const
 		{
-			return std::reduce(this->dims.begin(), this->dims.end(), 1, std::multiplies<value_type>());
+			return std::reduce(this->dims.begin(), this->dims.end(), (value_type) 1, std::multiplies<value_type>());
 
 		}
 

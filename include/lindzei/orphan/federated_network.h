@@ -14,16 +14,15 @@
 //export 
 namespace lindzei
 {
+	//template<typename T>
 	//class 
 	struct NetworkUpdate
 	{
-		std::vector<std::int64_t> network_structure;
-		pulse::NetworkWeights delta_weights;
+	//private:
+		//std::vector<std::int64_t> network_structure;
+		std::vector<pulse::Matrix<float>> delta_weights{};
 		std::int64_t examples_seen{ 0 };
 	};
-
-	NetworkUpdate GlobalNetworkUpdate(const std::vector<std::int64_t>& network_structure);
-
 }
 
 #endif
