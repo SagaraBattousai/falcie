@@ -12,6 +12,12 @@
 //export
 namespace lindzei
 {
+	//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
+	Federatedblock::Federatedblock()
+	{
+
+	}
+
 	//TODO: Decide, Probably could leave default constructors....
 
 	Federatedblock::Federatedblock(std::uint32_t version, pulse::Target target,
@@ -109,7 +115,7 @@ namespace lindzei
 		this->global_update.delta_weights.reserve(this->local_updates.size());
 
 		this->global_update.examples_seen =
-			std::reduce(std::execution::par,
+			std::accumulate(
 				this->local_updates.begin(), this->local_updates.end(), (std::int64_t)0,
 				[](std::int64_t acc, const NetworkUpdate& elem) {return std::move(acc) + elem.examples_seen; }
 		);
@@ -123,8 +129,6 @@ namespace lindzei
 				weight * (float(this->local_updates[0].examples_seen) / global_update.examples_seen));
 		}
 		
-
-
 		for (std::size_t ui = 1; ui < local_updates.size(); ui++)
 		{
 			const NetworkUpdate& update = local_updates[ui];

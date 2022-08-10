@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <utility>
 #include <ranges>
+#include <array>
 
 template <typename T>
 void print_span(std::span<T> v)
@@ -36,8 +37,11 @@ int main()
 
 	print_span<float>(k);
 
+	std::array<int, 3> x{};
 
-	k += 4;
+	std::cout << x[0];
+
+	k += m;
 
 	print_span<float>(k);
 

@@ -53,7 +53,7 @@ namespace pulse
 		constexpr const Dimensions::value_type& TotalSize() const //Is constexpr good??
 		{
 			return this->total_size;
-		}
+		};
 
 		//The following two are just for now (i think it'll allow me to be a range)
 		T* begin() const
@@ -202,6 +202,35 @@ namespace pulse
 		return vector;
 	}
 
+	//TODO When You Wake Up: VVVV
+	template<typename T>
+	Matrix<T>& operator+=(Matrix<T>& lhs, const Matrix<T>& rhs)
+	{
+		//#ifdef USE_AVX_INTRIN
+			//
+		//#else
+
+		//Use Functional stuff like the cool kidz, i.e. std::accumulate (as must be in order)
+		//Where binary op adds to vector.... alternativly use transfor or range::for_each etc..
+		//Actually, I wake up the next day realising what a hurry I'm in, keep it simple and boring for now!
+		for (std::int64_t i = 0; i < lhs.TotalSize(); i++)
+		{
+			lhs[i] += rhs[i];
+		}
+
+		//#endif
+
+		return lhs;
+	}
+
+	//TODO: make it work with compatable T and U
+	template<typename T>
+	Matrix<T> operator+(Matrix<T> lhs, const Matrix<T>& rhs)
+	{
+		lhs += rhs;
+		return std::move(lhs); //Is move applied automatically? I think so but im goint to be explicit to check ctor
+	}
+
 	/*
 	template<typename T>
 	Matrix<T>& pulse::Matrix<T>::operator*=(const Matrix<T>& rhs)
@@ -270,12 +299,7 @@ namespace pulse
 		return *this;
 	}
 
-	template<typename T>
-	Matrix<T> operator+(Matrix<T> lhs, const Matrix<T>& rhs)
-	{
-		lhs += rhs;
-		return lhs;
-	}
+	
 
 	
 

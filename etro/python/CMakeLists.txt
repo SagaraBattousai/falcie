@@ -5,6 +5,8 @@ set(FALPY_MODULE_ROOT "${ETRO_MODULE_ROOT}/python/falpy")
 set(sources "falpy.c" "tf_model_matrix.c")
 
 set(falpy_module 
+  "${FALPY_MODULE_ROOT}/_falpyconfig.h"
+  "${FALPY_MODULE_ROOT}/falpy.h" # ixx"
   "${FALPY_MODULE_ROOT}/tf_model_matrix.h" # ixx"
   )
 
@@ -16,7 +18,7 @@ target_sources(falpy PRIVATE
   FILE_SET headers
   TYPE HEADERS
   BASE_DIRS "${ETRO_MODULE_ROOT}/python"
-  FILES ${falpy_module} "${FALPY_MODULE_ROOT}/_falpyconfig.h"
+  FILES ${falpy_module} 
   )
 
 

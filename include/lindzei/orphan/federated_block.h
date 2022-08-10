@@ -29,6 +29,9 @@ namespace lindzei
 	{
 	public:
 
+		//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
+		Federatedblock();
+
 		//Good candidate for inline as just a function call
 		virtual inline blockhash_type Hash() const override 
 		{ 
