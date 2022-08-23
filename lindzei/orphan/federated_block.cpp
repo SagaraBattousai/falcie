@@ -1,4 +1,7 @@
 
+//For Debug
+#include <iostream>
+
 #include <vector> //import <vector>;
 #include <string>
 #include <numeric>
@@ -13,6 +16,7 @@
 namespace lindzei
 {
 	//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
+	//This is a bit of a problem as it leave member variables uninitalised
 	Federatedblock::Federatedblock()
 	{
 
@@ -133,10 +137,33 @@ namespace lindzei
 		{
 			const NetworkUpdate& update = local_updates[ui];
 
-			for (std::int64_t wi = 0; wi < update.delta_weights.size(); wi++)
+			for (std::int64_t wi = 0; wi < (std::int64_t) update.delta_weights.size(); wi++)
 			{
-				this->global_update.delta_weights[wi] += 
-					update.delta_weights[wi] * ( float(update.examples_seen) / this->global_update.examples_seen);
+				//this->global_update.delta_weights[wi] += 
+					//update.delta_weights[wi] * ( float(update.examples_seen) / this->global_update.examples_seen);
+				
+				////////////////////////////////////////////////////////////////////////////
+				//DEBUG:
+				auto guit = this->global_update.delta_weights[wi].begin();
+				auto luit = update.delta_weights[wi].begin();
+				for (std::int64_t wii = 0;
+					wii < (std::int64_t)this->global_update.delta_weights[wi].TotalSize();
+					wii++)
+				{
+					std::cout << guit[wii] << " + ( "
+						<< luit[wii] << " * "
+						<< float(update.examples_seen) << " / " << this->global_update.examples_seen
+						<< " = ";
+
+					guit[wii] += luit[wii] * (float(update.examples_seen) / this->global_update.examples_seen);
+
+					//	<< std::endl;
+
+					std::cout << guit[wii] << std::endl;
+				}
+				//END DEBUG:
+				////////////////////////////////////////////////////////////////////////////
+			
 			}
 		}
 	}

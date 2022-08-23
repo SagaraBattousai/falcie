@@ -1,6 +1,11 @@
 
 
+
 #include <falpy/tf_model_matrix.h>
+
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL FALPY_ARRAY_API
+#include <numpy/arrayobject.h>
 
 #define NULL_CHECK(value) if(value == NULL) return NULL
 

@@ -1,3 +1,6 @@
+#ifndef __FALPY_CONFIG_H__
+#define __FALPY_CONFIG_H__
+
 
 //Using EXPORT_SYMBOL and LOCAL_SYMBOL instead of EXPORT and NO_EXPORT to 
 //Make it harder to mistakenly type export when you don't mean to.
@@ -24,4 +27,6 @@
 	#define FALPY_EXPORT_SYMBOL
     #define FALPY_LOCAL_SYMBOL
   #endif
+#endif
+
 #endif

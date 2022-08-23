@@ -89,13 +89,13 @@ namespace lindzei
 
 			Builder& WithVersion(std::uint32_t version)
 			{
-				this->version = std::move(version);
+				this->m_version = std::move(version);
 				return *this;
 			};
 
 			Builder& WithTarget(pulse::Target target)
 			{
-				this->target = std::move(target);
+				this->m_target = std::move(target);
 				return *this;
 			};
 
@@ -103,36 +103,36 @@ namespace lindzei
 			Builder& WithHashFunction(BlockHashFunction hash_func)
 			{
 				//Or does the compiler do this for me?
-				this->hash_func = std::move(hash_func);
+				this->m_hash_func = std::move(hash_func);
 				return *this;
 			};
 
 			Builder& WithHashAlgorithm(pulse::HashAlgorithm hash_algo)
 			{
-				this->hash_algo = hash_algo;
+				this->m_hash_algo = hash_algo;
 				return *this;
 			};
 
 			Federatedblock Build() const
 			{
-				return Federatedblock::Federatedblock(version, target, hash_func, hash_algo);
+				return Federatedblock::Federatedblock(m_version, m_target, m_hash_func, m_hash_algo);
 			};
 
 			Federatedblock Genisis() const
 			{
 				return Federatedblock::Federatedblock(
-					pulse::Blockheader::Genisis(hash_algo, version), hash_func, hash_algo);
+					pulse::Blockheader::Genisis(m_hash_algo, m_version), m_hash_func, m_hash_algo);
 			};
 
 		private:
 
-			std::uint32_t version{ 0x01 };
+			std::uint32_t m_version{ 0x01 };
 
-			pulse::Target target{ pulse::Target::MinimumDifficulty };
+			pulse::Target m_target{ pulse::Target::MinimumDifficulty };
 
-			BlockHashFunction hash_func{ pulse::PulseHash };
+			BlockHashFunction m_hash_func{ pulse::PulseHash };
 
-			pulse::HashAlgorithm hash_algo{ pulse::HashAlgorithm::SHA256 };
+			pulse::HashAlgorithm m_hash_algo{ pulse::HashAlgorithm::SHA256 };
 		};
 	};
 
@@ -141,8 +141,8 @@ namespace lindzei
 	template< class ...Args >
 	void Federatedblock::AddLocalUpdate(Args&&... args)
 	{
-		//TODO: Is move safe? not forward?
-		this->local_updates.emplace_back(std::move(args)...);
+		//TODO: Is move safe? not forward? Looks like it isnt safe :)
+		this->local_updates.emplace_back(std::forward<Args>(args)...);
 
 		//TODO: For now, probably init block with network stucture (and possibly builder)
 		//To enfores all updates to be of a compatible network

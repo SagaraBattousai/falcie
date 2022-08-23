@@ -8,10 +8,18 @@ add_executable(etro_cpp "etro.cpp")
 
 ################################################
 
-set(sources "matrix.cpp")
+set(sources 
+  "matrix.cpp"
+  "federatedblock.cpp"
+  "federatedblockchain.cpp"
+  "networkupdate.cpp"
+  )
 
 set(etro_module 
   "${ETRO_MODULE_ROOT}/matrix.h"
+  "${ETRO_MODULE_ROOT}/federatedblock.h"
+  "${ETRO_MODULE_ROOT}/federatedblockchain.h"
+  "${ETRO_MODULE_ROOT}/networkupdate.h"
   )
 
 add_library(etro SHARED ${sources})
@@ -25,12 +33,12 @@ target_sources(etro PUBLIC
 
 target_link_libraries(etro PUBLIC pulse lindzei)
 
-target_link_libraries(etro_c PUBLIC pulse)
-target_link_libraries(etro_cpp PUBLIC pulse)
+target_link_libraries(etro_c PUBLIC etro)
+target_link_libraries(etro_cpp PUBLIC etro)
 
 if(WIN32)
-  symlink_library_to_target(etro_c pulse)
-  symlink_library_to_target(etro_cpp pulse)
+  auto_copy_dlls_for_target(etro_c)
+  auto_copy_dlls_for_target(etro_cpp)
   copy_openssl_runtime_lib_to_target(etro_c crypto)
   copy_openssl_runtime_lib_to_target(etro_cpp crypto)
 endif()

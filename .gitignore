@@ -9,6 +9,7 @@ vim_sessions/
 docs/sphinx/_static/css/_*
 
 etro/python/~/*
+etro/python/tmp/*
 
 ############################################################
 # Go Ignore

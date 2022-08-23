@@ -1,58 +1,24 @@
+
 #include <iostream>
-#include <anima/anima-matrix.h>
-#include <cstdlib>
-#include <vector>
-#include <span>
-#include <algorithm>
-#include <utility>
-#include <ranges>
-#include <array>
 
-template <typename T>
-void print_span(std::span<T> v)
+#include <etro/matrix.h>
+
+int main(void)
 {
-	for (auto i : v)
-	{
-		std::cout << i << " ";
-	}
-	std::cout << std::endl;
-}
+	float arr1[] = { 1,2,3,4,5,6,7,8,9 };
+	float arr2[] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
+	
+	intptr_t dims1[] = { 3,3 };
+	intptr_t dims2[] = { 3,3,1 };
+	intptr_t dims3[] = { 3,2,3 };
+	
+	matrix_t *matrix1 = new_matrix(arr1, 2, dims1);
+	matrix_t *matrix2 = new_matrix(arr1, 3, dims2);
+	matrix_t *matrix3 = new_matrix(arr2, 3, dims3);
 
-int main()
-{
-	std::vector<float> v{ 1, 2, 3, 4, 5, 6 };
-	pulse::Matrix<float> m{ {v.data(), 6}, {3,3} }; //Dims > data_size
-
-	//pulse::Dimensions d{ 2,3 };
-
-	//std::cout << d.TotalSize() << std::endl;
-
-	print_span<float>(m);
-
-	std::ranges::for_each(m, [](float& x) { x *= 3; });
-
-	print_span<float>(m);
-
-	pulse::Matrix<float> k = m * (float(1) / 3);
-
-	print_span<float>(k);
-
-	std::array<int, 3> x{};
-
-	std::cout << x[0];
-
-	k += m;
-
-	print_span<float>(k);
-
-
-
-
-	//m *= 3;
-
-	//print_span<float>({ m.Data(), 9 });
-
+	std::cout << *matrix1;
+	std::cout << *matrix2;
+	std::cout << *matrix3;
 
 	return 0;
-
 }

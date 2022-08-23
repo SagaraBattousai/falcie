@@ -169,8 +169,8 @@ namespace pulse
 
 	template<typename T, std::int64_t UnrolledElems>
 	Chain<T, UnrolledElems>::Node::Node()
-		: link(reinterpret_cast<std::uintptr_t>(this))
-		, elementCount(0)
+		: link{ reinterpret_cast<std::uintptr_t>(this) }
+		, elementCount{ 0 }
 	{
 	}
 

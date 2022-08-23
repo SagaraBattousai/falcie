@@ -12,6 +12,8 @@
 #include <utility>
 #include <concepts>
 #include <algorithm>
+#include <numeric>
+#include <iostream>
 #include <cstring>
 
 #include <anima/anima-dimensions.h>
@@ -22,6 +24,12 @@ namespace pulse
 {
 	//void broadcast_vectors(const float *in1, const float *in2,
 		//float *out, const int64_t dim1, const int64_t dim2, combinator_ptr combinator);
+
+	template <typename T> class Matrix;
+
+	template <typename T> 
+	std::ostream& operator<<(std::ostream& os, const Matrix<T>& obj);
+
 
 	template <typename T>
 	class Matrix
@@ -39,11 +47,9 @@ namespace pulse
 		//??? T(); Want ref to self but dims are swapped so .... Coud carry .T ref to self?
 
 		const T& operator[](Dimensions index) const;
-		//Writeable version
 		T& operator[](Dimensions index);
 
 		const T& operator[](index_type i) const;
-		//Writeable version
 		T& operator[](index_type i);
 
 		T* Data() const noexcept;
@@ -55,18 +61,17 @@ namespace pulse
 			return this->total_size;
 		};
 
-		//The following two are just for now (i think it'll allow me to be a range)
 		T* begin() const
 		{
 			return data.get();
 		};
 
-		//The following two are just for now (i think it'll allow me to be a range)
 		T* end() const
 		{
 			return data.get() + this->total_size;
 		};
 
+		friend std::ostream& operator<< <>(std::ostream& os, const Matrix<T>& obj);
 
 	private:
 
@@ -99,7 +104,7 @@ namespace pulse
 	//BUGS in constructure im gessing 
 	template <typename T>
 	Matrix<T>::Matrix(std::span<T> values) 
-		//Can I move because not "last" use
+		//Can I move because not "last" use also 
 		: Matrix(std::move(values), { 1, (std::int64_t)values.size() }) 
 	{}
 
@@ -229,6 +234,63 @@ namespace pulse
 	{
 		lhs += rhs;
 		return std::move(lhs); //Is move applied automatically? I think so but im goint to be explicit to check ctor
+	}
+
+	//TODO: Do properly but works perfectly for 2D arrays and 
+	// acceptably for higher dimensions but not with spacing and
+	// possibly [ and ]
+	//Cant workout how to do rn so will just print all values treating 
+	//them as 2d arrays such that 
+	//[x1, x2, x3, ...., xn] => [x1 * x2 * x3 * ...., xn]
+	template<typename T>
+	std::ostream& operator<< <>(std::ostream& os, const Matrix<T>& obj)
+	{
+		Dimensions dims = obj.dims;
+		std::int64_t ndims = dims.DimensionCount();
+		
+		//VV Tmp
+		std::int64_t outter_dims = std::reduce(
+			dims.AsArray(),
+			dims.AsArray() + (ndims - 1),
+			(std::int64_t)1, //Awesome and saves my backside :D
+			std::multiplies<std::int64_t>()
+		);
+		
+		std::int64_t index = 0;
+
+		if (ndims > 1)
+			os << std::string(ndims - 1, '[') << "\n"; //\n just for now untill \t done
+		else
+			os << "[";
+
+		//for (std::int64_t dimIndex = ndims - 1; dimIndex >= 0; dimIndex--)
+		for (std::int64_t outter_index = 0; outter_index < outter_dims; outter_index++)
+		{
+			//TODO: Will need a \t (tab) counter
+			os << "[";
+			//for (std::int64_t i = 0; i < dims.AsArray()[dimIndex] - 1; i++)
+			for (std::int64_t i = 0; i < dims.AsArray()[ndims - 1] - 1; i++)
+			{
+				os << obj[index] << ", ";
+				index++;
+			}
+			os << obj[index] << "]";
+			if (outter_index == outter_dims - 1)
+				//os << "]";
+				if (ndims > 1)
+					//\n just for now untill \t done
+					os << "\n" << std::string(ndims - 1, ']');
+				else
+					os << "]";
+			else
+				os << ",\n";
+			index++;
+		}
+
+		os << std::flush;
+
+		return os;
+		
 	}
 
 	/*

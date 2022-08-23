@@ -50,10 +50,22 @@ train_accuracy_results = []
 
 num_epochs = 201
 
+###################
+### Falpy Setup ###
+###################
 
 bb = falpy.BlockBuilder(0x01, 0x21FFFFFF)
 bc = falpy.Blockchain(bb, 32)
 
+nu1 = falpy.NetworkUpdate()
+nu2 = falpy.NetworkUpdate()
+
+model1_examples_seen = 0
+model2_examples_seen = 0
+
+block = bb.Build()
+
+#####################
 
 for epoch in range(num_epochs):
   epoch_loss_avg1 = tf.keras.metrics.Mean()
@@ -74,28 +86,35 @@ for epoch in range(num_epochs):
     epoch_accuracy1.update_state(y, model1(x, training=True))
     epoch_accuracy2.update_state(y, model2(x, training=True))
 
+    model1_examples_seen += len(x)
+    model2_examples_seen += len(x)
 
+
+    
+    #trainables[5].assign(np.array([1,2,3]), read_value=False)
+
+    #exit(0)
+
+  train_loss_results.append(epoch_loss_avg1.result())
+  train_accuracy_results.append(epoch_accuracy1.result())
+
+  print("epoch:", epoch, end="\r")
+
+  ### Falpy ###
+  if epoch % 5 == 0:
     #For now lets cheat and assume every variable is trainable
     #Also may not be a cheat since it is possible that 
     #if all not trainable vars are static then it will average to itself
-    trainables1 = model1.get_weights() #trainable_weights
-    trainables2 = model2.get_weights() #trainable_weights
 
-    ##############################################
-    #Falpy Part
+    for m1_trainables in model1.get_weights(): #trainable_weights:
+      nu1.add_weight(falpy.Weights(m1_trainables))
+      nu1.set_examples_seen(model1_examples_seen)
 
-    b = bb.build()
-    nu1 = falpy.NetworkUpdate()
-    nu2 = falpy.NetworkUpdate()
-
-    for t1 in trainables1:
-      nu1.add_weight(falpy.Weights(t1))
 
     for t2 in trainables2:
       nu2.add_weight(falpy.Weights(t2))
     
 
-    nu1.set_examples_seen(len(x))
     nu2.set_examples_seen(len(x))
     b.add_local_update(nu1)
     b.add_local_update(nu2)
@@ -113,15 +132,10 @@ for epoch in range(num_epochs):
     model1.set_weights(ws)
     model2.set_weights(ws)
 
-    
-    #trainables[5].assign(np.array([1,2,3]), read_value=False)
 
-    #exit(0)
-
-  train_loss_results.append(epoch_loss_avg1.result())
-  train_accuracy_results.append(epoch_accuracy1.result())
-
-  print("epoch:", epoch, end="\r")
+  if epoch % 10 == 0:
+  
+trainables2 = model2.get_weights() #trainable_weights
 
   if epoch % 50 == 0:
     print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format

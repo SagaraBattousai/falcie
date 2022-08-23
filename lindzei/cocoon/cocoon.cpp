@@ -47,6 +47,10 @@ int main(void)
 
 	Federatedblock b = block_builder.Build();
 
+	//b.AddLocalUpdate((std::vector<pulse::Matrix<float>>{
+		//pulse::Matrix<float>(w11, { 3,3 }),
+			//pulse::Matrix<float>(w12, { 3,1 })}), 4);
+	
 	b.AddLocalUpdate(network1_update);
 	b.AddLocalUpdate(network2_update);
 
