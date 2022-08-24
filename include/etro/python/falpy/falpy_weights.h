@@ -22,14 +22,17 @@ typedef struct FALPY_LOCAL_SYMBOL FalpyWeightsObject
 
 FALPY_LOCAL_SYMBOL extern PyTypeObject FalpyWeightsType;
 
-FALPY_LOCAL_SYMBOL PyObject*
-FalpyWeights_new(PyTypeObject *type, PyObject *args, PyObject *kwds);
+//FALPY_LOCAL_SYMBOL PyObject*
+//FalpyWeights_new(PyTypeObject *type, PyObject *args, PyObject *kwds);
 
 FALPY_LOCAL_SYMBOL int
 FalpyWeights_init(FalpyWeightsObject *self, PyObject *args, PyObject *kwds);
 
 FALPY_LOCAL_SYMBOL PyObject*
 FalpyWeights_str(FalpyWeightsObject *self);
+
+FALPY_LOCAL_SYMBOL PyObject*
+FalpyWeights_getarray(FalpyWeightsObject *self, void *closure);
 
 FALPY_LOCAL_SYMBOL int
 FalpyWeights_setup_array(FalpyWeightsObject *self, int n_dims, npy_intp *dims);

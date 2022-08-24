@@ -139,11 +139,12 @@ namespace lindzei
 
 			for (std::int64_t wi = 0; wi < (std::int64_t) update.delta_weights.size(); wi++)
 			{
-				//this->global_update.delta_weights[wi] += 
-					//update.delta_weights[wi] * ( float(update.examples_seen) / this->global_update.examples_seen);
+				this->global_update.delta_weights[wi] += 
+					update.delta_weights[wi] * ( float(update.examples_seen) / this->global_update.examples_seen);
 				
 				////////////////////////////////////////////////////////////////////////////
 				//DEBUG:
+				/*
 				auto guit = this->global_update.delta_weights[wi].begin();
 				auto luit = update.delta_weights[wi].begin();
 				for (std::int64_t wii = 0;
@@ -161,6 +162,7 @@ namespace lindzei
 
 					std::cout << guit[wii] << std::endl;
 				}
+				*/
 				//END DEBUG:
 				////////////////////////////////////////////////////////////////////////////
 			

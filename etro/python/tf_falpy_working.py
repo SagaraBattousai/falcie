@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import functools
 any_nan = lambda acc, elem: acc or (np.any(np.isnan(elem)))
 min_max_weight = lambda a, b: (min(a[0], np.amin(b[0])), max(a[1], np.amax(b[1])))
-##
 
 ds_split, info = tfds.load("penguins/processed", 
                             split=["train[:20%]", "train[20%:]"],
@@ -30,53 +29,36 @@ optimizer2 = tf.keras.optimizers.SGD(learning_rate=0.01)
 
 model1 = tf.keras.Sequential([
     tf.keras.layers.Dense(10, activation=tf.nn.relu, input_shape=(4,)),
+    tf.keras.layers.Dense(50, activation=tf.nn.relu, input_shape=(4,)),
     tf.keras.layers.Dense(10, activation=tf.nn.relu),
     tf.keras.layers.Dense(3)
     ])
 
 model2 = tf.keras.Sequential([
     tf.keras.layers.Dense(10, activation=tf.nn.relu, input_shape=(4,)),
+    tf.keras.layers.Dense(50, activation=tf.nn.relu, input_shape=(4,)),
     tf.keras.layers.Dense(10, activation=tf.nn.relu),
     tf.keras.layers.Dense(3)
     ])
 
-
-
-def loss(model, x, y, lo, training):
+def loss(model, x, y, training):
   y_ = model(x, training=training)
-  #Debug
-  # print(np.hstack((y.numpy().reshape(-1,1), y_.numpy())))
-  # mi, ma = functools.reduce(min_max_weight, 
-  #                  zip(model.get_weights(), model.get_weights()),
-  #                  (10000,-10000))
-
-  # print("loss:", mi, ma)
-
-  # print("Input:\n", x)
-  # print("-----------------")
-  # print("Model:\n", model.get_weights())
-  # print("-----------------")
-  # print("Preds:\n", y_)
-  # print("-----------------\n\n\n")
-
+  
   if np.any(np.isnan(y_.numpy())):
     print("Predicted a nan")
-    # print()
-    # print("True =", y, "\nPred =", y_)
     exit()
-  #
 
-  return lo(y_true=y, y_pred=y_)
+  return loss_object(y_true=y, y_pred=y_)
 
 def grad(model, inputs,  targets):
   with tf.GradientTape() as tape:
-    loss_value = loss(model, inputs, targets, loss_object, training=True)
+    loss_value = loss(model, inputs, targets, training=True)
   return loss_value, tape.gradient(loss_value, model.trainable_variables)
 
 train_loss_results = []
 train_accuracy_results = []
 
-num_epochs = 2001
+num_epochs = 401
 epoch_blockchain_submission = 25
 print("The Blockchain is updated every", epoch_blockchain_submission, "epochs") 
 
@@ -116,17 +98,11 @@ for epoch in range(num_epochs):
         print("Model 1 Weights are NaN")
         exit()
 
-      #vals = zip(model1.trainable_variables, model1.get_weights())
-      #for x, y in vals:
-      #  #for z in model1.get_weights(): #vals:
-      #  x
-        # print("T is W?", np.all(x.numpy() == y))
-
       epoch_loss_avg1.update_state(loss_value1)
+      epoch_loss_avg2.update_state(loss(model2, x, y, training=True))
       epoch_accuracy1.update_state(y, model1(x, training=True))
       epoch_accuracy2.update_state(y, model2(x, training=True))
 
-      # print("Len(x):",len(x))
       model1_examples_seen += len(x)
 
     else:
@@ -146,10 +122,10 @@ for epoch in range(num_epochs):
         exit()
 
       epoch_loss_avg2.update_state(loss_value2)
+      epoch_loss_avg1.update_state(loss(model1, x, y, training=True))
       epoch_accuracy2.update_state(y, model2(x, training=True))
       epoch_accuracy1.update_state(y, model1(x, training=True))
 
-      # print("Len(x)2:", len(x))
       model2_examples_seen += len(x)
 
   train_loss_results.append(epoch_loss_avg1.result())
@@ -168,22 +144,12 @@ for epoch in range(num_epochs):
     #Also may not be a cheat since it is possible that 
     #if all not trainable vars are static then it will average to itself
 
-    # for m1_trainables in model1.get_weights(): #trainable_weights:
-    #   nu1.add_weight(falpy.Weights(m1_trainables))
-    # for m2_trainables in model2.get_weights(): #trainable_weights
-    #   nu2.add_weight(falpy.Weights(t2))
-
-    #Zip is good here as both models shoul have 
-    #the same number of trainable weights.
-        # zip(model1.get_weights(), model2.get_weights()):
+    # zip(model1.get_weights(), model2.get_weights()):
     for m1_weights, m2_weights in \
         zip(model1.trainable_variables, model2.trainable_variables):
       nu1.add_weight(falpy.Weights(m1_weights.numpy()))
       nu2.add_weight(falpy.Weights(m2_weights.numpy()))
 
-    # print("m1_before_set:", model1.get_weights()[0][0])
-    # print("m2_before_set:", model2.get_weights()[0][0])
-    
     nu1.set_examples_seen(model1_examples_seen)
     nu2.set_examples_seen(model2_examples_seen)
 
@@ -193,58 +159,16 @@ for epoch in range(num_epochs):
     # last = bc.get_last()
     gu = bc.get_last().get_global_update()
 
-    # print("GU EG_SEEN:", gu.get_examples_seen())
-    # print("M1 EG_SEEN:", nu1.get_examples_seen())
-    # print("M2 EG_SEEN:", nu2.get_examples_seen())
-
+    #TODO: This (Hopefully) Is the last thing to fix!
     #Much like other bugs gu.get_weights MUST be assigned for some
     #(as yet) unknown reason!
     throw = gu.get_weights()
     
     blockchain_weights = [w.g_array for w in throw]
 
-    # print("*****\nM1:")
-    # print(model1.get_weights())
-    # print("\n*****\nM2:")
-    # print(model2.get_weights())
-    # print("\n*****\nBC:")
-    # print(blockchain_weights)
-
-    # print("Printing C version from python:")
-    # print(gu.get_weights())
-    # for w in gu.get_weights():
-    #   print(w)
-    #   print("\nI think it's from C\n")
-
-
-    # print("\n\n")
-    # print("blockchain last ", blockchain_weights[-1])
-    # print("gu last matrix  ", throw[-1])
-    # print("gu last array   ", throw[-1].array)
-    # print("gu last garray  ", throw[-1].g_array)
-
-
-
-    # print("BcW:", blockchain_weights[0][0])
-    # bcw_min, bcw_max = functools.reduce(min_max_weight, 
-    #                zip(blockchain_weights, blockchain_weights),
-    #                (10000,-10000))
-
-    # print("bcw_mm:", bcw_min, bcw_max)
-
     if functools.reduce(any_nan, blockchain_weights, False):
       print("NaN found in blockchain_weights")
-      # print("m1:", model1.get_weights()[0][0])
-      # print("m2:", model2.get_weights()[0][0])
-      # print("bw:", blockchain_weights[0][0])
-      # print("ls1:", loss_value1)
-      # print("gr1:", grads1[0][0])
-      # print("ls2:", loss_value2)
-      # print("gr2:", grads2[0][0])
       exit()
-    # for i, tw in enumerate(model1.trainable_weights):
-    #   tw = ws[i]
-
 
     model1.set_weights(blockchain_weights)
     model2.set_weights(blockchain_weights)
@@ -262,4 +186,16 @@ for epoch in range(num_epochs):
            epoch_loss_avg1.result(),
            epoch_accuracy1.result()))
 
-    #print("\n\n*****************\n\n",model1.get_weights(),"\n\n\n******\n")
+
+print("Training Finished:")
+
+test_accuracy = tf.keras.metrics.Accuracy()
+ds_test_batch = ds_test.batch(10)
+
+for (x, y) in ds_test_batch:
+  logits = model1(x, training=False)
+  prediction  = tf.math.argmax(logits, axis=1, output_type=tf.int64)
+  test_accuracy(prediction, y)
+
+print("Test set accuracy: {:.3%}".format(test_accuracy.result()))
+

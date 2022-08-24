@@ -30,6 +30,13 @@ PyMethodDef FalpyWeights_methods[] = {
 	{NULL} //Sentinel
 };
 
+PyGetSetDef FalpyWeights_getsetters[] = {
+		{"g_array", (getter)FalpyWeights_getarray, NULL,
+		 "Get the matrix data as an array", NULL},
+		{NULL}  /* Sentinel */
+};
+
+
 PyTypeObject FalpyWeightsType = {
 		PyVarObject_HEAD_INIT(NULL, 0)
 		.tp_name = "falpy.Weights",
@@ -43,6 +50,7 @@ PyTypeObject FalpyWeightsType = {
 		.tp_members = FalpyWeights_members,
 		.tp_methods = FalpyWeights_methods,
 		.tp_str = FalpyWeights_str,
+		.tp_getset = FalpyWeights_getsetters,
 };
 
 
@@ -63,6 +71,7 @@ PyTypeObject FalpyWeightsType = {
 //Object has:
 //PyArrayObject *npy_array;
 //matrix_t *matrix;
+
 
 //TF wrapper will call this and make a list of weights objects
 //Therefore this creates 1 matrix etc 
@@ -137,6 +146,13 @@ FalpyWeights_str(FalpyWeightsObject *self)
 	PyObject *pyStr = PyUnicode_FromStringAndSize(str, size);
 	free(str);
 	return pyStr;
+}
+
+FALPY_LOCAL_SYMBOL PyObject*
+FalpyWeights_getarray(FalpyWeightsObject *self, void *closure)
+{
+	Py_INCREF(self->npy_array);
+	return self->npy_array;
 }
 
 //TODO: Clearly somethin wrong here (like when 
