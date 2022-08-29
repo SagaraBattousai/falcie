@@ -8,8 +8,8 @@ vim_sessions/
 #Project specific
 docs/sphinx/_static/css/_*
 
-etro/python/~/*
-etro/python/tmp/*
+etro/python/*/~/*
+etro/python/*/tmp/*
 
 ############################################################
 # Go Ignore
