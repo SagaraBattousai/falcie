@@ -1,7 +1,11 @@
 [build-system]
 requires = [
-  "setuptools>=42",
+  "setuptools>=65",
   "wheel",
+  "cemake >=0.0.2",
 ]
 
 build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 80
