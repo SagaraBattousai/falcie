@@ -2,6 +2,7 @@ import argparse
 
 from falcie.falpy import *
 
+#TODO: Dataset name
 
 # Main
 parser = argparse.ArgumentParser(
@@ -50,7 +51,6 @@ parser.add_argument(
     default=50,
     help="The number of epochs to run before printing the networks statistics.",
 )
-
 
 subparsers = parser.add_subparsers(
     help="Subcommands allow users to specify what Neural Network framework they"

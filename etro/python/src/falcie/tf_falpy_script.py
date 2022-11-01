@@ -17,16 +17,67 @@ import matplotlib.pyplot as plt
 
 
 # Model configuration/builder
-def build_model():
+def build_modelA():
     model = tf.keras.Sequential(
         [
             tf.keras.layers.Conv2D(
-                32, (3, 3), activation="relu", input_shape=(32, 32, 3)
+                32,
+                (3, 3),
+                activation="relu",
+                # input_shape=(32, 32, 3)
             ),
             tf.keras.layers.MaxPooling2D((2, 2)),
             tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
             tf.keras.layers.MaxPooling2D((2, 2)),
             tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(64, activation="relu"),
+            tf.keras.layers.Dense(10),
+        ]
+    )
+
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
+
+    return model, optimizer
+
+
+def build_modelB():
+    model = tf.keras.Sequential(
+        [
+            tf.keras.layers.Conv2D(
+                filters=32,
+                kernel_size=(3, 3),
+                strides=1,
+                padding="same",
+                activation="relu",
+                use_bias=False,
+                # input_shape=(32, 32, 3),
+            ),
+            tf.keras.layers.Conv2D(
+                filters=32,
+                kernel_size=(3, 3),
+                strides=2,
+                padding="same",
+                activation="relu",
+                use_bias=False,
+            ),
+            tf.keras.layers.Conv2D(
+                filters=64,
+                kernel_size=(3, 3),
+                strides=1,
+                padding="same",
+                activation="relu",
+                use_bias=False,
+                input_shape=(32, 32, 3),
+            ),
+            tf.keras.layers.Conv2D(
+                filters=64,
+                kernel_size=(3, 3),
+                strides=2,
+                padding="same",
+                activation="relu",
+                use_bias=False,
+            ),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(64, activation="relu"),
             tf.keras.layers.Dense(10),
@@ -96,7 +147,11 @@ def get_train_and_test_data(
 
 
 def train_single_model(
-    num_epochs=151, batch_size=32, train_percent=1.0, stats_after_epochs=50
+    num_epochs=151,
+    batch_size=32,
+    model_builder=build_modelA,
+    train_percent=1.0,
+    stats_after_epochs=50,
 ):
 
     loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -106,7 +161,7 @@ def train_single_model(
     ds_train, ds_test = get_train_and_test_data(train_percent=train_percent)
     ds_train_batch = ds_train.batch(batch_size)
 
-    model, optimizer = build_model()
+    model, optimizer = model_builder()
 
     train_loss_results = []
     train_accuracy_results = []
@@ -117,7 +172,7 @@ def train_single_model(
 
         for x, y in ds_train_batch:
             # Train Model
-            model, optimizer = models[model_index]
+            # model, optimizer = models[model_index]
             loss_value, grads = grad(model, loss_object, x, y)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
@@ -181,6 +236,7 @@ def train_federated_model(
     epoch_blockchain_submission=25,
     num_epochs=151,
     batch_size=32,
+    model_builder=build_modelA,
     dataset_name="cifar10",
     train_percent=1.0,
     stats_after_epochs=50,
@@ -196,7 +252,7 @@ def train_federated_model(
     )
     ds_train_batch = ds_train.batch(batch_size)
 
-    models = [build_model()] * num_models
+    models = [model_builder()] * num_models
 
     if verbose:
         print_config(
@@ -307,178 +363,10 @@ if __name__ == "__main__":
         num_models=2,
         epoch_blockchain_submission=25,
         num_epochs=151,
+        model_builder=build_modelB,
+        dataset_name="fashion_mnist",
         batch_size=32,
         train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=4,
-        epoch_blockchain_submission=25,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=8,
-        epoch_blockchain_submission=25,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=2,
-        epoch_blockchain_submission=50,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=4,
-        epoch_blockchain_submission=50,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=8,
-        epoch_blockchain_submission=50,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=2,
-        epoch_blockchain_submission=75,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=4,
-        epoch_blockchain_submission=75,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=8,
-        epoch_blockchain_submission=75,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.1,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=2,
-        epoch_blockchain_submission=25,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=4,
-        epoch_blockchain_submission=25,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=8,
-        epoch_blockchain_submission=25,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=2,
-        epoch_blockchain_submission=50,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=4,
-        epoch_blockchain_submission=50,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=8,
-        epoch_blockchain_submission=50,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=2,
-        epoch_blockchain_submission=75,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=4,
-        epoch_blockchain_submission=75,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
-        stats_after_epochs=50,
-        verbose=True,
-    )
-
-    train_federated_model(
-        num_models=8,
-        epoch_blockchain_submission=75,
-        num_epochs=151,
-        batch_size=32,
-        train_percent=0.25,
         stats_after_epochs=50,
         verbose=True,
     )
