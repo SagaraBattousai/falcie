@@ -50,13 +50,14 @@ namespace pulse
 	public:
 		enum class ChainIteratorStartingPoint : unsigned char { Head, Tail };
 
-		class ChainIterator : public std::iterator<
-			std::bidirectional_iterator_tag, //iter_type
-			std::ptrdiff_t,                  //difference_type
-			T,                               //value_type
-			T*,								 //pointer
-			T&>                              //reference
+		class ChainIterator 
 		{
+		public:
+			using iterator_category = std::bidirectional_iterator_tag;
+			using value_type = T;
+			using difference_type = std::ptrdiff_t;
+			using pointer = T*;
+			using reference = T&;
 
 		private:
 			friend class Chain;
