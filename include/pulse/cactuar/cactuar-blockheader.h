@@ -76,10 +76,10 @@ namespace pulse
 	{ }
 
 
-	constexpr const int BlockheaderSize(HashAlgorithm algo)
+	const int BlockheaderSize(HashAlgorithm algo)
 	{
 		//return sizeof(Blockheader) + 2 * (AsHashSize(algo) - sizeof(std::vector<std::byte>));
-		return 20 + 2 * AsHashSize(algo);
+		return 20 + 2 * HashSize(algo);
 		//^^ for some reason I was getting 88 as sizeof(Blockheader) instead of 84
 	}
 

@@ -10,6 +10,8 @@ add_subdirectory(cactuar)
 
 add_subdirectory(dahaka)
 
+add_subdirectory(gran)
+
 # Will still use the term "Module" but untill compilers catchup we shall use
 # header.
 

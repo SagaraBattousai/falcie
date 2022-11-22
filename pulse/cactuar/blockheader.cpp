@@ -18,8 +18,8 @@ namespace pulse
 		it = CopyDataAsBytes(header->version, it);
 		it = CopyDataAsBytes(header->timestamp, it);
 		//TODO: try overloading with vector or pointer?
-		it = std::copy_n(reinterpret_cast<const std::byte*>(header->prev_hash.data()), AsHashSize(algo), it);
-		it = std::copy_n(reinterpret_cast<const std::byte*>(header->transaction_hash.data()), AsHashSize(algo), it);
+		it = std::copy_n(reinterpret_cast<const std::byte*>(header->prev_hash.data()), HashSize(algo), it);
+		it = std::copy_n(reinterpret_cast<const std::byte*>(header->transaction_hash.data()), HashSize(algo), it);
 		it = CopyDataAsBytes(header->target, it);
 		it = CopyDataAsBytes(header->nonce, it);
 
@@ -33,8 +33,8 @@ namespace pulse
 		return Blockheader{
 			version,
 			Block::GenerateTimestamp(),
-			std::vector<std::byte>(AsHashSize(hash_algo)),
-			std::vector<std::byte>(AsHashSize(hash_algo)),
+			std::vector<std::byte>(HashSize(hash_algo)),
+			std::vector<std::byte>(HashSize(hash_algo)),
 			0x00000000,
 			0
 		};

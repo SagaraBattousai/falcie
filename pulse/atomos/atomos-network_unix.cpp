@@ -1,7 +1,5 @@
 //module;
 
-#ifndef _WIN32 
-
 #include <memory>
 #include <iostream>
 
@@ -23,5 +21,3 @@ namespace pulse
 		return 7;
 	}
 }
-
-#endif

@@ -14,7 +14,7 @@
 #include <functional> //import <functional>;
 
 #include <cactuar/cactuar-encoding.h> //import :encoding;
-#include <cactuar/cactuar-crypto.h> //import :crypto;
+#include <cactuar/cactuar-hash.h> //import :crypto;
 #include <cactuar/cactuar-target.h> //import :target;
 
 //export 

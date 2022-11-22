@@ -10,8 +10,8 @@ set(ATOMOS_MODULE_ROOT "${PULSE_MODULE_ROOT}/atomos")
 set(atomos_module 
   "${ATOMOS_MODULE_ROOT}/atomos.h" #ixx"
   "${ATOMOS_MODULE_ROOT}/atomos-network.h" #ixx" 
-  # "${ATOMOS_MODULE_ROOT}/.ixx"
-  # "${ATOMOS_MODULE_ROOT}/.ixx" 
+  "${ATOMOS_MODULE_ROOT}/atomos-network_win32.h" #ixx" 
+  "${ATOMOS_MODULE_ROOT}/atomos-network_unix.h" #ixx" 
   )
 
 set(cpp_files 

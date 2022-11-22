@@ -3,14 +3,6 @@
 #ifndef __ATOMOS_NETWORK__
 #define __ATOMOS_NETWORK__
 
-#ifdef _WIN32 
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-//#include <iphlpapi.h> //If needed MUST be after winsock2.h
-
-#endif
-
 #include <memory>
 #include <iostream>
 
@@ -19,8 +11,14 @@
 //export 
 namespace pulse
 {
-	int f();
+	//abstract class
+	class P2PNode
+	{
+		
+	};
 
+	//Will use -> #ifdef _WIN32 to check os when called ...? Can a dll/library do this??
+	std::unique_ptr<P2PNode> MakeP2PNode(); //For auto os detection 
 } //namespace pulse
 
 #endif
