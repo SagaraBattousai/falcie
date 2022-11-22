@@ -8,16 +8,16 @@
 #include <cactuar/cactuar-crypto.h>
 #include <cactuar/cactuar-crypto_pool.h>
 
-typedef struct evp_md_ctx_st EVP_MD_CTX;
+typedef struct evp_pkey_st EVP_PKEY;
 
 namespace pulse
 {
 	namespace cactuar
 	{
-		class HashContextPool : public ContextPool<HashContextPool, EVP_MD_CTX, HashAlgorithm>
+		class ElipticalCurveContextPool : public ContextPool<ElipticalCurveContextPool, EVP_PKEY, ElipticalCurves>
 		{
 		private:
-			virtual EVP_MD_CTX* GetContext_impl(HashAlgorithm hash_algo) override;
+			virtual EVP_PKEY* GetContext_impl(ElipticalCurves) override;
 		};
 
 	} //namespace pulse::cactuar 

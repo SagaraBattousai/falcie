@@ -8,11 +8,12 @@
 #include <vector>
 #include <cstddef>
 
-
+#include <pulse/cactuar/cactuar-eliptical_curve_pool.h>
 #include <pulse/cactuar/cactuar-hash.h>
 
 int main()
 {
+	/*
 	EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
 
 	if (pctx == NULL)
@@ -50,7 +51,7 @@ int main()
 	{
 		return -6;
 	}
-
+	*/
 	//int EVP_DigestSignInit(EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx, const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);
 
 	EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
@@ -59,6 +60,10 @@ int main()
 	{
 		return -7;
 	}
+	//EVP_PKEY_CTX_free(pctx);
+	
+
+	EVP_PKEY* ppkey = pulse::cactuar::ElipticalCurveContextPool::GetContext(pulse::ElipticalCurves::SECP256K1);
 
 
 	EVP_DigestSignInit(mdctx, NULL, NULL, NULL, ppkey);

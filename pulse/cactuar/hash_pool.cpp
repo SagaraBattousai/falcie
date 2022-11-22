@@ -1,32 +1,68 @@
 
+//Openssl Higher-level api
+#include <openssl/evp.h>
+
+//For Hashing
+#include <openssl/provider.h>
+#include <openssl/err.h>
+
 #include <cactuar/cactuar-hash_pool.h>
-#include <cactuar/internal/cactuar-openssl_wrapper.h>
 
 namespace pulse
 {
 	namespace cactuar
 	{
-		std::vector<std::array<EVP_MD_CTX*, 1>>
-			HashContextPool::pool{ static_cast<int>(HashAlgorithm::AvailiableHashAlgorithms) };
 
-		HashContextPool& HashContextPool::Instance()
+		namespace
 		{
-			if (instance.get() == nullptr)
-			{
-				instance.reset(new HashContextPool());
-			}
-			return *instance;
-		};
+			OSSL_PROVIDER *OSSL_LEGACY_PROVIDER = nullptr;
+			OSSL_PROVIDER *OSSL_DEFAULT_PROVIDER = nullptr;
 
-		EVP_MD_CTX* HashContextPool::GetContext(HashAlgorithm hash_algo)
-		{
-			EVP_MD_CTX*& context = pool[static_cast<int>(hash_algo)][0];
-			if (context == nullptr)
+			inline void LoadDefaultProvider()
 			{
-				//this->pool[static_cast<int>(hash_algo)][0] = GetHashContext(hash_algo);
-				context = GetHashContext(hash_algo);
+				if (OSSL_DEFAULT_PROVIDER == nullptr)
+					OSSL_DEFAULT_PROVIDER = OSSL_PROVIDER_load(NULL, "default");
 			}
+			inline void LoadLegacyProvider()
+			{
+				if (OSSL_LEGACY_PROVIDER == NULL)
+					OSSL_LEGACY_PROVIDER = OSSL_PROVIDER_load(NULL, "legacy");
+			}
+		}
+
+		EVP_MD_CTX* HashContextPool::GetContext_impl(HashAlgorithm hash_algo)
+		{
+
+			EVP_MD_CTX *context = EVP_MD_CTX_new();
+			EVP_MD *evp_type;
+
+			switch (hash_algo)
+			{
+			case HashAlgorithm::SHA256:
+				LoadDefaultProvider();
+				evp_type = EVP_MD_fetch(NULL, "SHA256", NULL);
+				break;
+			case HashAlgorithm::RIPEMD160:
+				LoadLegacyProvider();
+				evp_type = EVP_MD_fetch(NULL, "RIPEMD160", "provider=legacy");
+				break;
+			default:
+				EVP_MD_CTX_free(context);
+				return nullptr;
+			}
+
+			if (evp_type == NULL)
+			{
+				EVP_MD_CTX_free(context);
+				return nullptr;
+			}
+
+			EVP_DigestInit_ex2(context, evp_type, NULL);
+
+			EVP_MD_free(evp_type);
+
 			return context;
+
 		}
 	} //namespace pulse::cactuar
 

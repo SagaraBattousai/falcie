@@ -14,8 +14,6 @@ namespace pulse
 	namespace cactuar
 	{
 
-		EVP_MD_CTX* GetHashContext(HashAlgorithm hash_type);
-
 		std::vector<std::byte> HashDataWithContext(EVP_MD_CTX *context, const std::span<const std::byte> input);
 
 		int HashSize(EVP_MD_CTX *context); //cant be inline (given headers) but smart compilers will save us
