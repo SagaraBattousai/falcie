@@ -41,23 +41,6 @@ namespace pulse
 		}
 	}
 
-	std::ostream& operator<<(std::ostream& os, const HashAlgorithm hashAlgo)
-	{
-		switch (hashAlgo)
-		{
-		case HashAlgorithm::SHA256:
-			os << "SHA256";
-			break;
-		case HashAlgorithm::RIPEMD160:
-			os << "RIPEMD160";
-			break;
-		default:
-			os << "UNKNOWN HASH ALGORITHM";
-		}
-
-		return os;
-	}
-
 	HashFunction::HashFunction(HashAlgorithm hash_algo)
 		: hash_func
 	{ [hash_algo = std::move(hash_algo)](HashFunction::input_type input)

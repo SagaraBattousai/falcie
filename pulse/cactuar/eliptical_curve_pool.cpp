@@ -1,4 +1,6 @@
 
+#include <cstdio>
+
 //Openssl Higher-level api
 #include <openssl/evp.h>
 
@@ -14,13 +16,13 @@ namespace pulse
 {
 	namespace cactuar
 	{
-		EVP_PKEY* ElipticalCurveContextPool::GetContext_impl(ElipticalCurves eliptical_curve)
+		EVP_PKEY* ElipticalCurveContextPool::GetContext_impl(ElipticalCurve eliptical_curve)
 		{
 			int curve_NID;
 
 			switch (eliptical_curve)
 			{
-			case ElipticalCurves::SECP256K1:
+			case ElipticalCurve::SECP256K1:
 				curve_NID = NID_secp256k1;
 				break;
 			default:
@@ -52,6 +54,11 @@ namespace pulse
 
 			EVP_PKEY_CTX_free(pctx);
 			EVP_PKEY_free(params);
+
+
+		
+			int prkw = EVP_PKEY_print_private_fp(stdout, ppkey, 0, NULL);
+			int pukw = EVP_PKEY_print_params_fp(stdout, ppkey, 0, NULL);
 
 			return ppkey;
 		}

@@ -30,32 +30,35 @@ namespace pulse
 			}
 		}
 
-		EVP_MD_CTX* HashContextPool::GetContext_impl(HashAlgorithm hash_algo)
+		EVP_MD* HashContextPool::GetDigestType(HashAlgorithm hash_algo)
 		{
-
-			EVP_MD_CTX *context = EVP_MD_CTX_new();
-			EVP_MD *evp_type;
-
 			switch (hash_algo)
 			{
 			case HashAlgorithm::SHA256:
 				LoadDefaultProvider();
-				evp_type = EVP_MD_fetch(NULL, "SHA256", NULL);
-				break;
+				return EVP_MD_fetch(NULL, "SHA256", NULL);
+				//break;
 			case HashAlgorithm::RIPEMD160:
 				LoadLegacyProvider();
-				evp_type = EVP_MD_fetch(NULL, "RIPEMD160", "provider=legacy");
-				break;
+				return EVP_MD_fetch(NULL, "RIPEMD160", "provider=legacy");
+				//break;
 			default:
-				EVP_MD_CTX_free(context);
+				return nullptr;
+			}
+		}
+
+
+		EVP_MD_CTX* HashContextPool::GetContext_impl(HashAlgorithm hash_algo)
+		{
+
+			EVP_MD *evp_type = GetDigestType(hash_algo); // or const &
+
+			if (evp_type == nullptr)
+			{
 				return nullptr;
 			}
 
-			if (evp_type == NULL)
-			{
-				EVP_MD_CTX_free(context);
-				return nullptr;
-			}
+			EVP_MD_CTX *context = EVP_MD_CTX_new();
 
 			EVP_DigestInit_ex2(context, evp_type, NULL);
 

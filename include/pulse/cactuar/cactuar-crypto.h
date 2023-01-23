@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstddef>
+#include <ostream>
 #include <span>
 
 namespace pulse
@@ -31,10 +32,11 @@ namespace pulse
 		 * elements in this enum other than this (which is a psudo-element).
 		*/
 		COUNT
-
 	};
 
-	enum class ElipticalCurves
+	std::ostream& operator<<(std::ostream&, const HashAlgorithm&);
+
+	enum class ElipticalCurve
 	{
 		SECP256K1,
 
@@ -46,13 +48,17 @@ namespace pulse
 		COUNT
 	};
 
+	std::ostream& operator<<(std::ostream&, const ElipticalCurve&);
+
 
 	class CryptographicFunction
 	{
 	public:
 		using return_type = std::vector<std::byte>;
 
-		virtual return_type operator()(const std::span<const std::byte> input) const = 0;
+		using input_type = const std::span<const std::byte>;
+
+		virtual return_type operator()(input_type input) const = 0;
 	};
 
 }

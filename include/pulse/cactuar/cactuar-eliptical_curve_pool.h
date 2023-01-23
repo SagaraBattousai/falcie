@@ -1,5 +1,5 @@
-#ifndef __CACTUAR_HASH_POOL_H__
-#define __CACTUAR_HASH_POOL_H__
+#ifndef __CACTUAR_ELIPTICAL_CURVE_POOL_H__
+#define __CACTUAR_ELIPTICAL_CURVE_POOL_H__
 
 #include <vector>
 #include <array>
@@ -14,14 +14,14 @@ namespace pulse
 {
 	namespace cactuar
 	{
-		class ElipticalCurveContextPool : public ContextPool<ElipticalCurveContextPool, EVP_PKEY, ElipticalCurves>
+		class ElipticalCurveContextPool : public ContextPool<ElipticalCurveContextPool, EVP_PKEY, ElipticalCurve>
 		{
 		private:
-			virtual EVP_PKEY* GetContext_impl(ElipticalCurves) override;
+			virtual EVP_PKEY* GetContext_impl(ElipticalCurve) override;
 		};
 
 	} //namespace pulse::cactuar 
 } //namespace pulse
 
 
-#endif // !__CACTUAR_HASH_POOL_H__
+#endif // !__CACTUAR_ELIPTICAL_CURVE_POOL_H__

@@ -4,11 +4,14 @@
 #include <openssl/ec.h>
 #include <openssl/obj_mac.h>
 
+#include <openssl/bio.h>
+
 #include <iostream>
 #include <vector>
 #include <cstddef>
 
 #include <pulse/cactuar/cactuar-eliptical_curve_pool.h>
+#include <pulse/cactuar/cactuar-hash_pool.h>
 #include <pulse/cactuar/cactuar-hash.h>
 
 int main()
@@ -54,19 +57,24 @@ int main()
 	*/
 	//int EVP_DigestSignInit(EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx, const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);
 
-	EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
+	EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+
+	EVP_MD *evp_type = pulse::cactuar::HashContextPool::GetDigestType(pulse::HashAlgorithm::SHA256);
+
+	EVP_DigestInit_ex2(mdctx, evp_type, NULL);
 
 	if (!mdctx)
 	{
 		return -7;
 	}
 	//EVP_PKEY_CTX_free(pctx);
-	
 
-	EVP_PKEY* ppkey = pulse::cactuar::ElipticalCurveContextPool::GetContext(pulse::ElipticalCurves::SECP256K1);
+	EVP_PKEY* ppkey = pulse::cactuar::ElipticalCurveContextPool::GetContext(pulse::ElipticalCurve::SECP256K1);
 
+	//BIO *mem = BIO_new(BIO_s_mem());
+	//ANS1_PCTX
 
-	EVP_DigestSignInit(mdctx, NULL, NULL, NULL, ppkey);
+	EVP_DigestSignInit(mdctx, NULL, evp_type, NULL, ppkey);
 	EVP_DigestSignUpdate(mdctx, "Hi There", 9);
 
 	size_t siglen;
@@ -86,30 +94,13 @@ int main()
 
 	std::cout << x << " Which means!" << std::endl;
 
-
-	pulse::HashFunction sha256 = pulse::HashFunction(pulse::HashAlgorithm::SHA256);
-	std::vector<std::byte> data = { std::byte{0x01}, std::byte{0x02}, std::byte{0x03}, std::byte{0x04}, std::byte{0x05} };
-	auto hash = sha256(data);
-	hash = sha256(hash);
-
-	auto dhf = pulse::HashFunction(pulse::HashAlgorithm::SHA256) * pulse::HashFunction(pulse::HashAlgorithm::SHA256);
-
-	auto double_hash = dhf(data);
-
-	for (auto d : hash)
+	for (int i = 0; i < siglen; i++)
 	{
-		std::cout << std::hex << static_cast<int>(d);
+		std::cout << std::hex << static_cast<int>(sig[i]);
 	}
-
 	std::cout << std::endl;
 
-	for (auto d : double_hash)
-	{
-		std::cout << std::hex << static_cast<int>(d);
-	}
-
 	std::cout << std::endl;
-
 
 	return 0;
 }
