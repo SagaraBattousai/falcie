@@ -5,7 +5,7 @@
 # Will still use the term "Module" but untill compilers catchup we shall use
 # header.
 
-set(ATOMOS_MODULE_ROOT "${PULSE_MODULE_ROOT}/atomos")
+set(ATOMOS_MODULE_ROOT "${MODULE_ROOT}/atomos")
 
 set(atomos_module 
   "${ATOMOS_MODULE_ROOT}/atomos.h" #ixx"

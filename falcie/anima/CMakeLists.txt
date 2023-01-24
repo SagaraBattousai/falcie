@@ -5,7 +5,7 @@
 # Will still use the term "Module" but untill compilers catchup we shall use
 # header.
 
-set(ANIMA_MODULE_ROOT "${PULSE_MODULE_ROOT}/anima")
+set(ANIMA_MODULE_ROOT "${MODULE_ROOT}/anima")
 
 # The ***_old dont work on unix (very strict) so we ignored it for now
 # but we want to add them back in!

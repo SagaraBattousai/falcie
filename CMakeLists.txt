@@ -45,43 +45,17 @@ set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
 # set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/modules")
 set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
-add_subdirectory(pulse)
-add_subdirectory(lindzei)
-add_subdirectory(etro)
-
-if(BUILD_TESTS)
-  # enable_testing()
-  # add_subdirectory(tests)
-endif()
+add_subdirectory(falcie)
 
 if(BUILD_DOCS)
   add_subdirectory(docs)
   #Do I need to add pulse's dependancies as well or is that transitive!?
-  add_dependencies(Doxygen pulse) #lindzei #etro
+  #TODO: # add_dependencies(Doxygen pulse) #lindzei #etro
 endif()
 
-# add_library(etro SHARED) # $<TARGET_OBJECTS:pulse>)
-
-#add_executable(etro_cpp "etro/main.cpp")
-#target_link_libraries(etro_cpp pulse)
-#target_include_directories(etro_cpp PUBLIC ${INCLUDE_ROOT})
-
-#add_executable(etro_c "etro/main.c")
-#target_link_libraries(etro_c pulse)
-#target_include_directories(etro_c PUBLIC ${INCLUDE_ROOT})
-
-##DLL's must be in same dir as exe (or added to path but i'd rather
-##avoid that if I can.
-#if(WIN32)
-#  symlink_library_to_target(etro_c pulse)
-#  symlink_library_to_target(etro_cpp pulse)
-#  copy_openssl_runtime_lib_to_target(etro_c crypto)
-#  copy_openssl_runtime_lib_to_target(etro_cpp crypto)
-#endif()
-
-if(MSVC)
-  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cocoon)
-endif()
+# if(MSVC)
+#   set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cocoon)
+# endif()
 
 #----------------------------------------------
 #   Install settings
@@ -102,46 +76,22 @@ if(INSTALL_IN_BUILD AND NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     CACHE PATH "..." FORCE)
 endif()
 
-
-#TEST
-# get_property(TP TARGET cactuar PROPERTY LINK_LIBRARIES)
-# message(STATUS "......**** ${TP}")
-# get_property(TP TARGET cactuar PROPERTY INCLUDE_DIRECTORIES)
-# message(STATUS "......**** ${TP}")
-
-
-
-
 #TODO: setup installing.....
 
-
-
-install(TARGETS pulse
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+# install(TARGETS pulse
+#   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # install(TARGETS cactuar
 #   FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-# install(IMPORTED_RUNTIME_ARTIFACTS OpenSSL::Crypto
-#   RUNTIME_DEPENDENCY_SET external_runtime_deps RUNTIME)
 
+#if(BUILD_DOCS)
+#  #Use trailing slashes to avoid adding subdirectories
+#  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/sphinx/"
+#    DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
-
-
-
-if(WIN32)
-  get_openssl_runtime_lib(crypto)
-  install(PROGRAMS ${OPENSSL_RUNTIME_LIB_crypto} 
-    DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
-
-if(BUILD_DOCS)
-  #Use trailing slashes to avoid adding subdirectories
-  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/sphinx/"
-    DESTINATION ${CMAKE_INSTALL_DOCDIR})
-
-  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/man/"
-    DESTINATION ${CMAKE_INSTALL_MANDIR})
-endif()
+#  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/man/"
+#    DESTINATION ${CMAKE_INSTALL_MANDIR})
+#endif()
 

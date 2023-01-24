@@ -10,10 +10,15 @@ vim_sessions/
 *.vs
 
 #Project specific
+
+## docs
 docs/sphinx/_static/css/_*
 
-etro/python/*/~/*
-etro/python/*/tmp/*
+## Tensorflow Datasets
+falcie/etro/python/*/~/*
+falcie/etro/python/*/tmp/*
+
+
 
 ############################################################
 # Go Ignore
