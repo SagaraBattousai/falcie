@@ -9,7 +9,7 @@ add_subdirectory(etro)
 
 # add_subdirectory(gran)
 
-# add_subdirectory(orphan)
+add_subdirectory(orphan)
 
 
 if(BUILD_TESTS)
