@@ -46,7 +46,7 @@ if (MSVC)
     NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
   auto_copy_dlls_for_target(falpy)
-  copy_openssl_runtime_lib_to_target(falpy crypto)
+  # copy_openssl_runtime_lib_to_target(falpy crypto)
 
   # symlink_library_to_target(falpy pulse)
   # symlink_library_to_target(falpy lindzei)

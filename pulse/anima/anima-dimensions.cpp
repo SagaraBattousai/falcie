@@ -18,20 +18,10 @@ namespace pulse
 	{
 	}
 
-	constexpr std::vector<Dimensions::value_type> Dimensions::DimensionIndex() const
-	{
-		std::vector<value_type> dimensionIndexer(this->dims.size());
+	//constexpr std::vector<Dimensions::value_type> Dimensions::DimensionIndex() const
+	
 
-		std::partial_sum(
-			dims.rbegin(), dims.rend() - 1,
-			dimensionIndexer.rbegin() + 1, std::multiplies<value_type>()
-		);
-
-		dimensionIndexer[dimensionIndexer.size() - 1] = 1;
-
-		return dimensionIndexer;
-	}
-
+	/*
 	constexpr Dimensions::value_type 
 		Dimensions::FlattenIndex(const std::vector<value_type>& indicies) const
 	{
@@ -42,6 +32,7 @@ namespace pulse
 			dimensionIndexer.begin(), (value_type) 0);
 
 	}
+	*/
 	/*
 	constexpr Dimensions::value_type Dimensions::TotalSize() const
 	{

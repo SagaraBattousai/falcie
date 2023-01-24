@@ -32,12 +32,13 @@ namespace pulse
 
 	template<typename T>
 	concept BlockchainAddable = requires (T block,
-		const std::vector<std::byte>&l_hash, std::vector<std::byte> && r_hash)
+		const std::vector<std::byte>&const_byte_vec_ref, std::vector<std::byte> && r_hash)
 	{
 		{ block.Mine(std::move(r_hash)) };
 		{ block.PrevHash() } -> std::convertible_to<const std::vector<std::byte>&>;
 		{ block.Hash() } -> std::convertible_to<std::vector<std::byte>>;
-		{ block.CompareWithTarget(l_hash) } -> std::convertible_to<bool>;
+		{ block.CompareWithTarget(const_byte_vec_ref) } -> std::convertible_to<bool>;
+		//{ block.GetTransactions(const_byte_vec_ref) } -> std::convertible_to<
 	};
 
 	//TODO: add V later or maybe leave concepts alone and do blockchain in cactuar etc
@@ -63,6 +64,8 @@ namespace pulse
 
 		bool Validate();
 
+		std::int64_t GetBalance(std::vector<std::byte> addr);
+
 		const T& GetLast();
 
 		typename Chain<T, UnrolledElems>::ChainIterator begin();
@@ -84,6 +87,7 @@ namespace pulse
 		this->chain.Add(std::forward<T>(genisis));
 	}
 
+	//Only Works with Proof-Of-Work
 	template<BlockchainAddable T, std::int64_t UnrolledElems>
 	void Blockchain<T, UnrolledElems>::Add(T&& elem)
 	{
@@ -153,6 +157,22 @@ namespace pulse
 			prevBlock = currBlock;
 		}
 		return true;
+	}
+
+	template<BlockchainAddable T, std::int64_t UnrolledElems>
+	std::int64_t Blockchain<T, UnrolledElems>::GetBalance(std::vector<std::byte> addr)
+	{
+		auto it = this->chain.begin();
+		++it; ///< Skip Genisis Block
+
+		auto end = this->chain.end();
+		while (it != end)
+		{
+			for (auto tran : it->)
+
+			++it;
+		}
+
 	}
 
 

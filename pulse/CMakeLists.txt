@@ -24,7 +24,6 @@ add_library(pulse SHARED #STATIC
   ${pulse_module}
   $<TARGET_OBJECTS:anima>
   $<TARGET_OBJECTS:atomos>
-  $<TARGET_OBJECTS:cactuar>
   )
 
 

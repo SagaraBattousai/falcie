@@ -1,38 +1,29 @@
-/* UNused Now (I think)
-
-module;
+/*
+#ifndef __FEDERATED_BLOCKCHAIN_H__
+#define __FEDERATED_BLOCKCHAIN_H__
 
 #include <cstdint>
 
-export module orphan:federated_blockchain;
+#include <pulse/dahaka/dahaka-blockchain.h>
 
-export namespace pulse
+#include <orphan/federated_block.h>
+
+namespace lindzei
 {
 
-constexpr int64_t FEDERATED_BLOCKCHAIN_UNROLLED_SIZE = 32;
+	constexpr int64_t FEDERATED_BLOCKCHAIN_UNROLLED_SIZE = 32;
 
-typedef Blockchain<federatedblock_t, unsigned char, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE> federated_blockchain_t;
-#else
-typedef struct federated_blockchain federated_blockchain_t;
-#endif
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdbool.h>
-
-	federated_blockchain_t* new_federated_blockchain(federatedblock_t genisis);
-
-	//Add some constness
-	void add(federated_blockchain_t* const chain, federatedblock_t block);
-
-	bool validate(federated_blockchain_t* const chain);
-
-	federatedblock_t get_last(federated_blockchain_t* const chain);
+	class FederatedBlockchain : public pulse::Blockchain<Federatedblock, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE>
+	{
+	public:
 
 
+	};
 
 }
+
+
+
+#endif
+
 */

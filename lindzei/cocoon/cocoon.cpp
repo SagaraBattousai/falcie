@@ -1,5 +1,6 @@
 
 #include <cstdint>
+#include <cstddef>
 #include <iostream>
 
 #include <vector> //import <vector>;
@@ -7,11 +8,17 @@
 
 #include <pulse/pulse.h> //import pulse;
 #include <lindzei/lindzei.h> //import lindzei;
+#include <orphan/federated_transaction.h> //import lindzei;
+#include <orphan/federated_user_account.h> //import lindzei;
+#include <orphan/federated_contract_account.h> //import lindzei;
 
 int main(void)
 {
 
 	using lindzei::Federatedblock;
+	using lindzei::FederatedTransaction;
+	using lindzei::UserAccount;
+	using lindzei::ContractAccount;
 	//using pulse::NeuralNetwork;
 	using lindzei::NetworkUpdate;
 
@@ -19,68 +26,34 @@ int main(void)
 
 	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ block_builder.Genisis(), 32 };
 
-	NetworkUpdate combined_update;
+	Federatedblock block = block_builder.Build();
 
-	std::vector<float> w11{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	std::vector<float> w12{ 10,11,12 };
-
-	std::vector<float> w21{ 2, 4, 6, 8, 10, 12, 14, 16, 18 };
-	std::vector<float> w22{ 24, 22, 20 };
-
-	NetworkUpdate network1_update
-	{
-		.delta_weights = std::vector<pulse::Matrix<float>>{
-			pulse::Matrix<float>(w11, {3,3}),
-			pulse::Matrix<float>(w12, {3,1})
-		},
-		.examples_seen = 4
-	};
-
-	NetworkUpdate network2_update
-	{
-		.delta_weights = std::vector<pulse::Matrix<float>>{
-			pulse::Matrix<float>(w21, {3,3}),
-			pulse::Matrix<float>(w22, {3,1})
-			},
-		.examples_seen = 2
-	};
-
-	Federatedblock b = block_builder.Build();
-
-	//b.AddLocalUpdate((std::vector<pulse::Matrix<float>>{
-		//pulse::Matrix<float>(w11, { 3,3 }),
-			//pulse::Matrix<float>(w12, { 3,1 })}), 4);
+	std::vector<std::byte> user_addr = std::vector<std::byte>{ std::byte{0}, std::byte{1}, std::byte{2} };
 	
-	b.AddLocalUpdate(network1_update);
-	b.AddLocalUpdate(network2_update);
+	std::vector < std::byte> contract_addr = std::vector<std::byte>{ std::byte{9}, std::byte{8}, std::byte{7} };
 
-	//use ptrs and builder in next iter TODO:
-	bc.Add(std::move(b));
+	UserAccount acc{ user_addr };
 
-	auto& last = bc.GetLast();
-
-	auto& gu = last.GetGlobalUpdate();
-
-	//network1.SetWeights(gu.delta_weights);
-	//network2.SetWeights(gu.delta_weights);
-
-	std::cout << gu.examples_seen << std::endl;
-
-	std::cout << gu.delta_weights.size() << std::endl;
-
-	for (auto& w1 : gu.delta_weights[0])
+	auto x = [](const FederatedTransaction& trans) -> FederatedTransaction
 	{
-		std::cout << w1 << " ";
-	}
+		return FederatedTransaction{ trans.GetReceiver(), trans.GetSender(), trans.GetValue() * 2 };
+	};
 
-	std::cout << "\n\n";
+	ContractAccount con{ contract_addr, x };
 
-	for (auto& w2 : gu.delta_weights[1])
-	{
-		std::cout << w2 << " ";
-	}
+	FederatedTransaction *ut = new FederatedTransaction{ user_addr, contract_addr, 7 };
 
-	std::cout << std::endl;
+	block.AddTransaction(ut);
+
+	bc.Add(std::move(block));
+
+	Federatedblock b2 = block_builder.Build();
+
+	con.ExecuteContract(b2, *ut);
+
+	bc.Add(std::move(b2));
+
+
 
 
 	return 0;

@@ -8,45 +8,63 @@
 //i.e. using an abstract type pointing to a base ....
 
 #include <cstdint>
-//#include <cstddef>
+#include <cstddef>
 
-//export module orphan:federated_block;
-
-#include <vector> //import <vector>;
-#include <memory> //import <memory>;
-#include <utility> //import <utility>;
+#include <vector>
+#include <memory>
+#include <functional>
+#include <utility>
 #include <ostream>
 
 #include <pulse/pulse.h> //import pulse;
 
+#include <cactuar/cactuar-keccak.h>
+
+#include <orphan/federated_blockheader.h>
 #include <orphan/federated_network.h> //import :federated_network;
+#include <orphan/federated_transaction.h>
 
 //export 
 namespace lindzei
 {
 
-	class Federatedblock : public pulse::Block
+	class Federatedblock : public cactuar::Block
 	{
 	public:
 
 		//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
 		Federatedblock();
 
-		//Good candidate for inline as just a function call
-		virtual inline blockhash_type Hash() const override 
+		// When hash is changed change here too
+		constexpr static int hash_size = 32;
+		virtual inline cactuar::hash_output Hash() const override 
 		{ 
-			return this->hash_func(hash_algo, *this); 
+			return cactuar::Keccak256(header->State());
 		};
 
-		virtual inline const blockhash_type& PrevHash() const override { 
+		virtual inline const cactuar::hash_output& PrevHash() const override 
+		{ 
 			return this->header.get()->prev_hash; 
 		};
 
-		virtual inline const bool CompareWithTarget(const blockhash_type& hash) const override;
+		virtual inline const bool CompareWithTarget(const cactuar::hash_output& hash) const override
+		{
+			return hash < this->header.get()->target;
+		}
 
-		virtual void Mine(blockhash_type&& prev_hash) override;
+		virtual void Mine(cactuar::hash_output&& prev_hash) override;
 
-		virtual inline std::vector<std::byte> State() const override;
+		virtual void ExecuteTransactions();
+
+		virtual void AddTransaction(cactuar::Transaction* transaction) override
+		{
+			this->transactions.push_back(std::ref(*transaction)); //I think this is dangerous AF!!
+		}
+
+		virtual const std::vector<std::reference_wrapper<cactuar::Transaction>> GetTransactions() const override
+		{
+			return transactions;
+		}
 
 		void AddLocalUpdate(NetworkUpdate&& update);
 
@@ -57,25 +75,21 @@ namespace lindzei
 		const NetworkUpdate& GetGlobalUpdate() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const Federatedblock& block);
-	
 
 	private:
-		Federatedblock(std::uint32_t, pulse::Target, BlockHashFunction, pulse::HashAlgorithm);
+		Federatedblock(std::uint32_t, cactuar::Target);// , cactuar::HashFunction);
 
-		Federatedblock(pulse::Blockheader&&, BlockHashFunction, pulse::HashAlgorithm);
+		Federatedblock(Blockheader&&);// , cactuar::HashFunction);
 
-		static Federatedblock Genisis(std::uint32_t = 0x01,
-			BlockHashFunction = pulse::PulseHash,
-			pulse::HashAlgorithm = pulse::HashAlgorithm::SHA256);
+		static Federatedblock Genisis(std::uint32_t = 0x01);
 
 		constexpr static std::uint32_t magic = 0x43616C6F; //Always 0x43616C6F
 		//std::uint32_t blocksize;
-		std::shared_ptr<pulse::Blockheader> header; //To allow for passing copy into Blockchain
+		std::shared_ptr<Blockheader> header; //To allow for passing copy into Blockchain
 		std::vector<NetworkUpdate> local_updates {};
 		NetworkUpdate global_update {};
 
-		pulse::HashAlgorithm hash_algo;
-		BlockHashFunction hash_func;
+		std::vector< std::reference_wrapper<cactuar::Transaction>> transactions{};
 
 		void CalculateGlobalUpdate();
 
@@ -93,46 +107,27 @@ namespace lindzei
 				return *this;
 			};
 
-			Builder& WithTarget(pulse::Target target)
+			Builder& WithTarget(cactuar::Target target)
 			{
 				this->m_target = std::move(target);
 				return *this;
 			};
 
-			//Is it a value ...
-			Builder& WithHashFunction(BlockHashFunction hash_func)
-			{
-				//Or does the compiler do this for me?
-				this->m_hash_func = std::move(hash_func);
-				return *this;
-			};
-
-			Builder& WithHashAlgorithm(pulse::HashAlgorithm hash_algo)
-			{
-				this->m_hash_algo = hash_algo;
-				return *this;
-			};
-
 			Federatedblock Build() const
 			{
-				return Federatedblock::Federatedblock(m_version, m_target, m_hash_func, m_hash_algo);
+				return Federatedblock::Federatedblock(m_version, m_target);// , m_hash_func, m_hash_algo);
 			};
 
 			Federatedblock Genisis() const
 			{
-				return Federatedblock::Federatedblock(
-					pulse::Blockheader::Genisis(m_hash_algo, m_version), m_hash_func, m_hash_algo);
+				return Federatedblock::Federatedblock(Blockheader::Genisis());
 			};
 
 		private:
 
 			std::uint32_t m_version{ 0x01 };
 
-			pulse::Target m_target{ pulse::Target::MinimumDifficulty };
-
-			BlockHashFunction m_hash_func{ pulse::PulseHash };
-
-			pulse::HashAlgorithm m_hash_algo{ pulse::HashAlgorithm::SHA256 };
+			cactuar::Target m_target{ cactuar::Target::MinimumDifficulty };
 		};
 	};
 

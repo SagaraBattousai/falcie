@@ -11,9 +11,9 @@ set(CMAKE_CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #Force is just for now until all kinks are worked out
-set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} CACHE PATH 
-  "Path to the root directory of an OpenSSL installation.")
-find_package(OpenSSL 3 REQUIRED)
+# set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} CACHE PATH 
+  # "Path to the root directory of an OpenSSL installation.")
+# find_package(OpenSSL 3 REQUIRED)
 
 set(CMAKE_MODULE_PATH 
   "${PROJECT_SOURCE_DIR}/cmake"
@@ -36,7 +36,7 @@ if (MSVC)
   add_compile_options(/W4) # /WX)
 else()
     # lots of warnings and all warnings as errors
-    add_compile_options(-Wall -Wextra -pedantic) # -Werror)
+    add_compile_options(-Wall -Wextra -pedantic -Wno-comment) # -Werror)
 endif()
 
 set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation.")

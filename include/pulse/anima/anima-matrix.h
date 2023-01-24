@@ -1,7 +1,7 @@
 
 //module;
-#ifndef __ANIMA_MATRIX__
-#define __ANIMA_MATRIX__
+#ifndef __ANIMA_MATRIX_H__
+#define __ANIMA_MATRIX_H__
 
 #include <cstdint>
 #include <stdexcept>
@@ -150,14 +150,16 @@ namespace pulse
 	template <typename T>
 	const T& Matrix<T>::operator[](Dimensions index) const
 	{
-		return this->data[FlattenIndex(index, this->dims)];
+		//return this->data[FlattenIndex(index, this->dims)];
+		return this->data[this->dims.FlattenIndex(index)];
 	};
 
 	//Writeable version
 	template <typename T>
 	T& Matrix<T>::operator[](Dimensions index)
 	{
-		return this->data[FlattenIndex(index, this->dims)];
+		//return this->data[FlattenIndex(index, this->dims)];
+		return this->data[this->dims.FlattenIndex(index)];
 	};
 
 	template <typename T>
@@ -243,7 +245,8 @@ namespace pulse
 	//them as 2d arrays such that 
 	//[x1, x2, x3, ...., xn] => [x1 * x2 * x3 * ...., xn]
 	template<typename T>
-	std::ostream& operator<< <>(std::ostream& os, const Matrix<T>& obj)
+	//std::ostream& operator<< <>(std::ostream& os, const Matrix<T>& obj)
+	std::ostream& operator<< (std::ostream& os, const Matrix<T>& obj)
 	{
 		Dimensions dims = obj.dims;
 		std::int64_t ndims = dims.DimensionCount();

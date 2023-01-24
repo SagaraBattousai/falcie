@@ -10,8 +10,7 @@ federated_block_builder_t* new_federeated_block_builder(builder_params_t *params
 {
 	lindzei::Federatedblock::Builder *builder = new lindzei::Federatedblock::Builder();
 
-	builder->WithVersion(params->version).WithTarget(params->target).
-		WithHashFunction(pulse::PulseHash).WithHashAlgorithm(pulse::HashAlgorithm(params->hash_algo));
+	builder->WithVersion(params->version).WithTarget(params->target);
 
 	return builder;
 }
@@ -35,8 +34,11 @@ const char* block_as_string(federated_block_t *block, size_t *str_size)
 	//malloc'd so it can be free'd from C
 	char* ret = (char *) malloc((*str_size) * sizeof(char));
 
-	//or &?
-	std::memcpy(ret, str.c_str(), *str_size);
+	if (ret != NULL)
+	{
+		//or &?
+		std::memcpy(ret, str.c_str(), *str_size);
+	}
 
 	return ret;
 }

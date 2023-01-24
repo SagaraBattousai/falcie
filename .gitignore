@@ -1,3 +1,7 @@
+# CMAKE Build dirs
+build/
+unix_build/
+
 # Vim Ignore
 *.swp
 vim_sessions/
