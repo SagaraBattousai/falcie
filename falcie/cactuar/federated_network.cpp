@@ -2,10 +2,10 @@
 #include <vector>
 
 #include <anima/anima-matrix.h>
-#include <orphan/federated_network.h>
+#include <cactuar/cactuar-federated_network.h>
 
 //export
-namespace lindzei
+namespace cactuar
 {
 	/*
 	NetworkUpdate GlobalNetworkUpdate(std::int64_t weight_count)

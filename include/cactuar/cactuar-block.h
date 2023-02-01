@@ -1,6 +1,6 @@
 //module;
-#ifndef __ORPHAN_FEDERATED_BLOCK__
-#define __ORPHAN_FEDERATED_BLOCK__
+#ifndef __CACTUAR_BLOCK_H__
+#define __CACTUAR_BLOCK_H__
 
 //NOTE:- Builder isnt enough to make an abstract base class because they will be so varied 
 //(AKA concepts were the right idea). However "fluent" builder is great here!
@@ -16,55 +16,48 @@
 #include <utility>
 #include <ostream>
 
-#include <pulse/pulse.h> //import pulse;
+#include <orphan/orphan-keccak.h>
 
-#include <cactuar/cactuar-keccak.h>
-
-#include <orphan/federated_blockheader.h>
-#include <orphan/federated_network.h> //import :federated_network;
-#include <orphan/federated_transaction.h>
+#include <cactuar/cactuar-blockheader.h>
+#include <cactuar/cactuar-federated_network.h>
+#include <cactuar/cactuar-target.h>
+#include <cactuar/cactuar-transaction.h>
 
 //export 
-namespace lindzei
+namespace cactuar
 {
 
-	class Federatedblock : public cactuar::Block
+	class Block
 	{
 	public:
 
 		//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
-		Federatedblock();
+		Block();
 
 		// When hash is changed change here too
 		constexpr static int hash_size = 32;
-		virtual inline cactuar::hash_output Hash() const override 
-		{ 
-			return cactuar::Keccak256(header->State());
+		virtual inline orphan::hash_output Hash() const
+		{
+			return orphan::Keccak256(header->State());
 		};
 
-		virtual inline const cactuar::hash_output& PrevHash() const override 
-		{ 
-			return this->header.get()->prev_hash; 
+		virtual inline const orphan::hash_output& PrevHash() const
+		{
+			return this->header.get()->prev_hash;
 		};
 
-		virtual inline const bool CompareWithTarget(const cactuar::hash_output& hash) const override
+		virtual inline const bool CompareWithTarget(const orphan::hash_output& hash) const
 		{
 			return hash < this->header.get()->target;
 		}
 
-		virtual void Mine(cactuar::hash_output&& prev_hash) override;
+		virtual void Mine(orphan::hash_output&& prev_hash);
 
 		virtual void ExecuteTransactions();
 
-		virtual void AddTransaction(cactuar::Transaction* transaction) override
-		{
-			this->transactions.push_back(std::ref(*transaction)); //I think this is dangerous AF!!
-		}
+		virtual void AddTransaction(Transaction* transaction); //are const refs polymorphic? // want a copy right?
 
-		virtual const std::vector<std::reference_wrapper<cactuar::Transaction>> GetTransactions() const override
-		{
-			return transactions;
-		}
+		virtual const std::vector<Transaction*> GetTransactions() const;
 
 		void AddLocalUpdate(NetworkUpdate&& update);
 
@@ -74,20 +67,22 @@ namespace lindzei
 
 		const NetworkUpdate& GetGlobalUpdate() const;
 
-		friend std::ostream& operator<<(std::ostream& os, const Federatedblock& block);
+		friend std::ostream& operator<<(std::ostream& os, const Block& block);
 
 	private:
-		Federatedblock(std::uint32_t, cactuar::Target);// , cactuar::HashFunction);
+		Block(std::uint32_t, Target);// , cactuar::HashFunction);
 
-		Federatedblock(Blockheader&&);// , cactuar::HashFunction);
+		Block(Blockheader&&);
 
-		static Federatedblock Genisis(std::uint32_t = 0x01);
+		static Block Genisis(std::uint32_t = 0x01);
 
 		constexpr static std::uint32_t magic = 0x43616C6F; //Always 0x43616C6F
-		//std::uint32_t blocksize;
+
 		std::shared_ptr<Blockheader> header; //To allow for passing copy into Blockchain
-		std::vector<NetworkUpdate> local_updates {};
-		NetworkUpdate global_update {};
+
+		std::vector<NetworkUpdate> local_updates{};
+
+		NetworkUpdate global_update{};
 
 		std::vector< std::reference_wrapper<cactuar::Transaction>> transactions{};
 
@@ -113,28 +108,28 @@ namespace lindzei
 				return *this;
 			};
 
-			Federatedblock Build() const
+			Block Build() const
 			{
-				return Federatedblock::Federatedblock(m_version, m_target);// , m_hash_func, m_hash_algo);
+				return Block(m_version, m_target);// , m_hash_func, m_hash_algo);
 			};
 
-			Federatedblock Genisis() const
+			Block Genisis() const
 			{
-				return Federatedblock::Federatedblock(Blockheader::Genisis());
+				return Block(Blockheader::Genisis());
 			};
 
 		private:
 
 			std::uint32_t m_version{ 0x01 };
 
-			cactuar::Target m_target{ cactuar::Target::MinimumDifficulty };
+			Target m_target{ Target::MinimumDifficulty };
 		};
 	};
 
 
 
 	template< class ...Args >
-	void Federatedblock::AddLocalUpdate(Args&&... args)
+	void Block::AddLocalUpdate(Args&&... args)
 	{
 		//TODO: Is move safe? not forward? Looks like it isnt safe :)
 		this->local_updates.emplace_back(std::forward<Args>(args)...);
@@ -148,6 +143,6 @@ namespace lindzei
 		//}
 
 	}
-} //namespace lindzei
+} //namespace cactuar
 
 #endif

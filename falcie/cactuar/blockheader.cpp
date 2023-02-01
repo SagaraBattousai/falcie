@@ -1,11 +1,11 @@
 #include <utility>
 
-#include <orphan/federated_blockheader.h>
+#include <cactuar/cactuar-blockheader.h>
 #include <cactuar/cactuar-block.h>
-#include <cactuar/cactuar-encoding.h>
+#include <cactuar/cactuar-endianness.h>
 
 
-namespace lindzei
+namespace cactuar
 {
 	//constexpr Blockheader::Blockheader(std::uint32_t version, std::int64_t timestamp,
 	//	std::vector<std::byte> prev_hash, std::vector<std::byte> transaction_hash,
@@ -43,27 +43,11 @@ namespace lindzei
 		return bytes;
 	}
 
-	//Change later when you have time to call constructor
-	//Can't be constexpr with gcc but totaly chill with msvc :'(
-	/*
-	Blockheader Blockheader::Genisis(std::uint32_t version)
-	{
-		return Blockheader{
-			version,
-			cactuar::Block::GenerateTimestamp(),
-			std::vector<std::byte>(),
-			std::vector<std::byte>(),
-			0x00000000,
-			0
-		};
-	}
-	*/
-
 	std::ostream& operator<<(std::ostream& os, const Blockheader& header)
 	{
 		os << "Version:          " << std::dec << header.version << "\n"
-			"Timestamp:        " << cactuar::Block::AsTimePoint(header.timestamp) << "\n"
-			"Previous Hash:    ";
+			    "Timestamp:        " << AsTimePoint(header.timestamp) << "\n"
+			    "Previous Hash:    ";
 
 		//std::Hex in loop incase something happens to IO ??
 		for (const std::byte& x : header.prev_hash)
@@ -88,4 +72,4 @@ namespace lindzei
 	}
 
 
-} // namespace lindzei
+} // namespace cactuar

@@ -1,15 +1,15 @@
-#ifndef __ORPHAN_FEDERATED_USER_ACCOUNT_H__
-#define __ORPHAN_FEDERATED_USER_ACCOUNT_H__
+#ifndef __CACTUAR_USER_ACCOUNT_H__
+#define __CACTUAR_USER_ACCOUNT_H__
 
 #include <cstdint>
 #include <vector>
 
 #include <cactuar/cactuar-account.h>
 
-namespace lindzei
+namespace cactuar
 {
 
-	class UserAccount : cactuar::Account
+	class UserAccount : Account
 	{
 	public:
 		UserAccount(std::vector<std::byte> signature);// , std::int64_t balance);

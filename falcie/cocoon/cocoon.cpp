@@ -6,11 +6,9 @@
 #include <vector> //import <vector>;
 #include <utility> //import <utility>;
 
-#include <pulse/pulse.h> //import pulse;
-#include <lindzei/lindzei.h> //import lindzei;
-#include <orphan/federated_transaction.h> //import lindzei;
-#include <orphan/federated_user_account.h> //import lindzei;
-#include <orphan/federated_contract_account.h> //import lindzei;
+#include <cactuar/cactuar-transaction.h> //import lindzei;
+#include <cactuar/cactuar-user_account.h> //import lindzei;
+#include <cactuar/cactuar-contract_account.h> //import lindzei;
 
 int main(void)
 {

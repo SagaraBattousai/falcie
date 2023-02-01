@@ -7,6 +7,7 @@ set(googletest_commit_hash "e2239ee6043f73722e7aa812a459f54a28552929")
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/${googletest_commit_hash}.zip
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE #??????
 )
 
 if(WIN32)
@@ -36,8 +37,7 @@ target_include_directories(tests PRIVATE
   )
 
 if(WIN32)
-  symlink_library_to_target(tests pulse)
-  copy_openssl_runtime_lib_to_target(tests crypto)
+  # symlink_library_to_target(tests pulse)
 endif()
 
 include(GoogleTest)

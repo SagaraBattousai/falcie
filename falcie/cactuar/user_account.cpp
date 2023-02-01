@@ -1,9 +1,11 @@
 
+#include <vector>
+#include <cstddef>
 
-#include <orphan/federated_user_account.h>
-#include <orphan/federated_transaction.h>
+#include <cactuar/cactuar-user_account.h>
+#include <cactuar/cactuar-transaction.h>
 
-namespace lindzei
+namespace cactuar
 {
 
 	UserAccount::UserAccount(std::vector<std::byte> signature)
@@ -13,7 +15,7 @@ namespace lindzei
 
 	std::unique_ptr<cactuar::Transaction> UserAccount::CreateTransaction(cactuar::Transaction::Address to, std::int64_t amount)
 	{
-		return std::make_unique<FederatedTransaction>(this->signature, to, amount);
+		return std::make_unique<Transaction>(this->signature, to, amount);
 	}
 
 	//void UserAccount::SendTransaction() { }

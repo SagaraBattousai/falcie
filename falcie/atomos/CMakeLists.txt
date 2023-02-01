@@ -37,7 +37,7 @@ add_library(atomos OBJECT ${atomos_module} ${cpp_files})
 target_sources(atomos PUBLIC
   FILE_SET headers 
   TYPE HEADERS
-  BASE_DIRS ${PULSE_MODULE_ROOT}
+  BASE_DIRS ${MODULE_ROOT}
   FILES ${atomos_module}
   )
 

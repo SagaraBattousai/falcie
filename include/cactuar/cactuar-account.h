@@ -1,20 +1,17 @@
-#ifndef __ORPHAN_FEDERATED_CONTRACT_ACCOUNT_H__
-#define __ORPHAN_FEDERATED_CONTRACT_ACCOUNT_H__
+#ifndef __CACTUAR_ACCOUNT_H__
+#define __CACTUAR_ACCOUNT_H__
 
 #include <cstdint>
 #include <vector>
 #include <memory>
 #include <functional>
 
-#include <cactuar/cactuar-account.h>
-#include <pulse/dahaka/dahaka-blockchain.h>
+#include <cactuar/cactuar-block.h>
 
-#include <orphan/federated_block.h>
-
-namespace lindzei
+namespace cactuar
 {
 
-	class ContractAccount : public cactuar::Account
+	class Account
 	{
 	public:
 

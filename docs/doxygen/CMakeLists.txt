@@ -1,7 +1,8 @@
 
 # Set: DOXYGEN_INPUT_FILES based on passed in targets' sources.
 function(set_doxygen_input_files)
-  if(ARGC LESS 2)
+  # if(ARGC LESS 2)
+  if(ARGC LESS 1)
     message(WARNING "Needs additional arguments; namely targets \
     whos source files require/want documentation.")
     return()
@@ -35,7 +36,7 @@ endfunction()
 
 macro(configure_doxygen_and_add_command)
   set(DOXYGEN_GENERATE_XML YES)
-  set(DOXYGEN_GENERATE_HTML NO)
+  set(DOXYGEN_GENERATE_HTML YES)
   set(DOXYGEN_GENERATE_MAN YES)
   set(DOXYGEN_GENERATE_LATEX NO)
   set(DOXYGEN_JAVADOC_BANNER YES)

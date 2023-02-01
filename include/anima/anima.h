@@ -5,8 +5,8 @@
 //export import :neural_network;
 //export import :random;
 
-#ifndef __PULSE_ANIMA__
-#define __PULSE_ANIMA__
+#ifndef __ANIMA_H__
+#define __ANIMA_H__
 
 #include <anima/anima-matrix.h>
 #include <anima/anima-neural_network.h>

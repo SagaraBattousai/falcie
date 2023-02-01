@@ -1,6 +1,6 @@
 
-#ifndef __ORPHAN_BLOCKHEADER_H__
-#define __ORPHAN_BLOCKHEADER_H__
+#ifndef __CACTUAR_BLOCKHEADER_H__
+#define __CACTUAR_BLOCKHEADER_H__
 
 
 #include <cstdint>
@@ -12,11 +12,10 @@
 #include <ostream>
 
 #include <cactuar/cactuar-block.h>
-//#include <cactuar/cactuar-crypto.h>
-#include <cactuar/cactuar-encoding.h>
+#include <cactuar/cactuar-endianness.h>
 #include <cactuar/cactuar-target.h>
 
-namespace lindzei
+namespace cactuar
 {
 	class Blockheader;
 
@@ -56,7 +55,7 @@ namespace lindzei
 		{
 			return Blockheader{
 				version,
-				cactuar::Block::GenerateTimestamp(),
+				GenerateTimestamp(),
 				std::vector<std::byte>(),
 				std::vector<std::byte>(),
 				0x00000000,

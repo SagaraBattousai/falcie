@@ -33,7 +33,7 @@ add_library(anima OBJECT ${anima_module} ${cpp_files})
 target_sources(anima PUBLIC
   FILE_SET headers 
   TYPE HEADERS
-  BASE_DIRS ${PULSE_MODULE_ROOT}
+  BASE_DIRS ${MODULE_ROOT}
   FILES ${anima_module}
   )
 

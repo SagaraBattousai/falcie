@@ -3,7 +3,9 @@ add_subdirectory(anima)
 
 add_subdirectory(atomos)
 
-# add_subdirectory(cactuar)
+add_subdirectory(cactuar)
+
+add_subdirectory(cocoon)
 
 add_subdirectory(etro)
 

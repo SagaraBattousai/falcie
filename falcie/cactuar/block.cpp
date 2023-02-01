@@ -7,48 +7,46 @@
 #include <numeric>
 #include <execution>
 
-#include <pulse/pulse.h>
+#include <cactuar/cactuar-block.h>
 #include <cactuar/cactuar-target.h>
 
-#include <orphan/federated_block.h>
 
 //export
-namespace lindzei
+namespace cactuar
 {
 	//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
 	//This is a bit of a problem as it leave member variables uninitalised
-	Federatedblock::Federatedblock()
+	Block::Block()
 	{
 
 	}
 
 	//TODO: Decide, Probably could leave default constructors....
-
-	Federatedblock::Federatedblock(std::uint32_t version, cactuar::Target target)
-		: Federatedblock(Blockheader{
+	Block::Block(std::uint32_t version, cactuar::Target target)
+		: Block(Blockheader{
 			version,
 			-1,
-			std::vector<std::byte>(Federatedblock::hash_size),
-			std::vector<std::byte>(Federatedblock::hash_size),
+			std::vector<std::byte>(Block::hash_size),
+			std::vector<std::byte>(Block::hash_size),
 			target,
 			0
 			})
 	{
 	}
 
-	Federatedblock::Federatedblock(Blockheader&& header)
+	Block::Block(Blockheader&& header)
 		: header{ std::make_shared<Blockheader>(std::move(header)) }
 		// ^^^may beable to go back to unique, we'll see
 		, local_updates{ std::vector<NetworkUpdate>{} }
 		, global_update{ }// std::make_unique<NetworkUpdate>() }
 	{}
 
-	Federatedblock Federatedblock::Genisis(std::uint32_t version)
+	Block Block::Genisis(std::uint32_t version)
 	{
-		return Federatedblock(Blockheader::Genisis(version));
+		return Block(Blockheader::Genisis(version));
 	}
 
-	void Federatedblock::Mine(cactuar::hash_output&& prev_hash)
+	void Block::Mine(cactuar::hash_output&& prev_hash)
 	{
 		this->header->prev_hash = std::move(prev_hash);
 		this->header->timestamp = Block::GenerateTimestamp();
@@ -69,7 +67,7 @@ namespace lindzei
 		CalculateGlobalUpdate();
 	}
 
-	void Federatedblock::ExecuteTransactions()
+	void Block::ExecuteTransactions()
 	{
 		for (auto tran : this->transactions)
 		{
@@ -83,7 +81,7 @@ namespace lindzei
 
 
 	//I think this can be rvalue since we dont need it after its added.
-	void Federatedblock::AddLocalUpdate(NetworkUpdate&& update)
+	void Block::AddLocalUpdate(NetworkUpdate&& update)
 	{
 		//TODO: For now, probably init block with network stucture (and possibly builder)
 		//To enfores all updates to be of a compatible network
@@ -97,12 +95,12 @@ namespace lindzei
 		this->local_updates.push_back(std::move(update));
 	}
 
-	const NetworkUpdate& Federatedblock::GetGlobalUpdate() const
+	const NetworkUpdate& Block::GetGlobalUpdate() const
 	{
 		return this->global_update;
 	}
 
-	void Federatedblock::CalculateGlobalUpdate()
+	void Block::CalculateGlobalUpdate()
 	{
 
 		if (this->local_updates.size() == 0)
@@ -165,7 +163,7 @@ namespace lindzei
 	}
 
 
-	std::ostream& operator<<(std::ostream& os, const Federatedblock& block)
+	std::ostream& operator<<(std::ostream& os, const Block& block)
 	{
 		if (block.header) //i.e. not genisis
 		{

@@ -6,9 +6,9 @@
 
 #include <pulse/dahaka/dahaka-blockchain.h>
 
-#include <orphan/federated_block.h>
+#include <cactuar/federated_block.h>
 
-namespace lindzei
+namespace cactuar
 {
 
 	constexpr int64_t FEDERATED_BLOCKCHAIN_UNROLLED_SIZE = 32;
