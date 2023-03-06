@@ -8,7 +8,7 @@
 template <typename T> using comparitor = int(*)(T& self, T& other);
 
 //export 
-namespace pulse
+namespace dahaka
 {
 	template <typename T>
 	class OrderedLinkedList

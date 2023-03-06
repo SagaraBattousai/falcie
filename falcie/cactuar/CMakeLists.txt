@@ -10,7 +10,7 @@ set(CACTUAR_MODULE_ROOT "${MODULE_ROOT}/cactuar")
 set(cpp_sources
   "account.cpp"
   "block.cpp"
-  # "blockchain.cpp"
+  "blockchain.cpp"
   "blockheader.cpp"
   "contract_account.cpp"
   "federated_network.cpp"

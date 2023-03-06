@@ -4,7 +4,7 @@
 #define __ANIMA_NEURAL_NETWORK__
 
 //export 
-namespace pulse
+namespace anima
 {
 
 	class Network

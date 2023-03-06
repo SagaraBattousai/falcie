@@ -24,7 +24,7 @@ template <typename T> using comparitor = int(*)(T& self, T& other);
 ******************************************************************************/
 
 
-namespace pulse
+namespace dahaka
 {
 
 	template <typename T>

@@ -1,29 +1,45 @@
-/*
-#ifndef __FEDERATED_BLOCKCHAIN_H__
-#define __FEDERATED_BLOCKCHAIN_H__
+#ifndef __CACTUAR_BLOCKCHAIN__
+#define __CACTUAR_BLOCKCHAIN__
 
+//module;
 #include <cstdint>
+#include <cstring>
 
-#include <pulse/dahaka/dahaka-blockchain.h>
+#include <vector>
+#include <concepts>
+#include <utility>
 
-#include <cactuar/federated_block.h>
+#include <dahaka/dahaka-chain.h>
+
+#include <cactuar/cactuar-block.h>
 
 namespace cactuar
 {
-
-	constexpr int64_t FEDERATED_BLOCKCHAIN_UNROLLED_SIZE = 32;
-
-	class FederatedBlockchain : public pulse::Blockchain<Federatedblock, FEDERATED_BLOCKCHAIN_UNROLLED_SIZE>
+	
+	class Blockchain
 	{
 	public:
+		static constexpr int ChainUnrolledLength = 32; // 64
 
+		using chain_t = dahaka::Chain<Block, ChainUnrolledLength>;
 
+		Blockchain();
+
+		void Add(Block&& elem);
+
+		bool Validate();
+
+		std::int64_t GetBalance(std::vector<std::byte> addr);
+
+		const Block& GetLast();
+
+		typename chain_t::ChainIterator begin();
+		typename chain_t::ChainIterator end();
+
+	private:
+		chain_t chain;
 	};
 
-}
-
-
+} //namespace cactuar
 
 #endif
-
-*/

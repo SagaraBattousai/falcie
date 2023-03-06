@@ -6,14 +6,14 @@
 
 #include <falpy/_falpyconfig.h>
 
-#include <etro/federatedblock.h>
+#include <etro/block.h>
 #include <falpy/falpy_networkupdate.h>
 
 
 typedef struct FALPY_LOCAL_SYMBOL FalpyBlockObject
 {
   PyObject_HEAD
-    federated_block_t *block;
+    block_t *block;
 
 } FalpyBlockObject;
 
@@ -22,7 +22,7 @@ FALPY_LOCAL_SYMBOL extern PyTypeObject FalpyBlockType;
 typedef struct FALPY_LOCAL_SYMBOL FalpyBlockBuilderObject
 {
   PyObject_HEAD
-    federated_block_builder_t *builder;
+    block_builder_t *builder;
 
 } FalpyBlockBuilderObject;
 

@@ -2,18 +2,18 @@
 #include <stdio.h>
 
 #include <etro/matrix.h>
-#include <etro/federatedblock.h>
-#include <etro/federatedblockchain.h>
+#include <etro/block.h>
+#include <etro/blockchain.h>
 #include <etro/networkupdate.h>
 
 int main(void)
 {
 	builder_params_t params = { .version = 0x01, .target = 0x21FFFFFF, .hash_algo = SHA256 };
-	federated_block_builder_t *bb = new_federeated_block_builder(&params);
+	block_builder_t *bb = new_block_builder(&params);
 
-	federated_blockchain_t *bc = new_federated_blockchain(bb, 32);
+	blockchain_t *bc = new_blockchain(bb, 32);
 
-	federated_block_t *b = build_federated_block(bb);
+	block_t *b = build_block(bb);
 
 	network_update_t *nu1 = new_network_update();
 	//TODO:try nd=1 as well or force in falpy t always be 2D min
@@ -40,7 +40,7 @@ int main(void)
 
 	add_block_to_chain(bc, b);
 
-	federated_block_t *last = NULL;
+	block_t *last = NULL;
 	get_last_added_block(bc, &last);
 
 	network_update_t *gu;

@@ -1,5 +1,5 @@
-#ifndef __ETRO_FEDERATED_BLOCK_H__
-#define __ETRO_FEDERATED_BLOCK_H__
+#ifndef __ETRO_BLOCK_H__
+#define __ETRO_BLOCK_H__
 
 #ifdef __cplusplus
 #include <cstdint>
@@ -12,11 +12,11 @@
 
 //Typedefs for C vs CPP
 #ifdef __cplusplus
-typedef cactuar::Block federated_block_t;
-typedef cactuar::Block::Builder federated_block_builder_t;
+typedef cactuar::Block block_t;
+typedef cactuar::Block::Builder block_builder_t;
 #else
-typedef struct federated_block federated_block_t;
-typedef struct federated_block_builder federated_block_builder_t;
+typedef struct block block_t;
+typedef struct block_builder block_builder_t;
 #endif
 
 #ifdef __cplusplus
@@ -53,22 +53,22 @@ extern "C" {
 	//inline const blockhash_type pulse_hash(hash_algorithm hash_algo, const federated_block_t* const);
 	//^^ For now force this to be default / only
 
-	federated_block_builder_t* new_federeated_block_builder(builder_params_t *params);
+	block_builder_t* new_block_builder(builder_params_t *params);
 
-	federated_block_t* build_federated_block(federated_block_builder_t *builder);
+	block_t* build_block(block_builder_t *builder);
 
-	federated_block_t* build_genisis_block(federated_block_builder_t *builder);
+	block_t* build_genisis_block(block_builder_t *builder);
 
-	int add_local_update(federated_block_t *block, network_update_t *update);
+	int add_local_update(block_t *block, network_update_t *update);
 
-	const char* block_as_string(federated_block_t *block, size_t *str_size);
+	const char* block_as_string(block_t *block, size_t *str_size);
 
 	//Won't return since we may add error handling to the C++ true code
-	int get_global_update(federated_block_t *block, network_update_t **update);
+	int get_global_update(block_t *block, network_update_t **update);
 
-	void delete_builder(federated_block_builder_t *builder);
+	void delete_builder(block_builder_t *builder);
 
-	void delete_block(federated_block_t *block);
+	void delete_block(block_t *block);
 
 #ifdef __cplusplus
 }

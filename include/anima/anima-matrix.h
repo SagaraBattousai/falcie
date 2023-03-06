@@ -20,7 +20,7 @@
 
 //TODO: Clean up Matrix Operations!!
 //export 
-namespace pulse
+namespace anima
 {
 	//void broadcast_vectors(const float *in1, const float *in2,
 		//float *out, const int64_t dim1, const int64_t dim2, combinator_ptr combinator);
@@ -30,19 +30,20 @@ namespace pulse
 	template <typename T> 
 	std::ostream& operator<<(std::ostream& os, const Matrix<T>& obj);
 
-
 	template <typename T>
 	class Matrix
 	{
 	public:
 
 		using index_type = Dimensions::value_type;
+		using const_iterator = std::vector<T>::const_iterator;
+		using iterator = std::vector<T>::iterator;
 
 		Matrix(Dimensions shape);
 		Matrix(std::span<T> values);
 		Matrix(std::span<T> values, Dimensions shape);
 
-		Matrix(const Matrix<T>&);
+		//Matrix(const Matrix<T>&);
 
 		//??? T(); Want ref to self but dims are swapped so .... Coud carry .T ref to self?
 
@@ -52,7 +53,7 @@ namespace pulse
 		const T& operator[](index_type i) const;
 		T& operator[](index_type i);
 
-		T* Data() const noexcept;
+		const T* Data() const noexcept;
 
 		const Dimensions& Shape() const;
 
@@ -61,34 +62,41 @@ namespace pulse
 			return this->total_size;
 		};
 
-		T* begin() const
+		const_iterator begin() const
 		{
-			return data.get();
+			return data.begin();
 		};
 
-		T* end() const
+		const_iterator end() const
 		{
-			return data.get() + this->total_size;
+			return data.end();
 		};
 
+		iterator begin()
+		{
+			return data.begin();
+		};
+
+		iterator end()
+		{
+			return data.end();
+		};
+
+		//Does this need to be friend? TODO:
+		//Why is this required to avoid linker error in etro??? Its not even implented!!
+		//Todo with DLLExport in cmake?
 		friend std::ostream& operator<< <>(std::ostream& os, const Matrix<T>& obj);
 
 	private:
 
 		//Turns out order does matter as it's reflected in the constructor and destructor 
 		//init-list order!
-		//1)
-		const Dimensions::value_type total_size;
 
-		//2)
+		const Dimensions::value_type total_size; 
+
 		Dimensions dims;
 
-		//We'll use Unique_ptr over shared_ptr because it's doable as unique because we can bind the
-		//lifetime of this class to the object that "shares it" by binding them in a struct 
-		//(for the C interop)
-		//3)
-		std::unique_ptr<T[]> data; //Scott Mayers agrees that this is the right move :D
-		//^^Disables copy ctor
+		std::vector<T> data;
 	};
 
 
@@ -96,7 +104,7 @@ namespace pulse
 	Matrix<T>::Matrix(Dimensions shape)
 		: total_size(shape.TotalSize())
 		, dims(std::move(shape))
-		, data(std::make_unique<T[]>(this->total_size)) //Maybe don't want to zero here either
+		, data(this->total_size)
 	{	}
 
 	//Just for now: make a Vector a column not row vector (... is this okay or a cheat?)
@@ -112,33 +120,33 @@ namespace pulse
 	Matrix<T>::Matrix(std::span<T> values, Dimensions shape)
 		: total_size(shape.TotalSize())
 		, dims(std::move(shape))
-		, data(std::make_unique_for_overwrite<T[]>(this->total_size))
+		, data{values.begin(), values.end()}
 	{ 
-		std::memcpy(this->data.get(), values.data(), sizeof(T) * this->total_size);
+		//std::memcpy(this->data.get(), values.data(), sizeof(T) * this->total_size);
 
-		//Maybe I don't want to zero out!
-		//Do I need to do anything here?? //TODO: Optimize?
-		if (index_type diff = this->total_size - values.size(); diff > 0)
-		{
-			std::memset(this->data.get() + values.size(),
-				0, sizeof(T) * (this->total_size - values.size()));
-		}
+		////Maybe I don't want to zero out!
+		////Do I need to do anything here?? //TODO: Optimize?
+		//if (index_type diff = this->total_size - values.size(); diff > 0)
+		//{
+		//	std::memset(this->data.get() + values.size(),
+		//		0, sizeof(T) * (this->total_size - values.size()));
+		//}
 	}
-
+	/*
 	template <typename T>
 	Matrix<T>::Matrix(const Matrix<T>& matrix)
 		: total_size(matrix.total_size)
 		, dims(matrix.dims)
-		, data(std::make_unique_for_overwrite<T[]>(matrix.total_size))
+		, data(matrix.data)
 	{
-		std::memcpy(this->data.get(), matrix.data.get(), sizeof(T) * matrix.total_size);
+		//std::memcpy(this->data.get(), matrix.data.get(), sizeof(T) * matrix.total_size);
 	}
-
+	*/
 
 	template <typename T>
-	T* Matrix<T>::Data() const noexcept
+	const T* Matrix<T>::Data() const noexcept
 	{
-		return this->data.get();
+		return this->data.data();
 	}
 
 	template <typename T>
@@ -150,7 +158,6 @@ namespace pulse
 	template <typename T>
 	const T& Matrix<T>::operator[](Dimensions index) const
 	{
-		//return this->data[FlattenIndex(index, this->dims)];
 		return this->data[this->dims.FlattenIndex(index)];
 	};
 
@@ -158,7 +165,6 @@ namespace pulse
 	template <typename T>
 	T& Matrix<T>::operator[](Dimensions index)
 	{
-		//return this->data[FlattenIndex(index, this->dims)];
 		return this->data[this->dims.FlattenIndex(index)];
 	};
 
@@ -177,11 +183,11 @@ namespace pulse
 	};
 
 
-	//May make convertable too T?. Really just want to say addable to T and return T
+	//May make convertable too T?. Really just want to say addable to T and return T (Use concept)
 	template<typename T, typename U> requires std::floating_point<U> || std::integral<U> 
 	Matrix<T>& operator*=(Matrix<T>& matrix, const U& scalar)
 	{
-		std::ranges::for_each(matrix, [&scalar](T& value) { value *= scalar; });
+		std::for_each(matrix.begin(), matrix.end(), [&scalar](T& value)mutable { value *= scalar; });
 
 		return matrix;
 	}
@@ -197,7 +203,7 @@ namespace pulse
 	template<typename T, typename U> requires std::floating_point<U> || std::integral<U>
 	Matrix<T>&operator+=(Matrix<T>&matrix, const U & scalar)
 	{
-		std::ranges::for_each(matrix, [&scalar](T& value) { value += scalar; });
+		std::for_each(matrix.begin(), matrix.end(), [&scalar](T& value)mutable { value += scalar; });
 
 		return matrix;
 	}

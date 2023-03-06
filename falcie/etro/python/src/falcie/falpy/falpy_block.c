@@ -127,7 +127,7 @@ FalpyBlockBuilder_init(FalpyBlockBuilderObject *self, PyObject *args, PyObject *
 	builder_params_t params = { .version = version, .target = target, .hash_algo = SHA256 };
 
 	//TODO: check new succeeded.
-	self->builder = new_federeated_block_builder(&params);
+	self->builder = new_block_builder(&params);
 
 	return 0;
 
@@ -139,7 +139,7 @@ FalpyBlockBuilder_build(FalpyBlockBuilderObject *self, PyObject *Py_UNUSED(ignor
 {
 	PyTypeObject *type = &FalpyBlockType;
 	FalpyBlockObject *block = (FalpyBlockObject *)type->tp_alloc(type, 0); //auto incref
-	block->block = build_federated_block(self->builder);
+	block->block = build_block(self->builder);
 	return block;
 
 }

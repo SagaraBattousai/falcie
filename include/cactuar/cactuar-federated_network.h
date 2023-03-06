@@ -16,7 +16,7 @@ namespace cactuar
 	{
 	//private:
 		//std::vector<std::int64_t> network_structure;
-		std::vector<pulse::Matrix<float>> delta_weights{};
+		std::vector<anima::Matrix<float>> delta_weights{};
 		std::int64_t examples_seen{ 0 };
 	};
 }

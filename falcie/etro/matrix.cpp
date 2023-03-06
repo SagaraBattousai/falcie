@@ -16,9 +16,9 @@ matrix_t* new_matrix(float *data, int64_t nd, intptr_t const *dims)
 		total_element_count *= dims[i];
 	}
 
-	pulse::Dimensions dimensions{ {dims, dims + nd} };
+	anima::Dimensions dimensions{ {dims, dims + nd} };
 
-	return new pulse::Matrix<float>({ data, (std::size_t) total_element_count }, dimensions);
+	return new anima::Matrix<float>({ data, (std::size_t) total_element_count }, dimensions);
 }
 
 const char* matrix_as_string(matrix_t *matrix, size_t *str_size)
@@ -51,7 +51,7 @@ intptr_t const* get_matrix_dimensions(matrix_t *matrix)
 	return matrix->Shape().AsArray();
 }
 
-float* get_matrix_data(matrix_t *matrix)
+const float* get_matrix_data(matrix_t *matrix)
 {
 	return matrix->Data();
 }

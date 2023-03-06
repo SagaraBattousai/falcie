@@ -8,11 +8,11 @@
 set(DAHAKA_MODULE_ROOT "${MODULE_ROOT}/dahaka")
 
 set(dahaka_module 
-  "${DAHAKA_MODULE_ROOT}/dahaka.h" # ixx"
   "${DAHAKA_MODULE_ROOT}/dahaka-chain.h" # ixx" 
-  "${DAHAKA_MODULE_ROOT}/dahaka-blockchain.h" # ixx" 
   "${DAHAKA_MODULE_ROOT}/dahaka-orderedlist.h" # ixx" 
   "${DAHAKA_MODULE_ROOT}/dahaka-tree.h" # ixx"
+  # "${DAHAKA_MODULE_ROOT}/dahaka.h" # ixx"
+  # "${DAHAKA_MODULE_ROOT}/dahaka-blockchain.h" # ixx" 
 )
 
 

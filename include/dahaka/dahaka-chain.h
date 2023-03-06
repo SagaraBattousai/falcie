@@ -13,7 +13,7 @@
 #include <array> //import <array>;
 
 //export
-namespace pulse
+namespace dahaka
 {
 
 	template<typename T, std::int64_t UnrolledElems>
@@ -131,6 +131,8 @@ namespace pulse
 		//Shouldn't need to set head and tail to nullptr since object is dead/deleted
 	}
 	*/
+
+
 	template<typename T, std::int64_t UnrolledElems>
 	void Chain<T, UnrolledElems>::Add(T&& elem)
 	{

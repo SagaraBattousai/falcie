@@ -47,12 +47,12 @@ FalpyBlockchain_init(FalpyBlockchainObject *self, PyObject *args, PyObject *kwds
 	}
 
 	if (self->blockchain != NULL) //TODO: Proper new but for now I dont have time
-		delete_federated_blockchain(self->blockchain);
+		delete_blockchain(self->blockchain);
 
 	//Not possible (I think due to ParseTuple)
 	if (block_builder == NULL) return -1;
 
-	self->blockchain = new_federated_blockchain(block_builder->builder, hash_size);
+	self->blockchain = new_blockchain(block_builder->builder, hash_size);
 
 	return 0;
 }
@@ -103,7 +103,7 @@ FalpyBlockchain_dealloc(FalpyBlockchainObject *self)
 	//Must I check null before delete?
 	if (self->blockchain != NULL)
 	{
-		delete_federated_blockchain(self->blockchain);
+		delete_blockchain(self->blockchain);
 	}
 	Py_TYPE(self)->tp_free((PyObject *)self);
 }

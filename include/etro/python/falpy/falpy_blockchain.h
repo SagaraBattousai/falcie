@@ -6,14 +6,14 @@
 
 #include <falpy/_falpyconfig.h>
 
-#include <etro/federatedblockchain.h>
+#include <etro/blockchain.h>
 #include <falpy/falpy_block.h>
 
 
 typedef struct FALPY_LOCAL_SYMBOL FalpyBlockchainObject
 {
   PyObject_HEAD
-    federated_blockchain_t *blockchain;
+    blockchain_t *blockchain;
 
 } FalpyBlockchainObject;
 

@@ -35,6 +35,8 @@ namespace cactuar
 		//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
 		Block();
 
+		static Block Genisis(std::uint32_t = 0x01);
+
 		// When hash is changed change here too
 		constexpr static int hash_size = 32;
 		virtual inline orphan::hash_output Hash() const
@@ -74,8 +76,6 @@ namespace cactuar
 		Block(std::uint32_t, Target);// , cactuar::HashFunction);
 
 		Block(Blockheader&&);
-
-		static Block Genisis(std::uint32_t = 0x01);
 
 		constexpr static std::uint32_t magic = 0x43616C6F; //Always 0x43616C6F
 

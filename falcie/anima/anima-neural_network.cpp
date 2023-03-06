@@ -17,14 +17,10 @@
 //#include <anima/anima-neural_network.h>
 
 
-namespace pulse
-{
-
-	namespace anima
+namespace anima
 	{
 	} //namespace anima
 
-} //namespace pulse
 
 
 

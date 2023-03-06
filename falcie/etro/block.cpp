@@ -3,28 +3,28 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <etro/federatedblock.h>
+#include <etro/block.h>
 
-federated_block_builder_t* new_federeated_block_builder(builder_params_t *params)
+block_builder_t* new_block_builder(builder_params_t *params)
 {
-	federated_block_builder_t *builder = new federated_block_builder_t();
+	block_builder_t *builder = new block_builder_t();
 
 	builder->WithVersion(params->version).WithTarget(params->target);
 
 	return builder;
 }
 
-federated_block_t* build_federated_block(federated_block_builder_t *builder)
+block_t* build_block(block_builder_t *builder)
 {
-	return new federated_block_t(builder->Build());
+	return new block_t(builder->Build());
 }
 
-federated_block_t* build_genisis_block(federated_block_builder_t *builder)
+block_t* build_genisis_block(block_builder_t *builder)
 {
-	return new federated_block_t(builder->Genisis());
+	return new block_t(builder->Genisis());
 }
 
-const char* block_as_string(federated_block_t *block, size_t *str_size)
+const char* block_as_string(block_t *block, size_t *str_size)
 {
 	std::ostringstream oss;
 	oss << *block << std::endl;
@@ -45,7 +45,7 @@ const char* block_as_string(federated_block_t *block, size_t *str_size)
 
 //Shoul I change network update to be a unique ptr to the local update ....?
 //Global should be shared or ....
-int add_local_update(federated_block_t *block, network_update_t *update)
+int add_local_update(block_t *block, network_update_t *update)
 {
 	//network_update_t u(*update);
 	block->AddLocalUpdate(*update); //Hoping that this will copy, will have to do mem profile
@@ -55,20 +55,20 @@ int add_local_update(federated_block_t *block, network_update_t *update)
 }
 
 //Won't return since we may add error handling to the C++ true code
-int get_global_update(federated_block_t *block, network_update_t **update)
+int get_global_update(block_t *block, network_update_t **update)
 {
 	*update = new network_update_t(block->GetGlobalUpdate());
 
 	return 0; //TODO: unhardcode ^^ ptr check
 }
 
-void delete_builder(federated_block_builder_t *builder)
+void delete_builder(block_builder_t *builder)
 {
 	delete builder;
 }
 
 
-void delete_block(federated_block_t *block)
+void delete_block(block_t *block)
 {
 	delete block;
 }

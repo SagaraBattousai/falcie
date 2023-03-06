@@ -10,15 +10,15 @@ add_executable(etro_cpp "etro.cpp")
 
 set(sources 
   "matrix.cpp"
-  "federatedblock.cpp"
-  "federatedblockchain.cpp"
+  "block.cpp"
+  "blockchain.cpp"
   "networkupdate.cpp"
   )
 
 set(etro_module 
   "${ETRO_MODULE_ROOT}/matrix.h"
-  "${ETRO_MODULE_ROOT}/federatedblock.h"
-  "${ETRO_MODULE_ROOT}/federatedblockchain.h"
+  "${ETRO_MODULE_ROOT}/block.h"
+  "${ETRO_MODULE_ROOT}/blockchain.h"
   "${ETRO_MODULE_ROOT}/networkupdate.h"
   )
 

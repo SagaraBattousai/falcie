@@ -10,7 +10,7 @@
 
 //Typedefs for C vs CPP
 #ifdef __cplusplus
-typedef pulse::Matrix<float> matrix_t;
+typedef anima::Matrix<float> matrix_t;
 #else
 typedef struct matrix matrix_t;
 #endif
@@ -24,7 +24,7 @@ extern "C" {
 	const char* matrix_as_string(matrix_t *matrix, size_t *str_size);
 	int64_t get_matrix_dimension_count(matrix_t *matrix);
 	intptr_t const* get_matrix_dimensions(matrix_t *matrix);
-	float* get_matrix_data(matrix_t *matrix);
+	const float* get_matrix_data(matrix_t *matrix);
 	void delete_matrix(matrix_t *matrix);
 
 

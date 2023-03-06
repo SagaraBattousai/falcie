@@ -7,17 +7,20 @@
 #include <numeric>
 #include <functional>
 
-namespace pulse
+namespace anima
 {
 	class Dimensions
 	{
 	public:
 		using value_type = std::int64_t;		
 
-		Dimensions(std::initializer_list<value_type> dimensions);
-		Dimensions(std::vector<value_type> dimensions);
+		Dimensions(std::initializer_list<value_type> dimensions) :dims(dimensions)
+		{	}
 
-		constexpr value_type FlattenIndex(const std::vector<value_type>& indicies) const //;
+		Dimensions(std::vector<value_type> dimensions) :dims(std::move(dimensions))
+		{ }
+
+		constexpr value_type FlattenIndex(const std::vector<value_type>& indicies) const
 		{
 			std::vector<std::int64_t> dimensionIndexer = this->DimensionIndex();
 
@@ -26,7 +29,7 @@ namespace pulse
 				dimensionIndexer.begin(), (value_type)0);
 		}
 
-		constexpr value_type FlattenIndex(const Dimensions& indicies) const //;
+		constexpr value_type FlattenIndex(const Dimensions& indicies) const
 		{
 			return this->FlattenIndex(indicies.dims);
 		}
@@ -67,7 +70,7 @@ namespace pulse
 
 	}; 
 
-} //namespace pulse
+} //namespace anima
 
 
 #endif

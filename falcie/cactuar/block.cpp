@@ -119,23 +119,23 @@ namespace cactuar
 			return;
 		}
 
-		this->global_update.delta_weights.reserve(this->local_updates.size());
+		this->global_update.delta_weights.reserve(this->local_updates.size()); //Why
 
 		this->global_update.examples_seen =
 			std::accumulate(
 				this->local_updates.begin(), this->local_updates.end(), (std::int64_t)0,
-				[](std::int64_t acc, const NetworkUpdate& elem) {return std::move(acc) + elem.examples_seen; }
+				[](std::int64_t acc, const NetworkUpdate& elem) {return std::move(acc) + elem.examples_seen; } //why move
 		);
 
 		//TODO: RedoALL
 
-		
-		for (const pulse::Matrix<float>& weight : this->local_updates[0].delta_weights)
+		//for (const anima::Matrix<float>& weight : this->local_updates[0].delta_weights)
+		for (const auto& weight : this->local_updates[0].delta_weights)
 		{
 			global_update.delta_weights.push_back(
 				weight * (float(this->local_updates[0].examples_seen) / global_update.examples_seen));
 		}
-		
+
 		for (std::size_t ui = 1; ui < local_updates.size(); ui++)
 		{
 			const NetworkUpdate& update = local_updates[ui];

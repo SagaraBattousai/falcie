@@ -14,8 +14,8 @@
 #include <anima/anima-matrix.h> //module anima:matrix;
 
 
-namespace pulse
+namespace anima
 {
 
 
-} //namespace pulse
+} //namespace anima
