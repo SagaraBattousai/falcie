@@ -30,8 +30,8 @@ if (MSVC)
   #Give Wall a try and see if the ones that are turned off are okay
   add_compile_options(/W4) # /WX)
 else()
-    # lots of warnings and all warnings as errors
-    add_compile_options(-Wall -Wextra -pedantic -Wno-comment) # -Werror)
+  # lots of warnings and all warnings as errors
+  add_compile_options(-Wall -Wextra -pedantic -Wno-comment) # -Werror)
 endif()
 
 set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation.")

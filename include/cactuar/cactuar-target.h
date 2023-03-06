@@ -5,6 +5,7 @@
 
 
 #include <cstdint>
+#include <cstddef>
 #include <memory>
 //#include <cstring>
 
@@ -22,9 +23,9 @@
 //export 
 namespace cactuar
 {
-	class Target;
+	//class Target;
 
-	constexpr std::strong_ordering operator<=>(const Target&, const Target&);
+	//constexpr std::strong_ordering operator<=>(const Target&, const Target&);
 
 
 	/** Wrapper around std::uint32_t to act as a target for blockchain hash */
@@ -42,10 +43,11 @@ namespace cactuar
 
 		constexpr const std::vector<std::byte> Expand() const;
 
-		constexpr operator std::uint32_t() const { return target; };
+		constexpr operator std::uint32_t() const { return target; }
 
-		constexpr inline std::strong_ordering operator<=>(const std::vector<std::byte>& hash)
-		{ return this->Expand() <=> hash; };
+		//constexpr inline
+        std::strong_ordering operator<=>(const std::vector<std::byte>& hash)
+		{ return (this->Expand()) <=> hash; }
 
 		static constexpr int TargetSize = 32; //< target array is truly 256 bits
 
@@ -66,7 +68,8 @@ namespace cactuar
 	constexpr Target::Target(std::uint32_t target) : target(target) {}
 
 
-	constexpr const std::vector<std::byte> Target::Expand() const
+	//constexpr
+    const std::vector<std::byte> Target::Expand() const
 	{
 		unsigned char exp = (this->target >> 24) & 255;
 
@@ -94,7 +97,7 @@ namespace cactuar
 
 	constexpr std::strong_ordering operator<=>(const Target& lhs, const Target& rhs)
 	{
-		return lhs.Expand() <=> rhs.Expand();
+		return (lhs.Expand()) <=> (rhs.Expand());
 	}
 
 	

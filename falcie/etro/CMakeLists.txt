@@ -1,7 +1,6 @@
 
 set(ETRO_MODULE_ROOT "${MODULE_ROOT}/etro")
-
-add_subdirectory(python)
+set(ETRO_FOLDER_NAME "Etro")
 
 add_executable(etro_c "etro.c")
 add_executable(etro_cpp "etro.cpp")
@@ -43,4 +42,15 @@ if(WIN32)
   # copy_openssl_runtime_lib_to_target(etro_cpp crypto)
 endif()
 
-set_target_properties(etro etro_c etro_cpp falpy PROPERTIES FOLDER Etro)
+
+set_target_properties(etro etro_c etro_cpp PROPERTIES FOLDER ${ETRO_FOLDER_NAME})
+
+#TODO: Maybe
+# set(BUILD_PYTHON_BINDINGS ON CACHE BOOL 
+#  "Whether or not to build Python bindings")
+
+add_subdirectory(python)
+
+
+
+
