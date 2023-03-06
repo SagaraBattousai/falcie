@@ -12,22 +12,21 @@
 
 int main(void)
 {
+	/*
+	using cactuar::Block;
+	using cactuar::Transaction;
+	using cactuar::UserAccount;
+	using cactuar::ContractAccount;
+	using cactuar::NetworkUpdate;
 
-	using lindzei::Federatedblock;
-	using lindzei::FederatedTransaction;
-	using lindzei::UserAccount;
-	using lindzei::ContractAccount;
-	//using pulse::NeuralNetwork;
-	using lindzei::NetworkUpdate;
-
-	Federatedblock::Builder block_builder = Federatedblock::Builder().WithVersion(0x02);
+	Block::Builder block_builder = Block::Builder().WithVersion(0x02);
 
 	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ block_builder.Genisis(), 32 };
 
 	Federatedblock block = block_builder.Build();
 
 	std::vector<std::byte> user_addr = std::vector<std::byte>{ std::byte{0}, std::byte{1}, std::byte{2} };
-	
+
 	std::vector < std::byte> contract_addr = std::vector<std::byte>{ std::byte{9}, std::byte{8}, std::byte{7} };
 
 	UserAccount acc{ user_addr };
@@ -50,7 +49,7 @@ int main(void)
 	con.ExecuteContract(b2, *ut);
 
 	bc.Add(std::move(b2));
-
+	*/
 
 
 

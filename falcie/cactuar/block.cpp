@@ -46,15 +46,15 @@ namespace cactuar
 		return Block(Blockheader::Genisis(version));
 	}
 
-	void Block::Mine(cactuar::hash_output&& prev_hash)
+	void Block::Mine(orphan::hash_output&& prev_hash)
 	{
 		this->header->prev_hash = std::move(prev_hash);
-		this->header->timestamp = Block::GenerateTimestamp();
+		this->header->timestamp = Blockheader::GenerateTimestamp();
 
 		//TODO: add error for invalid cactaur values
 		std::vector<std::byte> difficulty_array = this->header->target.Expand();
 
-		cactuar::hash_output currHash = this->Hash();
+		orphan::hash_output currHash = this->Hash();
 
 		while (currHash > difficulty_array)
 		{
@@ -69,6 +69,7 @@ namespace cactuar
 
 	void Block::ExecuteTransactions()
 	{
+		/*
 		for (auto tran : this->transactions)
 		{
 			if (tran.get().GetReceiver()[0] == std::byte{ 9 }) //if sent to contract
@@ -77,6 +78,16 @@ namespace cactuar
 				//Execute Contract
 			}
 		}
+		*/
+	}
+
+	void Block::AddTransaction(Transaction * transaction)
+	{
+	}
+
+	const std::vector<Transaction*> Block::GetTransactions() const
+	{
+		return std::vector<Transaction*>();
 	}
 
 

@@ -7,6 +7,8 @@ add_subdirectory(cactuar)
 
 add_subdirectory(cocoon)
 
+add_subdirectory(dahaka)
+
 add_subdirectory(etro)
 
 # add_subdirectory(gran)

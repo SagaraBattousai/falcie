@@ -4,7 +4,7 @@
 
 network_update_t* new_network_update()
 {
-	return new lindzei::NetworkUpdate();
+	return new network_update_t();
 }
 
 void set_network_update_examples_seen(network_update_t *update, std::int64_t examples_seen)

@@ -31,7 +31,7 @@ target_sources(etro PUBLIC
   FILES ${etro_module}
   )
 
-target_link_libraries(etro PUBLIC pulse lindzei)
+target_link_libraries(etro PUBLIC cactuar)
 
 target_link_libraries(etro_c PUBLIC etro)
 target_link_libraries(etro_cpp PUBLIC etro)

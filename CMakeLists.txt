@@ -10,11 +10,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-#Force is just for now until all kinks are worked out
-# set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR} CACHE PATH 
-  # "Path to the root directory of an OpenSSL installation.")
-# find_package(OpenSSL 3 REQUIRED)
-
 set(CMAKE_MODULE_PATH 
   "${PROJECT_SOURCE_DIR}/cmake"
   ${CMAKE_MODULE_PATH}
@@ -52,6 +47,7 @@ if(BUILD_DOCS)
   #Do I need to add pulse's dependancies as well or is that transitive!?
   #TODO: # add_dependencies(Doxygen pulse) #lindzei #etro
 endif()
+
 
 # if(MSVC)
 #   set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cocoon)

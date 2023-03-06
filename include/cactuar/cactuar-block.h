@@ -23,6 +23,7 @@
 #include <cactuar/cactuar-target.h>
 #include <cactuar/cactuar-transaction.h>
 
+
 //export 
 namespace cactuar
 {
@@ -38,7 +39,7 @@ namespace cactuar
 		constexpr static int hash_size = 32;
 		virtual inline orphan::hash_output Hash() const
 		{
-			return orphan::Keccak256(header->State());
+			return orphan::Keccak256(header.get()->State());
 		};
 
 		virtual inline const orphan::hash_output& PrevHash() const

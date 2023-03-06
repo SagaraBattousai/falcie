@@ -15,22 +15,16 @@ namespace cactuar
 	{
 	public:
 
-		using ContractCode = std::function<FederatedTransaction(const FederatedTransaction&)>; //wont work as value only lref ??
+		//Account(std::vector<std::byte> address);
 
-		ContractAccount(std::vector<std::byte>, ContractCode);
-
-		virtual std::unique_ptr<cactuar::Transaction> CreateTransaction(cactuar::Transaction::Address, std::int64_t) override;
+		virtual std::unique_ptr<cactuar::Transaction> CreateTransaction(cactuar::Transaction::Address, std::int64_t) = 0;
 
 		//TODO: when a blockchain is abs class virtual void SendTransaction() override;
 
-		virtual std::int64_t GetBalance() const override;
-
-		//template<std::int64_t UnrolledElems> //Cant be virtul for now
-		void ExecuteContract(Federatedblock, const FederatedTransaction&);//pulse::Blockchain<Federatedblock, UnrolledElems>);
+		virtual std::int64_t GetBalance() const = 0;
 
 	private:
 		std::vector<std::byte> signature;
-		ContractCode code;
 	};
 
 }

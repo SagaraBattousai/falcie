@@ -5,7 +5,7 @@
 # Will still use the term "Module" but untill compilers catchup we shall use
 # header.
 
-set(DAHAKA_MODULE_ROOT "${PULSE_MODULE_ROOT}/dahaka")
+set(DAHAKA_MODULE_ROOT "${MODULE_ROOT}/dahaka")
 
 set(dahaka_module 
   "${DAHAKA_MODULE_ROOT}/dahaka.h" # ixx"

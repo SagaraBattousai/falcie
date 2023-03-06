@@ -30,7 +30,7 @@ set_property(TARGET tests PROPERTY FOLDER Tests)
 set_target_properties(gtest gtest_main gmock gmock_main
   PROPERTIES FOLDER Tests/googleTest)
 
-target_link_libraries(tests PRIVATE gtest_main pulse)
+target_link_libraries(tests PRIVATE gtest_main anima cactuar atomos)
 target_include_directories(tests PRIVATE 
   "${INCLUDE_ROOT}"
   "${INCLUDE_ROOT}/pulse/internal"

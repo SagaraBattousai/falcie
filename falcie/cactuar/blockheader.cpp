@@ -46,7 +46,7 @@ namespace cactuar
 	std::ostream& operator<<(std::ostream& os, const Blockheader& header)
 	{
 		os << "Version:          " << std::dec << header.version << "\n"
-			    "Timestamp:        " << AsTimePoint(header.timestamp) << "\n"
+			"Timestamp:        " << Blockheader::AsTimePoint(header.timestamp) << "\n"
 			    "Previous Hash:    ";
 
 		//std::Hex in loop incase something happens to IO ??

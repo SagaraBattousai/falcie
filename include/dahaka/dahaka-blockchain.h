@@ -159,9 +159,12 @@ namespace pulse
 		return true;
 	}
 
+	
 	template<BlockchainAddable T, std::int64_t UnrolledElems>
 	std::int64_t Blockchain<T, UnrolledElems>::GetBalance(std::vector<std::byte> addr)
 	{
+		return 0;
+		/*
 		auto it = this->chain.begin();
 		++it; ///< Skip Genisis Block
 
@@ -172,6 +175,7 @@ namespace pulse
 
 			++it;
 		}
+		*/
 
 	}
 

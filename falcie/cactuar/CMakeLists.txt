@@ -37,6 +37,9 @@ set(cactuar_module
 add_library(cactuar SHARED ${cactuar_module} ${cpp_sources})
 
 target_link_libraries(cactuar PUBLIC orphan anima)
+#target_include_directories(cactuar PUBLIC orphan)
+target_include_directories(cactuar PUBLIC 
+  "${PROJECT_SOURCE_DIR}/falcie/orphan/include")
 
 target_sources(cactuar PUBLIC
   FILE_SET headers

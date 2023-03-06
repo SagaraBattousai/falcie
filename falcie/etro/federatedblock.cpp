@@ -4,11 +4,10 @@
 #include <cstring>
 
 #include <etro/federatedblock.h>
-#include <cactuar/cactuar-crypto.h>
 
 federated_block_builder_t* new_federeated_block_builder(builder_params_t *params)
 {
-	lindzei::Federatedblock::Builder *builder = new lindzei::Federatedblock::Builder();
+	federated_block_builder_t *builder = new federated_block_builder_t();
 
 	builder->WithVersion(params->version).WithTarget(params->target);
 

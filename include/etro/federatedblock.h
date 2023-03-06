@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 #include <cstdint>
-#include <orphan/federated_block.h>
+#include <cactuar/cactuar-block.h>
 #else
 #include <stdint.h>
 #endif
@@ -12,8 +12,8 @@
 
 //Typedefs for C vs CPP
 #ifdef __cplusplus
-typedef lindzei::Federatedblock federated_block_t;
-typedef lindzei::Federatedblock::Builder federated_block_builder_t;
+typedef cactuar::Block federated_block_t;
+typedef cactuar::Block::Builder federated_block_builder_t;
 #else
 typedef struct federated_block federated_block_t;
 typedef struct federated_block_builder federated_block_builder_t;
