@@ -11,6 +11,7 @@
 #include <span>
 #include <utility>
 #include <concepts>
+#include <type_traits>
 #include <algorithm>
 #include <numeric>
 #include <iostream>
@@ -36,8 +37,8 @@ namespace anima
 	public:
 
 		using index_type = Dimensions::value_type;
-		using const_iterator = std::vector<T>::const_iterator;
-		using iterator = std::vector<T>::iterator;
+		using const_iterator = typename std::vector<T>::const_iterator;
+		using iterator = typename std::vector<T>::iterator;
 
 		Matrix(Dimensions shape);
 		Matrix(std::span<T> values);
@@ -184,7 +185,7 @@ namespace anima
 
 
 	//May make convertable too T?. Really just want to say addable to T and return T (Use concept)
-	template<typename T, typename U> requires std::floating_point<U> || std::integral<U> 
+	template<typename T, typename U> //requires std::floating_point<U> || std::integral<U>
 	Matrix<T>& operator*=(Matrix<T>& matrix, const U& scalar)
 	{
 		std::for_each(matrix.begin(), matrix.end(), [&scalar](T& value)mutable { value *= scalar; });
@@ -192,7 +193,7 @@ namespace anima
 		return matrix;
 	}
 
-	template<typename T, typename U> requires std::floating_point<U> || std::integral<U>
+	template<typename T, typename U> //requires std::floating_point<U> || std::integral<U>
 	Matrix<T> operator*(Matrix<T> matrix, const U& scalar)
 	{
 		matrix *= scalar;
@@ -200,7 +201,7 @@ namespace anima
 	}
 
 	//May make convertable too T?. Really just want to say addable to T and return T
-	template<typename T, typename U> requires std::floating_point<U> || std::integral<U>
+	template<typename T, typename U> //requires std::floating_point<U> || std::integral<U>
 	Matrix<T>&operator+=(Matrix<T>&matrix, const U & scalar)
 	{
 		std::for_each(matrix.begin(), matrix.end(), [&scalar](T& value)mutable { value += scalar; });

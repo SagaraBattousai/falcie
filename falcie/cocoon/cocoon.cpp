@@ -9,6 +9,7 @@
 #include <cactuar/cactuar-transaction.h> //import lindzei;
 #include <cactuar/cactuar-user_account.h> //import lindzei;
 #include <cactuar/cactuar-contract_account.h> //import lindzei;
+#include <cactuar/cactuar-blockheader.h> //import lindzei;
 
 int main(void)
 {
@@ -50,6 +51,8 @@ int main(void)
 
 	bc.Add(std::move(b2));
 	*/
+
+	std::cout << "Header = " << cactuar::Blockheader::Genisis() << std::endl;
 
 
 

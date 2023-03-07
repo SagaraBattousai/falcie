@@ -7,6 +7,8 @@
 #include <numeric>
 #include <functional>
 
+#include <_falcie_config.h>
+
 namespace anima
 {
 	class Dimensions
@@ -20,7 +22,7 @@ namespace anima
 		Dimensions(std::vector<value_type> dimensions) :dims(std::move(dimensions))
 		{ }
 
-		constexpr value_type FlattenIndex(const std::vector<value_type>& indicies) const
+		CONSTEXPR_FUNC value_type FlattenIndex(const std::vector<value_type>& indicies) const
 		{
 			std::vector<std::int64_t> dimensionIndexer = this->DimensionIndex();
 
@@ -29,7 +31,7 @@ namespace anima
 				dimensionIndexer.begin(), (value_type)0);
 		}
 
-		constexpr value_type FlattenIndex(const Dimensions& indicies) const
+		CONSTEXPR_FUNC value_type FlattenIndex(const Dimensions& indicies) const
 		{
 			return this->FlattenIndex(indicies.dims);
 		}
@@ -54,7 +56,7 @@ namespace anima
 	private:
 		std::vector<value_type> dims;
 
-		constexpr std::vector<value_type> DimensionIndex() const
+		CONSTEXPR_FUNC std::vector<value_type> DimensionIndex() const
 		{
 			std::vector<value_type> dimensionIndexer(this->dims.size());
 

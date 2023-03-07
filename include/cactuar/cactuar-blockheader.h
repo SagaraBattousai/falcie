@@ -12,7 +12,6 @@
 #include <utility>
 #include <ostream>
 
-//#include <cactuar/cactuar-block.h>
 #include <cactuar/cactuar-endianness.h>
 #include <cactuar/cactuar-target.h>
 

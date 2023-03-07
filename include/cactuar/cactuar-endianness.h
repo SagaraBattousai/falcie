@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <_falcie_config.h>
+
 namespace cactuar
 {
 	namespace
@@ -24,12 +26,12 @@ namespace cactuar
 
 	}
 
-	constexpr bool SystemIsLittleEndian()
+	CONSTEXPR_FUNC inline bool SystemIsLittleEndian()
 	{
 		return (*(const char*)&endianTest) == littleEndianValue;
 	}
 
-	constexpr bool SystemIsBigEndian()
+	CONSTEXPR_FUNC inline bool SystemIsBigEndian()
 	{
 		return (*(const char*)&endianTest) == bigEndianValue;
 	}

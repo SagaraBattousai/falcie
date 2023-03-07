@@ -22,7 +22,7 @@ android {
                 //-DANDROID_STL=c++_shared -> Could be a huge problem!
                 // Be careful (may need to build my code as a single shared lib)
                 arguments "-DANDROID_STL=c++_shared"
-                targets "etro"
+                targets "cactuar"
             }
         }
 

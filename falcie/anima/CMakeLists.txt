@@ -29,6 +29,7 @@ set(cpp_files
   "anima-random.cpp")
 
 add_library(anima OBJECT ${anima_module} ${cpp_files})
+target_include_directories(anima PUBLIC ${MODULE_ROOT})
 
 target_sources(anima PUBLIC
   FILE_SET headers 

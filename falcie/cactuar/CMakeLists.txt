@@ -39,13 +39,17 @@ add_library(cactuar SHARED ${cactuar_module} ${cpp_sources})
 target_link_libraries(cactuar PUBLIC orphan anima)
 #target_include_directories(cactuar PUBLIC orphan)
 target_include_directories(cactuar PUBLIC 
-  "${PROJECT_SOURCE_DIR}/falcie/orphan/include")
+  "${PROJECT_SOURCE_DIR}/falcie/orphan/include"
+  ${MODULE_ROOT})
 
 target_sources(cactuar PUBLIC
   FILE_SET headers
   TYPE HEADERS
   BASE_DIRS ${MODULE_ROOT}
-  FILES ${cactuar_module}
+  FILES ${cactuar_module} 
+  "${MODULE_ROOT}/_falcie_config.h"
+  #^^ Even though this header is for all libraries we include it here
+  # for now for convineance
   )
 
 # if(MSVC)

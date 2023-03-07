@@ -1,5 +1,5 @@
-#ifndef __CACTUAR_BLOCKCHAIN__
-#define __CACTUAR_BLOCKCHAIN__
+#ifndef __CACTUAR_BLOCKCHAIN_H__
+#define __CACTUAR_BLOCKCHAIN_H__
 
 //module;
 #include <cstdint>
