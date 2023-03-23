@@ -66,13 +66,13 @@ FalpyNetworkUpdate_set_examples_seen(FalpyNetworkUpdateObject *self, PyObject *a
 
 	if (!PyArg_ParseTuple(args, "L", &examples_seen))
 	{
-		return -1;
+		return (PyObject*) -1;
 	}
 
 	if (self->update == NULL)
 	{
 		//TODO: Set error
-		return -1;
+		return (PyObject *) -1;
 	}
 
 	set_network_update_examples_seen(self->update, examples_seen);
@@ -101,7 +101,7 @@ FalpyNetworkUpdate_add_weight(FalpyNetworkUpdateObject *self, PyObject *args)
 	if (self->update == NULL || weights->matrix == NULL)
 	{
 		//TODO: Set error
-		return -1;
+		return (PyObject*) - 1; //Msvc doesn't mind but Clang insists on cast
 	}
 
 	add_matrix_to_update(self->update, weights->matrix);

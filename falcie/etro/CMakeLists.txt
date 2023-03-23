@@ -51,6 +51,8 @@ set_target_properties(etro etro_c etro_cpp PROPERTIES FOLDER ${ETRO_FOLDER_NAME}
 
 add_subdirectory(python)
 
+add_subdirectory(Android/faldroid)
+
 
 
 

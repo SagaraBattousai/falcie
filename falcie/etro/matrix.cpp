@@ -48,7 +48,9 @@ int64_t get_matrix_dimension_count(matrix_t *matrix)
 //May need to change intptr_t to int64_t
 intptr_t const* get_matrix_dimensions(matrix_t *matrix)
 {
-	return matrix->Shape().AsArray();
+	//return matrix->Shape().AsArray();
+	//TMP!!!!
+	return (intptr_t *)matrix->Shape().AsArray();
 }
 
 const float* get_matrix_data(matrix_t *matrix)

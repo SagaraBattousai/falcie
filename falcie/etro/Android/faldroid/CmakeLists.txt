@@ -1,0 +1,13 @@
+
+add_library(tf_lite SHARED IMPORTED)
+set_target_properties(
+  tf_lite 
+  PROPERTIES IMPORTED_LOCATION
+  "${CMAKE_CURRENT_SOURCE_DIR}/TFLite/${ANDROID_ABI}/libtensorflowlite_jni.so")
+
+
+set(sources "faldroid.c")
+
+add_library(faldroid SHARED ${sources})
+
+target_link_libraries(faldroid tf_lite)
