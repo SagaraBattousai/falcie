@@ -93,8 +93,13 @@ class Model(tf.Module):
     @tf.function(input_signature=[tf.TensorSpec(shape=[], dtype=tf.string)])
     def getWeights(self, unused):
         weights = {}
-        for i, w in enumerate(self.model.weights):
-            weights[f"layer_{i}"] = w
+        weight_iter = enumerate(self.model.weights) 
+        #Should use try but we know its even for this case
+        for i, w in weight_iter: 
+            weights[f"layer_{(i // 2) + 1}_kernel"] = w
+            (i, w) = next(weight_iter)
+            weights[f"layer_{(i // 2) + 1}_bias"] = w
+
         return weights
 
     # @tf.function(
@@ -130,9 +135,32 @@ class Model(tf.Module):
                     tf.TensorSpec(shape=[64,10], dtype=tf.float32),
                     tf.TensorSpec(shape=[10], dtype=tf.float32),
                     ])
-    def saveTmp(self, checkpoint_path, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10):
+    def saveFedWeights(self, checkpoint_path,
+            layer_1_kernel,
+            layer_1_bias,
+            layer_2_kernel,
+            layer_2_bias,
+            layer_3_kernel,
+            layer_3_bias,
+            layer_4_kernel,
+            layer_4_bias,
+            layer_5_kernel,
+            layer_5_bias
+            ):
         tensor_names = [weight.name for weight in self.model.weights]
-        tensors_to_save = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10]
+        tensors_to_save = [
+                layer_1_kernel,
+                layer_1_bias,
+                layer_2_kernel,
+                layer_2_bias,
+                layer_3_kernel,
+                layer_3_bias,
+                layer_4_kernel,
+                layer_4_bias,
+                layer_5_kernel,
+                layer_5_bias
+                ]
+
         tf.raw_ops.Save(
                 filename=checkpoint_path, tensor_names=tensor_names,
                 data=tensors_to_save, name="save")
@@ -206,8 +234,8 @@ def preTrainAndSave(saved_model_dir=SAVED_MODEL_DIR, num_epochs: int = 100):
                         model.restore.get_concrete_function(),
                     'getWeights':
                         model.getWeights.get_concrete_function(),
-                    'saveTmp':
-                        model.saveTmp.get_concrete_function(),
+                    'saveFedWeights':
+                        model.saveFedWeights.get_concrete_function(),
             })
 
 def convert_dir_to_tflite(saved_model_dir=SAVED_MODEL_DIR):

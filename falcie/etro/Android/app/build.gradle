@@ -17,15 +17,15 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        /*
         externalNativeBuild {
             cmake {
                 //-DANDROID_STL=c++_shared -> Could be a huge problem!
                 // Be careful (may need to build my code as a single shared lib)
                 arguments "-DANDROID_STL=c++_shared", "-DBUILD_TESTS=OFF"
                 targets "faldroid"
+                cppFlags ''
             }
-        }*/
+        }
 
     }
 
@@ -51,14 +51,12 @@ android {
         kotlinCompilerExtensionVersion '1.4.4'
     }
 
-
-    /*
     externalNativeBuild {
         cmake {
             version "3.26.0-rc5"
             path "../../../../CMakeLists.txt"
         }
-    }*/
+    }
 }
 
 dependencies {
@@ -75,7 +73,7 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-support:0.4.3'
     //implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
     //implementation 'org.tensorflow:tensorflow-lite-gpu:2.3.0'
-    implementation 'org.tensorflow:tensorflow-lite:2.7.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.11.0'
     //implementation 'com.google.android.gms:play-services-tflite-java:16.0.1'
     // Optional: include Tensorflow Lite Support Library
     //implementation 'com.google.android.gms:play-services-tflite-support:16.0.1'
