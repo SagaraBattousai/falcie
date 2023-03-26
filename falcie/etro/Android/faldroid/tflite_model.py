@@ -16,7 +16,7 @@ IMG_SIZE = 32
 
 IMG_CHANNELS = 3
 
-SAVED_MODEL_DIR = "./trained_models"
+SAVED_MODEL_DIR_FORMAT = "./trained_models/{}epochs/"
 
 
 class Model(tf.Module):
@@ -102,25 +102,6 @@ class Model(tf.Module):
 
         return weights
 
-    # @tf.function(
-    #         input_signature=[
-    #                 tf.TensorSpec(shape=[3,3,3,32], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[32], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[3,3,32,64], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[64], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[3,3,64,64], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[64], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[1024,64], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[64], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[64,10], dtype=tf.float32),
-    #                 tf.TensorSpec(shape=[10], dtype=tf.float32),
-    #                 ])
-
-    # def setWeights(self, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10):
-    #     newWeights = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10]
-    #     for i, var in enumerate(self.model.weights):
-    #         var.assign(newWeights[i])
-
     @tf.function(
             input_signature=[
                     tf.TensorSpec(shape=[], dtype=tf.string),
@@ -198,11 +179,12 @@ def get_train_and_test_data(
 def preTraining(model,
         num_epochs: int = 100,
         batch_size: int = 100,
+        train_percent: float = 0.25
         ):
     epochs = np.arange(1, num_epochs + 1, 1)
     losses = np.zeros([num_epochs])
 
-    ds_train, _ = get_train_and_test_data(train_percent=0.25)
+    ds_train, _ = get_train_and_test_data(train_percent=train_percent)
     ds_train = ds_train.batch(batch_size)
 
     for i in range(num_epochs):
@@ -214,17 +196,17 @@ def preTraining(model,
             print(f"Finished {i + 1} epochs")
             print(f"\tloss: {losses[i]:.3f}")
 
-
-    model.save(f"{SAVED_MODEL_DIR}/25_cifar10.ckpt")
-
-def preTrainAndSave(saved_model_dir=SAVED_MODEL_DIR, num_epochs: int = 100):
+def preTrainAndSave(saved_model_dir: str = None, num_epochs: int = 100):
+    if saved_model_dir is None:
+        saved_model_dir = SAVED_MODEL_DIR_FORMAT.format(num_epochs)
+    
     model = Model()
-    preTraining(model)
+    preTraining(model, num_epochs=num_epochs)
     tf.saved_model.save(
             model,
             saved_model_dir,
             signatures={
-                    'train':
+                    'atrain': #Hacky but awesome fix
                         model.train.get_concrete_function(),
                     'infer':
                         model.infer.get_concrete_function(),
@@ -238,8 +220,8 @@ def preTrainAndSave(saved_model_dir=SAVED_MODEL_DIR, num_epochs: int = 100):
                         model.saveFedWeights.get_concrete_function(),
             })
 
-def convert_dir_to_tflite(saved_model_dir=SAVED_MODEL_DIR):
-    converter = tf.lite.TFLiteConverter.from_saved_model(SAVED_MODEL_DIR)
+def convert_dir_to_tflite(saved_model_dir):
+    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
     converter.target_spec.supported_ops = [
             tf.lite.OpsSet.TFLITE_BUILTINS, # enable TF Lite ops.
             tf.lite.OpsSet.SELECT_TF_OPS # enable TF ops.
@@ -247,17 +229,21 @@ def convert_dir_to_tflite(saved_model_dir=SAVED_MODEL_DIR):
     converter.experimental_enable_resource_variables = True
     tflite_model = converter.convert()
 
-    with open(f"{SAVED_MODEL_DIR}/25_cifar10.tflite", "wb") as f:
+    with open(f"{saved_model_dir}/cifar10.tflite", "wb") as f:
         f.write(tflite_model)
 
 if __name__ == '__main__':
     
     # model = Model()
-    # model.restore(f"{SAVED_MODEL_DIR}/25_cifar10.ckpt")
+    # num_epochs = 100
+    # model.restore(
+    #   f"{SAVED_MODEL_DIR_FORMAT.format{num_epochs}/cifar10.ckpt")
     # print(model.model.weights[0][0][0][0])
-
-    preTrainAndSave()
-    convert_dir_to_tflite()
+    
+    num_epochs=100
+    
+    preTrainAndSave(SAVED_MODEL_DIR_FORMAT.format(num_epochs), num_epochs)
+    convert_dir_to_tflite(SAVED_MODEL_DIR_FORMAT.format(num_epochs))
 
     # model = Model()
     # model.restore(f"{SAVED_MODEL_DIR}/25_cifar10.ckpt")

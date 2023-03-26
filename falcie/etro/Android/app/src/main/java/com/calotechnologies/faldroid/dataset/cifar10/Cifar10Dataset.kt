@@ -3,14 +3,15 @@ package com.calotechnologies.faldroid.dataset.cifar10
 import android.content.res.AssetManager
 import android.util.Log
 import com.calotechnologies.faldroid.dataset.Dataset
-import com.calotechnologies.faldroid.model.Model
-import com.calotechnologies.faldroid.utils.loadImage
-import java.io.File
-import java.io.FileInputStream
+import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
+import com.calotechnologies.faldroid.utils.directAllocateNativeLongBuffer
+import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 
-class Cifar10Dataset : Dataset<FloatBuffer, LongBuffer>() {
+class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuffer, LongBuffer>() {
 
     private val trainingDatasetFilenames = arrayOf(
         "data_batch_1.rgb", "data_batch_2.rgb",
@@ -35,7 +36,11 @@ class Cifar10Dataset : Dataset<FloatBuffer, LongBuffer>() {
     }
 
     //Pre datapoint must be between 1 and 60,000 (i.e. 1 and number of training+test data
-    fun getDatapoint(assetManager: AssetManager, datapoint: Int): Datapoint {
+    fun getDatapoint(
+        assetManager: AssetManager,
+        datapoint: Int,
+        normalize: Boolean = true
+    ): Datapoint {
         var dataIndex = datapoint.coerceIn(1, TOTAL_DATA_COUNT) - 1
         val filename = if (dataIndex < TRAINING_DATA_COUNT)
             trainingDatasetFilenames[dataIndex / BATCH_SIZE]
@@ -56,12 +61,25 @@ class Cifar10Dataset : Dataset<FloatBuffer, LongBuffer>() {
         )
         inputStream.close()
 
-        val label = LongBuffer.allocate(LABEL_SIZE)
+        //LongBuffer.allocate(LABEL_SIZE)
+        val label: LongBuffer = ByteBuffer
+            .allocateDirect(LABEL_SIZE * Long.SIZE_BYTES)
+            .order(ByteOrder.nativeOrder())
+            .asLongBuffer()
+
         label.put(rawData[0].toLong())
 
-        val pixels = FloatBuffer.allocate(INPUT_SIZE)
+        //FloatBuffer.allocate(INPUT_SIZE)
+        val pixels: FloatBuffer = ByteBuffer
+            .allocateDirect(INPUT_SIZE * Float.SIZE_BYTES)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
         for (i in 1..INPUT_SIZE) {
-            pixels.put(rawData[i].toFloat())
+            if (normalize)
+                pixels.put(rawData[i].toFloat() / 255.0f)
+            else
+                pixels.put(rawData[i].toFloat())
         }
 
         return Datapoint(pixels, label)
@@ -71,26 +89,30 @@ class Cifar10Dataset : Dataset<FloatBuffer, LongBuffer>() {
     fun getTrainingData(
         assetManager: AssetManager,
         batchSize: Int = BATCH_SIZE,
-        normalize: Boolean = false
-    ): DataBatch {
+        normalize: Boolean = true
+    ): BatchedDataset {
 
         /* Load Raw Data into memory */
 
         //Is this a ridiculous way to do this? I guess its inefficient but is it bad?
-        val rawTrainingData = ByteArray(BATCH_FILE_SIZE * TRAINING_FILE_COUNT)
+        val rawTrainingData = ByteArray(BATCH_FILE_SIZE)// * TRAINING_FILE_COUNT)
         var currRead = 0
-        var currInputStream: FileInputStream
+        var currInputStream: InputStream
 
-        for (fname in trainingDatasetFilenames) {
-            currInputStream = FileInputStream(assetManager.openFd(fname).fileDescriptor)
-            val readBytes = currInputStream.read(rawTrainingData, currRead, BATCH_FILE_SIZE)
-            Log.d(
-                TAG,
-                "readBytes: $readBytes MUST equal $BATCH_FILE_SIZE! ${readBytes == BATCH_FILE_SIZE}"
-            )
-            currRead += readBytes
-            currInputStream.close()
-        }
+        //for (fname in trainingDatasetFilenames) {
+        //TODO TMP
+        val fname = trainingDatasetFilenames[0]
+        //currInputStream = FileInputStream(assetManager.openFd(fname).fileDescriptor)
+        currInputStream = assetManager.open(fname)
+        val readBytes = currInputStream.read(rawTrainingData, currRead, BATCH_FILE_SIZE)
+        currInputStream.close()
+        Log.d(
+            TAG,
+            "readBytes: $readBytes MUST equal $BATCH_FILE_SIZE! ${readBytes == BATCH_FILE_SIZE}"
+        )
+        currRead += readBytes
+        currInputStream.close()
+        //}
 
         /*
         val numberOfBatches =
@@ -99,24 +121,41 @@ class Cifar10Dataset : Dataset<FloatBuffer, LongBuffer>() {
             else (TRAINING_DATA_COUNT / batchSize) + 1
          */
 
-        val numberOfBatches: Int = TRAINING_DATA_COUNT / batchSize
+        //val numberOfBatches: Int = TRAINING_DATA_COUNT / batchSize
+        //TODO: UNDO
+        val numberOfBatches: Int = BATCH_SIZE / batchSize
 
         val trainInputBatches: MutableList<FloatBuffer> = ArrayList(numberOfBatches)
         val trainLabelBatches: MutableList<LongBuffer> = ArrayList(numberOfBatches);
 
         var rawDataOffset: Int = 0
 
+        val nativeByteOrder = ByteOrder.nativeOrder()
+
         for (i in 0 until numberOfBatches) {
             // Prepare training batches.
-            val trainImages: FloatBuffer = FloatBuffer.allocate(batchSize * INPUT_SIZE)
-            val trainLabels: LongBuffer = LongBuffer.allocate(batchSize)
+
+            //FloatBuffer.allocate(batchSize * INPUT_SIZE)
+            val trainImages: FloatBuffer = ByteBuffer
+                .allocateDirect(batchSize * INPUT_SIZE * Float.SIZE_BYTES)
+                .order(nativeByteOrder)
+                .asFloatBuffer()
+
+            //LongBuffer.allocate(batchSize)
+            val trainLabels: LongBuffer = ByteBuffer
+                .allocateDirect(batchSize * Long.SIZE_BYTES)
+                .order(nativeByteOrder)
+                .asLongBuffer()
 
             var it: Int = 0
             while (it < batchSize) {
                 trainLabels.put(rawTrainingData[rawDataOffset].toLong())
                 ++rawDataOffset
                 for (j in rawDataOffset until INPUT_SIZE + rawDataOffset) {
-                    trainImages.put(rawTrainingData[j].toFloat())
+                    if (normalize)
+                        trainImages.put(rawTrainingData[j].toFloat() / 255.0f)
+                    else
+                        trainImages.put(rawTrainingData[j].toFloat())
                 }
                 rawDataOffset += INPUT_SIZE
                 ++it
@@ -128,6 +167,83 @@ class Cifar10Dataset : Dataset<FloatBuffer, LongBuffer>() {
             trainLabelBatches.add(trainLabels)
 
         }
-        return DataBatch(trainInputBatches, trainLabelBatches)
+        return BatchedDataset(trainInputBatches, trainLabelBatches, batchSize)
     }
+
+    override fun DataBatchIterator(
+        batchSize: Int,
+        data_percent: Float,
+        normalize: Boolean
+    ): Cifar10DataBatchIterator {
+        return Cifar10DataBatchIterator(batchSize, data_percent, normalize)
+    }
+
+    inner class Cifar10DataBatchIterator(
+        val batchSize: Int,
+        val data_percent: Float,
+        val normalize: Boolean
+    ) : Iterator<DataBatch> {
+
+        private var amountRead: Int = 0
+        private var wholeFilesRead: Int = 0
+        private var readBuffer = ByteArray(BATCH_FILE_SIZE) //AKA cache!
+        private var bufferOffset: Int = 0
+
+
+        //AKA number of images
+        private val totalData: Int = (TRAINING_DATA_COUNT * data_percent).toInt()
+
+        //^^ Note this adds complexity of final batch as size will be smaller
+
+        //VV Actually may not need, I really am tired and hungry!!
+        private val numberOfBatches: Int = if ((totalData % batchSize) == 0)
+            (totalData / batchSize) else (totalData / batchSize) + 1
+
+        init {
+            readNextChunk()
+        }
+
+        override fun hasNext(): Boolean = amountRead < totalData
+
+        private fun readNextChunk() {
+            val inputStream = assetManager.open(trainingDatasetFilenames[wholeFilesRead])
+            inputStream.read(readBuffer, 0, BATCH_FILE_SIZE)
+            inputStream.close()
+        }
+
+        override fun next(): DataBatch {
+            //assert wholeFilesRead < 5
+
+            val trainBatch = directAllocateNativeFloatBuffer(batchSize * INPUT_SIZE)
+            val labelBatch = directAllocateNativeLongBuffer(batchSize * LABEL_SIZE)
+
+            for (i in 0 until batchSize)
+            {
+                labelBatch.put(readBuffer[bufferOffset].toLong())
+                ++bufferOffset
+
+                for (j in 0 until INPUT_SIZE) {
+                    var pixelChannel: Float = readBuffer[j + bufferOffset].toFloat()
+                    if (normalize)
+                        pixelChannel /= 255.0f
+                    trainBatch.put(pixelChannel)
+                }
+                bufferOffset += INPUT_SIZE
+
+                ++amountRead
+
+                //TODO: Check this is correct (although it should be it is late and im hungry)
+                if (bufferOffset == BATCH_FILE_SIZE)
+                {
+                    bufferOffset = 0
+                    ++wholeFilesRead
+                    readNextChunk()
+                }
+            }
+            trainBatch.rewind()
+            labelBatch.rewind()
+            return DataBatch(trainBatch, labelBatch, batchSize)
+        }
+    }
+
 }

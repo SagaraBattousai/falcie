@@ -16,7 +16,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+/*
         externalNativeBuild {
             cmake {
                 //-DANDROID_STL=c++_shared -> Could be a huge problem!
@@ -26,6 +26,8 @@ android {
                 cppFlags ''
             }
         }
+
+ */
 
     }
 
@@ -50,13 +52,15 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.4.4'
     }
-
+/*
     externalNativeBuild {
         cmake {
             version "3.26.0-rc5"
             path "../../../../CMakeLists.txt"
         }
     }
+
+ */
 }
 
 dependencies {

@@ -2,6 +2,8 @@ package com.calotechnologies.faldroid.model
 
 import android.content.res.AssetManager
 import android.util.Log
+import com.calotechnologies.faldroid.dataset.cifar10.Cifar10Dataset
+import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
 import com.calotechnologies.faldroid.utils.loadImage
 import com.calotechnologies.faldroid.utils.loadModelFile
 import org.tensorflow.lite.Interpreter
@@ -12,7 +14,9 @@ import java.nio.MappedByteBuffer
 
 class Model(modelData: MappedByteBuffer) {
 
-    private val model = Interpreter(modelData)
+    //TODO: UNDO
+    //private val model = Interpreter(modelData)
+    val model = Interpreter(modelData)
 
     constructor(assetManager: AssetManager, modelFilename: String) :
             this(loadModelFile(assetManager, modelFilename)) {
@@ -22,7 +26,7 @@ class Model(modelData: MappedByteBuffer) {
 
         private const val TAG = "ModelClassTag"
 
-        private const val TRAIN_SIGNATURE = "train"
+        private const val TRAIN_SIGNATURE = "atrain" //beautiful hacky fix TODO: Inform tensorflow
         private const val INFER_SIGNATURE = "infer"
         private const val SAVE_SIGNATURE = "save"
         private const val RESTORE_SIGNATURE = "restore"
@@ -144,6 +148,8 @@ class Model(modelData: MappedByteBuffer) {
         numberOfEpochs: Int = DEFAULT_NUM_EPOCHS,
         batchSize: Int = DEFAULT_BATCH_SIZE,
         normalize: Boolean = false
+
+
     ) : FloatArray {
         val trainingDataCount: Int = trainingImageFilenames.size
 
@@ -181,8 +187,8 @@ class Model(modelData: MappedByteBuffer) {
     }
 
     fun train(
-        trainInputBatches: MutableList<FloatBuffer>,
-        trainLabelBatches: MutableList<LongBuffer>,
+        trainInputBatches: List<FloatBuffer>,
+        trainLabelBatches: List<LongBuffer>,
         numberOfBatches: Int,
         numberOfEpochs: Int = DEFAULT_NUM_EPOCHS,
     ) : FloatArray {
@@ -201,12 +207,61 @@ class Model(modelData: MappedByteBuffer) {
                 val loss = FloatBuffer.allocate(1)
                 outputs[TRAIN_LOSS_OUTPUT_PARAMETER_NAME] = loss
 
+                //TODO: unhardcode
+                model.resizeInput(1, intArrayOf(100, 32, 32, 3), true)
+                //model.resizeInput(1, intArrayOf(100), true)
+                model.resizeInput(0, intArrayOf(100))
+                model.resetVariableTensors()
+
                 model.runSignature(inputs, outputs, TRAIN_SIGNATURE)
 
                 //record final loss
                 if (batchIndex == numberOfBatches - 1)
                     losses[epoch] = loss[0]
             }
+            if ((epoch + 1) % 10 == 0) {
+                Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
+            }
+
+        }
+        return losses
+    }
+
+    fun train(
+        datasetIterator: Cifar10Dataset.Cifar10DataBatchIterator,
+        //numberOfBatches: Int,
+        numberOfEpochs: Int = DEFAULT_NUM_EPOCHS,
+    ) : FloatArray {
+
+        // Run training for a few steps.
+        val losses = FloatArray(numberOfEpochs)
+
+        for (epoch in 0 until numberOfEpochs) {
+            var loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
+            while (datasetIterator.hasNext()) {
+                val inputs: MutableMap<String, Any> = HashMap()
+                val batch = datasetIterator.next()
+                inputs[MODEL_INPUT_PARAMETER_NAME] = batch.inputBatch
+                inputs[MODEL_LABEL_PARAMETER_NAME] = batch.labelBatch
+
+                val outputs: MutableMap<String, Any> = HashMap()
+
+                outputs[TRAIN_LOSS_OUTPUT_PARAMETER_NAME] = loss
+
+                //X is 1 for some reason TODO: use get index
+                model.resizeInput(1, intArrayOf(batch.batchSize, 32, 32, 3), true)
+                model.resizeInput(0, intArrayOf(batch.batchSize),true)
+                model.resetVariableTensors()
+
+                model.runSignature(inputs, outputs, TRAIN_SIGNATURE)
+
+                loss.rewind()
+
+            }
+            //record final loss
+            losses[epoch] = loss[0]
+            Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
+
             if ((epoch + 1) % 10 == 0) {
                 Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
             }
@@ -260,4 +315,7 @@ class Model(modelData: MappedByteBuffer) {
     }
 
 
+    fun trainInputNames(): Array<String> {
+        return model.getSignatureInputs(TRAIN_SIGNATURE)
+    }
 }

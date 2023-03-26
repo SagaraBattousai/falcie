@@ -17,11 +17,14 @@ fun bitmapFromFloatBuffer(
     val numPixels = width * hieght
     val img = IntBuffer.allocate(numPixels)
 
+    //Cant use absolute indexing as buffer may have non zero position (i.e. for batch)
+    //But lets not move the position by doing this :)
+    val pos: Int = pixels.position()
     for (pixelCount in 0 until numPixels * NUMBER_OF_CHANNELS step NUMBER_OF_CHANNELS) {
         val argb = SOLID_ALPHA or
-                   ((pixels[pixelCount + 2].toInt() and 0xFF) shl 16) or
-                   ((pixels[pixelCount + 1].toInt() and 0xFF) shl 8) or
-                   (pixels[pixelCount].toInt() and 0xFF)
+                   ((pixels[pos + pixelCount + 2].toInt() and 0xFF) shl 16) or
+                   ((pixels[pos + pixelCount + 1].toInt() and 0xFF) shl 8) or
+                   (pixels[pos + pixelCount].toInt() and 0xFF)
 
         img.put(argb)
     }

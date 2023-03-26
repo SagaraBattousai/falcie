@@ -1,3 +1,4 @@
+/*
 package com.calotechnologies.faldroid.blockchain
 
 class Blockchain {
@@ -8,3 +9,4 @@ class Blockchain {
 
     external fun testFunc(): String
 }
+*/

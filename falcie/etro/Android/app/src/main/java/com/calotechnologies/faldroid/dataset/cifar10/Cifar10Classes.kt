@@ -1,5 +1,7 @@
 package com.calotechnologies.faldroid.dataset.cifar10
 
+import java.nio.FloatBuffer
+
 enum class Cifar10Classes {
     Airplane,
     Automobile,
@@ -16,7 +18,7 @@ enum class Cifar10Classes {
         private val ordinalMap: Array<Cifar10Classes> by lazy { Cifar10Classes.values() }
 
         //Pre: probabilities must be of length 10 exactly
-        fun mapProbabilityToClass(probabilities: LongArray): String {
+        fun mapProbabilityToClass(probabilities: FloatBuffer): String {
             var max = probabilities[0]
             var index = 0
 
