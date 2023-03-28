@@ -265,7 +265,8 @@ def train_federated_model(
 
             # For now lets cheat and assume every variable is trainable
             # Also may not be a cheat since it is possible that
-            # if all not trainable vars are static then it will average to itself
+            # if all not trainable vars are static then it will average 
+            # to itself
 
             for i, (model, _) in enumerate(models):
                 for weight in model.get_weights():

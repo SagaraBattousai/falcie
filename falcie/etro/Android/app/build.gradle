@@ -16,7 +16,8 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-/*
+
+
         externalNativeBuild {
             cmake {
                 //-DANDROID_STL=c++_shared -> Could be a huge problem!
@@ -26,9 +27,6 @@ android {
                 cppFlags ''
             }
         }
-
- */
-
     }
 
     buildTypes {
@@ -52,15 +50,13 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.4.4'
     }
-/*
+
     externalNativeBuild {
         cmake {
             version "3.26.0-rc5"
             path "../../../../CMakeLists.txt"
         }
     }
-
- */
 }
 
 dependencies {
@@ -89,8 +85,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     //From compose UI lets try and understand this and relearn android (Its been wayyy too long!)
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.0'
-    implementation 'androidx.activity:activity-compose:1.6.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+    implementation 'androidx.activity:activity-compose:1.7.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.compose.material3:material3:1.1.0-alpha08'

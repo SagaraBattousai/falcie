@@ -19,7 +19,7 @@
 #include <orphan/orphan-keccak.h>
 
 #include <cactuar/cactuar-blockheader.h>
-#include <cactuar/cactuar-federated_network.h>
+#include <cactuar/cactuar-network_structure_update.h>
 #include <cactuar/cactuar-target.h>
 #include <cactuar/cactuar-transaction.h>
 
@@ -62,13 +62,13 @@ namespace cactuar
 
 		virtual const std::vector<Transaction*> GetTransactions() const;
 
-		void AddLocalUpdate(NetworkUpdate&& update);
+		void AddLocalUpdate(NetworkStructureUpdate&& update);
 
 		//constexpr
 		template<class... Args >
 		void AddLocalUpdate(Args&&... args);
 
-		const NetworkUpdate& GetGlobalUpdate() const;
+		const NetworkStructureUpdate& GetGlobalUpdate() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const Block& block);
 
@@ -81,9 +81,9 @@ namespace cactuar
 
 		std::shared_ptr<Blockheader> header; //To allow for passing copy into Blockchain
 
-		std::vector<NetworkUpdate> local_updates{};
+		std::vector<NetworkStructureUpdate> local_updates{};
 
-		NetworkUpdate global_update{};
+		NetworkStructureUpdate global_update{};
 
 		std::vector< std::reference_wrapper<cactuar::Transaction>> transactions{};
 

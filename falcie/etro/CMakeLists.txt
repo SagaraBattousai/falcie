@@ -45,13 +45,17 @@ endif()
 
 set_target_properties(etro etro_c etro_cpp PROPERTIES FOLDER ${ETRO_FOLDER_NAME})
 
+
+#TODO: MAKE ETRO MORE......C++ as well as C Happy!!!!
+#OR Not, Just move the add_subdir call out one
+
+
 #TODO: Maybe
 # set(BUILD_PYTHON_BINDINGS ON CACHE BOOL 
 #  "Whether or not to build Python bindings")
 
 add_subdirectory(python)
 
-add_subdirectory(Android/faldroid)
 
 
 

@@ -1,18 +1,19 @@
 //module;
-#ifndef __CACTUAR_FEDERATED_NETWORK__
-#define __CACTUAR_FEDERATED_NETWORK__
+#ifndef __CACTUAR_NETWORK_STRUCTURE_UPDATE__
+#define __CACTUAR_NETWORK_STRUCTURE_UPDATE__
 
 #include <cstdint>
 
 #include <vector>
 
+#include <cactuar/cactuar-network_update.h>
 #include <anima/anima-matrix.h>
 
 namespace cactuar
 {
 	//template<typename T>
 	//class 
-	struct NetworkUpdate
+	struct NetworkStructureUpdate : NetworkUpdate
 	{
 	//private:
 		//std::vector<std::int64_t> network_structure;

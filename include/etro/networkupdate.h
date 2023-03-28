@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 #include <cstdint>
-#include <cactuar/cactuar-federated_network.h>
+#include <cactuar/cactuar-network_structure_update.h>
 #else
 #include <stdint.h>
 #endif
@@ -11,7 +11,7 @@
 #include <etro/matrix.h>
 
 #ifdef __cplusplus
-typedef cactuar::NetworkUpdate network_update_t;
+typedef cactuar::NetworkStructureUpdate network_update_t;
 #else
 typedef struct network_update network_update_t;
 #endif

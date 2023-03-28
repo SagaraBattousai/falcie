@@ -3,29 +3,37 @@
 #include <cstddef>
 #include <iostream>
 
-#include <vector> //import <vector>;
-#include <utility> //import <utility>;
+#include <vector>
+#include <utility>
 
-#include <cactuar/cactuar-transaction.h> //import lindzei;
-#include <cactuar/cactuar-user_account.h> //import lindzei;
-#include <cactuar/cactuar-contract_account.h> //import lindzei;
-#include <cactuar/cactuar-blockheader.h> //import lindzei;
+#include <cactuar/cactuar-transaction.h>
+#include <cactuar/cactuar-user_account.h>
+#include <cactuar/cactuar-contract_account.h>
+#include <cactuar/cactuar-blockheader.h>
+#include <cactuar/cactuar-block.h>
+#include <cactuar/cactuar-blockchain.h>
 
 int main(void)
 {
-	/*
+
 	using cactuar::Block;
+	using cactuar::Blockchain;
 	using cactuar::Transaction;
 	using cactuar::UserAccount;
 	using cactuar::ContractAccount;
-	using cactuar::NetworkUpdate;
+	using cactuar::NetworkStructureUpdate;
 
 	Block::Builder block_builder = Block::Builder().WithVersion(0x02);
 
-	pulse::Blockchain<lindzei::Federatedblock, 32> bc{ block_builder.Genisis(), 32 };
+	Blockchain bc();
 
-	Federatedblock block = block_builder.Build();
+	Block block = block_builder.Build();
 
+
+
+
+
+	/*
 	std::vector<std::byte> user_addr = std::vector<std::byte>{ std::byte{0}, std::byte{1}, std::byte{2} };
 
 	std::vector < std::byte> contract_addr = std::vector<std::byte>{ std::byte{9}, std::byte{8}, std::byte{7} };
@@ -52,7 +60,7 @@ int main(void)
 	bc.Add(std::move(b2));
 	*/
 
-	std::cout << "Header = " << cactuar::Blockheader::Genisis() << std::endl;
+	//std::cout << "Header = " << cactuar::Blockheader::Genisis() << std::endl;
 
 
 

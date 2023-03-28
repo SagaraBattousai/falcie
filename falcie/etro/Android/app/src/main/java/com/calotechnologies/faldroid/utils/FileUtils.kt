@@ -14,14 +14,15 @@ import java.text.Normalizer
 fun loadModelFile(assetManager: AssetManager, modelPath: String) : MappedByteBuffer
 {
     val fileDesc: AssetFileDescriptor = assetManager.openFd(modelPath)
-    val inputStream: FileInputStream = FileInputStream(fileDesc.fileDescriptor)
+    val inputStream = FileInputStream(fileDesc.fileDescriptor)
 
-    val fileChannel: FileChannel = inputStream.channel
+    val fileChannel = inputStream.channel
     val startOffset: Long = fileDesc.startOffset
     val declaredLength: Long = fileDesc.declaredLength
 
     val modelFile = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
 
+    fileChannel.close()
     inputStream.close()
     fileDesc.close()
 

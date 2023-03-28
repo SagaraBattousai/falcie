@@ -37,8 +37,8 @@ namespace cactuar
 	Block::Block(Blockheader&& header)
 		: header{ std::make_shared<Blockheader>(std::move(header)) }
 		// ^^^may beable to go back to unique, we'll see
-		, local_updates{ std::vector<NetworkUpdate>{} }
-		, global_update{ }// std::make_unique<NetworkUpdate>() }
+		, local_updates{ std::vector<NetworkStructureUpdate>{} }
+		, global_update{ }// std::make_unique<NetworkStructureUpdate>() }
 	{}
 
 	Block Block::Genisis(std::uint32_t version)
@@ -92,7 +92,7 @@ namespace cactuar
 
 
 	//I think this can be rvalue since we dont need it after its added.
-	void Block::AddLocalUpdate(NetworkUpdate&& update)
+	void Block::AddLocalUpdate(NetworkStructureUpdate&& update)
 	{
 		//TODO: For now, probably init block with network stucture (and possibly builder)
 		//To enfores all updates to be of a compatible network
@@ -106,7 +106,7 @@ namespace cactuar
 		this->local_updates.push_back(std::move(update));
 	}
 
-	const NetworkUpdate& Block::GetGlobalUpdate() const
+	const NetworkStructureUpdate& Block::GetGlobalUpdate() const
 	{
 		return this->global_update;
 	}
@@ -124,7 +124,7 @@ namespace cactuar
 		this->global_update.examples_seen =
 			std::accumulate(
 				this->local_updates.begin(), this->local_updates.end(), (std::int64_t)0,
-				[](std::int64_t acc, const NetworkUpdate& elem) {return std::move(acc) + elem.examples_seen; } //why move
+				[](std::int64_t acc, const NetworkStructureUpdate& elem) {return std::move(acc) + elem.examples_seen; } //why move: Indeed
 		);
 
 		//TODO: RedoALL
@@ -138,7 +138,7 @@ namespace cactuar
 
 		for (std::size_t ui = 1; ui < local_updates.size(); ui++)
 		{
-			const NetworkUpdate& update = local_updates[ui];
+			const NetworkStructureUpdate& update = local_updates[ui];
 
 			for (std::int64_t wi = 0; wi < (std::int64_t) update.delta_weights.size(); wi++)
 			{

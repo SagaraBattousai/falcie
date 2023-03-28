@@ -9,20 +9,19 @@ namespace cactuar
 		this->chain.Add(Block::Genisis());
 	}
 
-	void Blockchain::Add(Block&& elem)
+	void Blockchain::Add(Block&& block)
 	{
-		/*
+		
 		const Block& prev = chain.GetLast();
 		auto prev_hash = prev.Hash(); //should be a copy
 
 		//TODO:Update Difficulty
 
-		elem.Mine(std::move(prev_hash));
+		block.Mine(std::move(prev_hash));
 
 		//TODO:Set everything else required on block
 
-		this->chain.Add(std::move(elem));
-		*/
+		this->chain.Add(std::move(block));
 	}
 
 	const Block& Blockchain::GetLast()
@@ -32,7 +31,6 @@ namespace cactuar
 
 	bool Blockchain::Validate()
 	{
-		/*
 		//typename Chain<Block, UnrolledElems>::ChainIterator 
 		auto it = this->chain.begin();
 		++it; ///< Skip Genisis Block
@@ -41,31 +39,14 @@ namespace cactuar
 		Block currBlock;
 
 		auto end = this->chain.end();
-		while (++it != end) //< Is it acceptable to inc in the while? Is that defined behavouir?
+		while (++it != end) // Usually don't like this but meh
 		{
-			//++it;
-			currBlock = *it;
+			//currBlock = *it;
 
 			//previousBlock'sHash == current->blockheader->prevhash
 			// &&
 			//currentBlock'sHash < currentBlocks Target
 
-			//auto test = currBlock.Target();
-
-			/*
-			std::vector<std::byte> difficulty_array = this->header->target.Expand();
-
-		blockhash_type currHash = this->Hash();
-
-		while (currHash > difficulty_array)
-			*/
-
-			/*
-			std::memcmp(this->hash(&prevBlock),
-					this->previous_hash(&currBlock),
-					sizeof(unsigned char) * this->hash_size) == 0
-			*/
-		/*
 			if (!(
 				prevBlock.Hash() == currBlock.Hash() &&
 				currBlock.CompareWithTarget(currBlock.Hash())
@@ -73,12 +54,10 @@ namespace cactuar
 			{
 				return false;
 			}
-
+			//Probably should be move but removed matrix's 
 			prevBlock = currBlock;
 		}
 		return true;
-		*/
-		return false;
 	}
 
 

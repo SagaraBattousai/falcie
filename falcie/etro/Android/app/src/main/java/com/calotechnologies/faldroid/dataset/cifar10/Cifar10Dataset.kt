@@ -2,7 +2,8 @@ package com.calotechnologies.faldroid.dataset.cifar10
 
 import android.content.res.AssetManager
 import android.util.Log
-import com.calotechnologies.faldroid.dataset.Dataset
+import android.util.NoSuchPropertyException
+import com.calotechnologies.faldroid.dataset.*
 import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
 import com.calotechnologies.faldroid.utils.directAllocateNativeLongBuffer
 import java.io.InputStream
@@ -11,36 +12,47 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 
-class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuffer, LongBuffer>() {
+//File private variables (To allow iterator to be non inner class)
+private val trainingDatasetFilenames = arrayOf(
+    "data_batch_1.rgb", "data_batch_2.rgb",
+    "data_batch_3.rgb", "data_batch_4.rgb", "data_batch_5.rgb"
+)
+private const val testDatasetFilename = "test_batch.rgb"
+private const val TRAINING_DATA_COUNT: Int = 50000
+private const val TEST_DATA_COUNT: Int = 10000
+private const val TOTAL_DATA_COUNT: Int = TRAINING_DATA_COUNT + TEST_DATA_COUNT //60000
 
-    private val trainingDatasetFilenames = arrayOf(
-        "data_batch_1.rgb", "data_batch_2.rgb",
-        "data_batch_3.rgb", "data_batch_4.rgb", "data_batch_5.rgb"
-    )
+private const val INPUT_SIZE: Int = (32 * 32 * 3)
+private const val LABEL_SIZE: Int = 1
+private const val DATA_SIZE: Int = INPUT_SIZE + LABEL_SIZE
 
-    private val testDatasetFilename = "test_batch.rgb"
+private const val TRAINING_FILE_COUNT: Int = 5
+private const val TEST_FILE_COUNT: Int = 1
 
+
+class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuffer, LongBuffer> {
     companion object {
         private const val TAG = "Cifar10DatasetTAG:"
         const val BATCH_SIZE: Int = 10000
-        const val TRAINING_DATA_COUNT: Int = 50000
-        const val TEST_DATA_COUNT: Int = 10000
-        const val TOTAL_DATA_COUNT: Int = 60000
-        private const val DATA_SIZE: Int = (32 * 32 * 3) + 1
-        private const val INPUT_SIZE: Int = (32 * 32 * 3)
-        private const val LABEL_SIZE: Int = 1
         private const val BATCH_FILE_SIZE: Int = DATA_SIZE * BATCH_SIZE
-        private const val TRAINING_FILE_COUNT: Int = 5
-        private const val TEST_FILE_COUNT: Int = 1
-
     }
+
+    var batchSize: Int = BATCH_SIZE
+
+    var dataPercent = 1.0f
+        set(value) {
+            field = value.coerceIn(0.0f, 1.0f)
+        }
+
+    var normalize: Boolean = false
 
     //Pre datapoint must be between 1 and 60,000 (i.e. 1 and number of training+test data
     fun getDatapoint(
         assetManager: AssetManager,
         datapoint: Int,
-        normalize: Boolean = true
-    ): Datapoint {
+        normalize: Boolean = this.normalize
+    ): Datapoint<FloatBuffer, LongBuffer> {
+
         var dataIndex = datapoint.coerceIn(1, TOTAL_DATA_COUNT) - 1
         val filename = if (dataIndex < TRAINING_DATA_COUNT)
             trainingDatasetFilenames[dataIndex / BATCH_SIZE]
@@ -62,18 +74,12 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
         inputStream.close()
 
         //LongBuffer.allocate(LABEL_SIZE)
-        val label: LongBuffer = ByteBuffer
-            .allocateDirect(LABEL_SIZE * Long.SIZE_BYTES)
-            .order(ByteOrder.nativeOrder())
-            .asLongBuffer()
+        val label: LongBuffer = directAllocateNativeLongBuffer(LABEL_SIZE)
 
         label.put(rawData[0].toLong())
 
         //FloatBuffer.allocate(INPUT_SIZE)
-        val pixels: FloatBuffer = ByteBuffer
-            .allocateDirect(INPUT_SIZE * Float.SIZE_BYTES)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer()
+        val pixels: FloatBuffer = directAllocateNativeFloatBuffer(INPUT_SIZE)
 
         for (i in 1..INPUT_SIZE) {
             if (normalize)
@@ -82,15 +88,18 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
                 pixels.put(rawData[i].toFloat())
         }
 
+        pixels.rewind()
+        label.rewind()
+
         return Datapoint(pixels, label)
     }
 
     //Pre BatchSize must be a multiple of 50,000 AKA Training Data Size
     fun getTrainingData(
         assetManager: AssetManager,
-        batchSize: Int = BATCH_SIZE,
-        normalize: Boolean = true
-    ): BatchedDataset {
+        batchSize: Int = this.batchSize,
+        normalize: Boolean = this.normalize
+    ): BatchedDataset<FloatBuffer, LongBuffer> {
 
         /* Load Raw Data into memory */
 
@@ -170,19 +179,38 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
         return BatchedDataset(trainInputBatches, trainLabelBatches, batchSize)
     }
 
-    override fun DataBatchIterator(
+    //unused I think
+    fun dataBatchIterator(
         batchSize: Int,
         data_percent: Float,
         normalize: Boolean
-    ): Cifar10DataBatchIterator {
-        return Cifar10DataBatchIterator(batchSize, data_percent, normalize)
-    }
+    ): Cifar10DataBatchIterator =
+        Cifar10DataBatchIterator(assetManager, data_percent, normalize).batch(batchSize)
 
-    inner class Cifar10DataBatchIterator(
-        val batchSize: Int,
-        val data_percent: Float,
-        val normalize: Boolean
-    ) : Iterator<DataBatch> {
+    override fun datasetIterator(): Cifar10DataBatchIterator =
+        Cifar10DataBatchIterator(assetManager, dataPercent, normalize).batch(batchSize)
+
+    //Could make outer but meh
+    class Cifar10DataBatchIterator(
+        private val assetManager: AssetManager,
+        val dataPercent: Float = 1.0f,
+        val normalize: Boolean = false
+    ) :
+        DatasetIterator<FloatBuffer, LongBuffer> {
+
+        var hasStarted = false
+            private set
+
+        private var batchSize: Int = BATCH_SIZE
+
+        //AKA number of images
+        private val totalData: Int = (TRAINING_DATA_COUNT * dataPercent).toInt()
+        //^^ Note this adds complexity of final batch as size will be smaller
+
+        //VV Actually may not need, I really am tired and hungry!!
+        // VV Will need changing in batch fun
+        //private val numberOfBatches: Int = if ((totalData % batch) == 0)
+        //    (totalData / batch) else (totalData / batch) + 1
 
         private var amountRead: Int = 0
         private var wholeFilesRead: Int = 0
@@ -190,20 +218,23 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
         private var bufferOffset: Int = 0
 
 
-        //AKA number of images
-        private val totalData: Int = (TRAINING_DATA_COUNT * data_percent).toInt()
-
-        //^^ Note this adds complexity of final batch as size will be smaller
-
-        //VV Actually may not need, I really am tired and hungry!!
-        private val numberOfBatches: Int = if ((totalData % batchSize) == 0)
-            (totalData / batchSize) else (totalData / batchSize) + 1
-
-        init {
-            readNextChunk()
+        fun batch(batchSize: Int): Cifar10DataBatchIterator {
+            if (!hasStarted)
+                this.batchSize = batchSize
+            return this
         }
 
         override fun hasNext(): Boolean = amountRead < totalData
+
+        override fun reset(): Cifar10DataBatchIterator {
+            hasStarted = false
+            amountRead = 0
+            wholeFilesRead = 0
+            bufferOffset = 0
+
+            return this
+        }
+
 
         private fun readNextChunk() {
             val inputStream = assetManager.open(trainingDatasetFilenames[wholeFilesRead])
@@ -211,14 +242,23 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
             inputStream.close()
         }
 
-        override fun next(): DataBatch {
-            //assert wholeFilesRead < 5
+        override fun next(): DataBatch<FloatBuffer, LongBuffer> {
+            //assert wholeFilesRead < 5 on entry on exit it may??
+
+            if (!hasNext())
+                throw NoSuchElementException("Iterator Has Finished")
+
+            hasStarted = true
+
 
             val trainBatch = directAllocateNativeFloatBuffer(batchSize * INPUT_SIZE)
             val labelBatch = directAllocateNativeLongBuffer(batchSize * LABEL_SIZE)
 
-            for (i in 0 until batchSize)
-            {
+            for (i in 0 until batchSize) {
+
+                if (bufferOffset == 0)
+                    readNextChunk()
+
                 labelBatch.put(readBuffer[bufferOffset].toLong())
                 ++bufferOffset
 
@@ -233,11 +273,10 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
                 ++amountRead
 
                 //TODO: Check this is correct (although it should be it is late and im hungry)
-                if (bufferOffset == BATCH_FILE_SIZE)
-                {
+                if (bufferOffset == BATCH_FILE_SIZE) {
                     bufferOffset = 0
                     ++wholeFilesRead
-                    readNextChunk()
+                    //readNextChunk()
                 }
             }
             trainBatch.rewind()

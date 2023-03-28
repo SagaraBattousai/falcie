@@ -42,7 +42,9 @@ namespace anima
 
 		Matrix(Dimensions shape);
 		Matrix(std::span<T> values);
+		Matrix(std::vector<T> values);
 		Matrix(std::span<T> values, Dimensions shape);
+		Matrix(std::vector<T> values, Dimensions shape);
 
 		//Matrix(const Matrix<T>&);
 
@@ -54,7 +56,14 @@ namespace anima
 		const T& operator[](index_type i) const;
 		T& operator[](index_type i);
 
-		const T* Data() const noexcept;
+		const T* Data() const noexcept
+		{
+			return this->data.data();
+		}
+
+
+
+
 
 		const Dimensions& Shape() const;
 
@@ -93,7 +102,9 @@ namespace anima
 		//Turns out order does matter as it's reflected in the constructor and destructor 
 		//init-list order!
 
-		const Dimensions::value_type total_size; 
+		//const here deletes move assignment operator which we may not need but meh
+		//const 
+			Dimensions::value_type total_size; 
 
 		Dimensions dims;
 
@@ -114,25 +125,28 @@ namespace anima
 	template <typename T>
 	Matrix<T>::Matrix(std::span<T> values) 
 		//Can I move because not "last" use also 
-		: Matrix(std::move(values), { 1, (std::int64_t)values.size() }) 
+		: Matrix({ values.begin(), values.end() })
+	{}
+
+	//Added since span (when vector was the underlying) wasted stuff
+	template <typename T>
+	Matrix<T>::Matrix(std::vector<T> values)
+		//Can I move because not "last"? No its dangerous af and clearly you/we/I did not understand it
+		: Matrix(values, { 1, (Dimensions::value_type) values.size() })
 	{}
 
 	template <typename T>
 	Matrix<T>::Matrix(std::span<T> values, Dimensions shape)
+		: Matrix(std::vector<T>{ values.begin(), values.end() }, shape)
+	{}
+
+	template <typename T>
+	Matrix<T>::Matrix(std::vector<T> values, Dimensions shape)
 		: total_size(shape.TotalSize())
 		, dims(std::move(shape))
-		, data{values.begin(), values.end()}
-	{ 
-		//std::memcpy(this->data.get(), values.data(), sizeof(T) * this->total_size);
+		, data{ values.begin(), values.end() }
+	{}
 
-		////Maybe I don't want to zero out!
-		////Do I need to do anything here?? //TODO: Optimize?
-		//if (index_type diff = this->total_size - values.size(); diff > 0)
-		//{
-		//	std::memset(this->data.get() + values.size(),
-		//		0, sizeof(T) * (this->total_size - values.size()));
-		//}
-	}
 	/*
 	template <typename T>
 	Matrix<T>::Matrix(const Matrix<T>& matrix)
@@ -144,11 +158,13 @@ namespace anima
 	}
 	*/
 
+	/*
 	template <typename T>
 	const T* Matrix<T>::Data() const noexcept
 	{
 		return this->data.data();
 	}
+	*/
 
 	template <typename T>
 	const Dimensions& Matrix<T>::Shape() const

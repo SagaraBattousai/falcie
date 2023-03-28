@@ -15,6 +15,9 @@ add_subdirectory(etro)
 
 add_subdirectory(orphan)
 
+#Added outside etro as doesnot use etro but is a binding
+add_subdirectory(etro/Android/faldroid)
+
 
 if(BUILD_TESTS)
   enable_testing()

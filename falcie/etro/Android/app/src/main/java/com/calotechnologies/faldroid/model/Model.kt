@@ -2,26 +2,24 @@ package com.calotechnologies.faldroid.model
 
 import android.content.res.AssetManager
 import android.util.Log
-import com.calotechnologies.faldroid.dataset.cifar10.Cifar10Dataset
-import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
-import com.calotechnologies.faldroid.utils.loadImage
-import com.calotechnologies.faldroid.utils.loadModelFile
+import com.calotechnologies.faldroid.dataset.DatasetIterator
+import com.calotechnologies.faldroid.utils.*
 import org.tensorflow.lite.Interpreter
 import java.io.File
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 import java.nio.MappedByteBuffer
 
+//TODO: Move back from Data Buffer
 class Model(modelData: MappedByteBuffer) {
 
-    //TODO: UNDO
-    //private val model = Interpreter(modelData)
-    val model = Interpreter(modelData)
+    private val model = Interpreter(modelData)
+
+    //TODO: Increment in training!
+    private var examplesSeen: Long = 0L //Since last getWeights //getWeights resets to 0
 
     constructor(assetManager: AssetManager, modelFilename: String) :
-            this(loadModelFile(assetManager, modelFilename)) {
-    }
-
+            this(loadModelFile(assetManager, modelFilename))
     companion object {
 
         private const val TAG = "ModelClassTag"
@@ -43,33 +41,93 @@ class Model(modelData: MappedByteBuffer) {
         private const val TRAIN_LOSS_OUTPUT_PARAMETER_NAME = "loss"
 
         private const val NUM_CLASSES = 10
-        private const val NUM_WEIGHT_LAYERS = 10 //come up with better name
-        private const val IMG_WIDTH: Int = 32;
-        private const val IMG_HEIGHT: Int = 32;
-        private const val IMG_CHANNELS: Int = 3;
+        private const val NUM_LAYERS = 5
+        private const val NUM_WEIGHT_LAYERS = NUM_LAYERS * 2 //since kernel and bias are separate
+        private const val IMG_WIDTH: Int = 32
+        private const val IMG_HEIGHT: Int = 32
+        private const val IMG_CHANNELS: Int = 3
 
         private const val DEFAULT_NUM_EPOCHS = 100
         private const val DEFAULT_BATCH_SIZE = 100
 
-        private fun newWeightBuffer(): List<FloatBuffer> {
-            return listOf(
-                FloatBuffer.allocate(3 * 3 * 3 * 32),
-                FloatBuffer.allocate(32),
-                FloatBuffer.allocate(3 * 3 * 32 * 64),
-                FloatBuffer.allocate(64),
-                FloatBuffer.allocate(3 * 3 * 64 * 64),
-                FloatBuffer.allocate(64),
-                FloatBuffer.allocate(1024 * 64),
-                FloatBuffer.allocate(64),
-                FloatBuffer.allocate(64 * 10),
-                FloatBuffer.allocate(10)
+        private const val LAYER_1_KERNEL_PARAMETERS: Int = 3 * 3 * 3 * 32
+        private const val LAYER_1_BIAS_PARAMETERS: Int = 32
+        private const val LAYER_2_KERNEL_PARAMETERS: Int = 3 * 3 * 32 * 64
+        private const val LAYER_2_BIAS_PARAMETERS: Int = 64
+        private const val LAYER_3_KERNEL_PARAMETERS: Int = 3 * 3 * 64 * 64
+        private const val LAYER_3_BIAS_PARAMETERS: Int = 64
+        private const val LAYER_4_KERNEL_PARAMETERS: Int = 1024 * 64
+        private const val LAYER_4_BIAS_PARAMETERS: Int = 64
+        private const val LAYER_5_KERNEL_PARAMETERS: Int = 64 * 10
+        private const val LAYER_5_BIAS_PARAMETERS: Int = 10
+
+        const val MODEL_PARAMETERS = LAYER_1_KERNEL_PARAMETERS +
+                LAYER_1_BIAS_PARAMETERS +
+                LAYER_2_KERNEL_PARAMETERS +
+                LAYER_2_BIAS_PARAMETERS +
+                LAYER_3_KERNEL_PARAMETERS +
+                LAYER_3_BIAS_PARAMETERS +
+                LAYER_4_KERNEL_PARAMETERS +
+                LAYER_4_BIAS_PARAMETERS +
+                LAYER_5_KERNEL_PARAMETERS +
+                LAYER_5_BIAS_PARAMETERS
+
+        fun newWeightBuffer(): Array<FloatBuffer> {
+            return arrayOf(
+                directAllocateNativeFloatBuffer(LAYER_1_KERNEL_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_1_BIAS_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_2_KERNEL_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_2_BIAS_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_3_KERNEL_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_3_BIAS_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_4_KERNEL_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_4_BIAS_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_5_KERNEL_PARAMETERS),
+                directAllocateNativeFloatBuffer(LAYER_5_BIAS_PARAMETERS)
             )
         }
 
+        /*
+        fun flattenWeightBuffer(weights: List<FloatBuffer>): FloatBuffer {
+            val dataBuffer = directAllocateNativeFloatBuffer(MODEL_PARAMETERS)
+            for (wb in weights)
+                dataBuffer.put(wb)
+
+            dataBuffer.rewind()
+            return dataBuffer //I think this'll work :)
+        }
+
+        fun reformWeightBuffer(flattenedWeights: FloatBuffer): List<FloatBuffer> {
+            val weights = newWeightBuffer()
+
+            var offset = 0
+
+            if (flattenedWeights.hasArray()) { //May never be true due to it being a view
+                for (w in weights) {
+                    w.put(
+                        flattenedWeights.array(),
+                        offset + flattenedWeights.arrayOffset(),
+                        w.capacity()
+                    )
+                    offset += w.capacity()
+                }
+            } else {
+                for (w in weights) {
+                    for(i in 0 until w.capacity()) {
+                        w.put(i, flattenedWeights.get())
+                    }
+                }
+            }
+            return weights
+        }
+
+         */
+
+
         private fun setWeightReference(
-            weights: List<FloatBuffer>,
+            weights: Array<FloatBuffer>,
             map: MutableMap<String, Any>
-        ): Unit {
+        ) {
             for (i in weights.indices step 2) {
                 map["layer_${(i / 2) + 1}_kernel"] = weights[i]
                 //since we know float buffer must have even size we don't
@@ -78,21 +136,20 @@ class Model(modelData: MappedByteBuffer) {
             }
         }
 
+
         //Technically a static/class method as A) applies to many models and B) saveFedWeights
         //is the exact same function regardless of model instance (as long as they are all of the
         //same type/Architecture
         //Also NOTE: Naughtily allows access to private members much like friend func
         //Note: you probably want to rewind all buffers before calling this func
         fun setFederatedWeights(
-            models: List<Model>, //Must have size > 0
-            federatedWeights: List<FloatBuffer>,
+            models: Array<Model>, //Must have size > 0
+            federatedWeights: Array<FloatBuffer>,
             fileRoot: File
-        ): Unit {
+        ) {
             //could make out? //want to be immutable later
             val federatedSaveInputs: MutableMap<String, Any> = HashMap()
             setWeightReference(federatedWeights, federatedSaveInputs)
-
-            //val outputs: MutableMap<String, Any> = HashMap()
 
             val federatedWeightsFile = File(fileRoot, FEDERATED_WEIGHTS_SAVE_FILENAME)
 
@@ -106,34 +163,34 @@ class Model(modelData: MappedByteBuffer) {
             val federatedRestoreInputs: MutableMap<String, Any> = HashMap()
             federatedRestoreInputs["checkpoint_path"] = federatedWeightsFile.absolutePath
 
-            //val outputs3: MutableMap<String, Any> = HashMap()
-
             for (m in models) {
                 m.restore(federatedWeightsFile)
             }
         }
-
     }
 
-    fun getWeights(): List<FloatBuffer> {
+    fun getWeights(): FederatedWeights<FloatBuffer> {
         val inputs: MutableMap<String, Any> = HashMap()
         inputs["unused"] = ""
 
         val outputs: MutableMap<String, Any> = HashMap()
-        val weights: List<FloatBuffer> = newWeightBuffer()
+        val weights: Array<FloatBuffer> = newWeightBuffer() //TODO: Fix change
 
-        setWeightReference(weights, outputs)
+        setWeightReference(weights, outputs) //TODO: Fix Change
 
-        model.runSignature(inputs, outputs, GET_WEIGHTS_SIGNATURE);
+        model.runSignature(inputs, outputs, GET_WEIGHTS_SIGNATURE)
 
-        return weights
+        val fedWeights = FederatedWeights(weights, examplesSeen)
+        examplesSeen = 0
+
+        return fedWeights
     }
 
-    fun restore(fileRoot: File, checkpointPath: String): Unit {
+    fun restore(fileRoot: File, checkpointPath: String) {
         restore(File(fileRoot, checkpointPath))
     }
 
-    fun restore(checkpointFile: File): Unit {
+    fun restore(checkpointFile: File) {
         val inputs: MutableMap<String, Any> = HashMap()
         inputs[SAVE_AND_RESTORE_PARAMETER_NAME] = checkpointFile.absolutePath
         //TODO: Try mapOf
@@ -141,6 +198,7 @@ class Model(modelData: MappedByteBuffer) {
         model.runSignature(inputs, HashMap(), RESTORE_SIGNATURE)
     }
 
+    //Unused Me thinks
     fun train(
         assetManager: AssetManager,
         trainingImageFilenames: Array<String>,
@@ -150,48 +208,47 @@ class Model(modelData: MappedByteBuffer) {
         normalize: Boolean = false
 
 
-    ) : FloatArray {
+    ): FloatArray {
         val trainingDataCount: Int = trainingImageFilenames.size
 
         val numberOfBatches = trainingDataCount / batchSize
 
-        val trainInputBatches: MutableList<FloatBuffer> = ArrayList(numberOfBatches)
-        val trainLabelBatches: MutableList<LongBuffer> = ArrayList(numberOfBatches);
+        val trainInputBatches: Array<FloatBuffer> = Array(numberOfBatches) {
+            directAllocateNativeFloatBuffer(batchSize * IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS)
+        }
+        val trainLabelBatches: Array<LongBuffer> = Array(numberOfBatches) {
+            directAllocateNativeLongBuffer(batchSize)
+        }
 
         for (i in 0 until numberOfBatches) {
             // Prepare training batches.
-            val trainImages: FloatBuffer =
-                FloatBuffer.allocate(batchSize * IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS)
+            //val trainImages: FloatBuffer = FloatBuffer.allocate()
 
             val offset = i * batchSize
 
-            val trainLabels: LongBuffer =
-                LongBuffer.allocate(batchSize).put(trainingLabels, offset, batchSize)
+            //val trainLabels: LongBuffer = LongBuffer.allocate(batchSize).put(trainingLabels, offset, batchSize)
+            trainLabelBatches[i].put(trainingLabels, offset, batchSize)
 
             for (j in offset until offset + batchSize) {
-                trainImages.put(
+                trainInputBatches[i].put(
                     loadImage(
                         assetManager, trainingImageFilenames[j],
                         IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS, normalize
                     )
                 )
             }
-            trainImages.rewind()
-            trainLabels.rewind()
-
-            trainInputBatches.add(trainImages)
-            trainLabelBatches.add(trainLabels)
-
+            trainInputBatches[i].rewind()
+            trainLabelBatches[i].rewind()
         }
         return train(trainInputBatches, trainLabelBatches, numberOfBatches, numberOfEpochs)
     }
 
     fun train(
-        trainInputBatches: List<FloatBuffer>,
-        trainLabelBatches: List<LongBuffer>,
+        trainInputBatches: Array<FloatBuffer>,
+        trainLabelBatches: Array<LongBuffer>,
         numberOfBatches: Int,
         numberOfEpochs: Int = DEFAULT_NUM_EPOCHS,
-    ) : FloatArray {
+    ): FloatArray {
 
         // Run training for a few steps.
         val losses = FloatArray(numberOfEpochs)
@@ -207,7 +264,7 @@ class Model(modelData: MappedByteBuffer) {
                 val loss = FloatBuffer.allocate(1)
                 outputs[TRAIN_LOSS_OUTPUT_PARAMETER_NAME] = loss
 
-                //TODO: unhardcode
+                //TODO: un-hardcode
                 model.resizeInput(1, intArrayOf(100, 32, 32, 3), true)
                 //model.resizeInput(1, intArrayOf(100), true)
                 model.resizeInput(0, intArrayOf(100))
@@ -228,16 +285,18 @@ class Model(modelData: MappedByteBuffer) {
     }
 
     fun train(
-        datasetIterator: Cifar10Dataset.Cifar10DataBatchIterator,
-        //numberOfBatches: Int,
+        datasetIterator: DatasetIterator<FloatBuffer, LongBuffer>,
         numberOfEpochs: Int = DEFAULT_NUM_EPOCHS,
-    ) : FloatArray {
+    ): FloatArray {
 
         // Run training for a few steps.
         val losses = FloatArray(numberOfEpochs)
 
+        Log.v(TAG, "Training Starting")
         for (epoch in 0 until numberOfEpochs) {
-            var loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
+            datasetIterator.reset()
+            val loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
+
             while (datasetIterator.hasNext()) {
                 val inputs: MutableMap<String, Any> = HashMap()
                 val batch = datasetIterator.next()
@@ -250,17 +309,17 @@ class Model(modelData: MappedByteBuffer) {
 
                 //X is 1 for some reason TODO: use get index
                 model.resizeInput(1, intArrayOf(batch.batchSize, 32, 32, 3), true)
-                model.resizeInput(0, intArrayOf(batch.batchSize),true)
+                model.resizeInput(0, intArrayOf(batch.batchSize), true)
                 model.resetVariableTensors()
 
                 model.runSignature(inputs, outputs, TRAIN_SIGNATURE)
-
                 loss.rewind()
-
             }
             //record final loss
             losses[epoch] = loss[0]
-            Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
+
+            Log.d(TAG, "Epoch complete")
+
 
             if ((epoch + 1) % 10 == 0) {
                 Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
@@ -298,20 +357,20 @@ class Model(modelData: MappedByteBuffer) {
         outputs[INFER_PROBABILITIES_OUTPUT_PARAMETER_NAME] = probabilities
         outputs[INFER_LOGITS_OUTPUT_PARAMETER_NAME] = logits
 
-        model.runSignature(inputs, outputs, INFER_SIGNATURE);
+        model.runSignature(inputs, outputs, INFER_SIGNATURE)
 
         return outputs
     }
 
-    fun save(fileRoot: File, checkpointPath: String): Unit {
+    fun save(fileRoot: File, checkpointPath: String) {
         save(File(fileRoot, checkpointPath))
     }
 
-    fun save(checkpointFile: File): Unit {
+    fun save(checkpointFile: File) {
         val inputs: MutableMap<String, Any> = HashMap()
         inputs[SAVE_AND_RESTORE_PARAMETER_NAME] = checkpointFile.absolutePath
         //TODO: Try mapOf
-        model.runSignature(inputs, HashMap(), RESTORE_SIGNATURE)
+        model.runSignature(inputs, HashMap(), SAVE_SIGNATURE)
     }
 
 
