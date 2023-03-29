@@ -2,6 +2,7 @@ package com.calotechnologies.faldroid.model
 
 import android.content.res.AssetManager
 import android.util.Log
+import com.calotechnologies.faldroid.dataset.DataBatch
 import com.calotechnologies.faldroid.dataset.DatasetIterator
 import com.calotechnologies.faldroid.utils.*
 import org.tensorflow.lite.Interpreter
@@ -15,16 +16,18 @@ class Model(modelData: MappedByteBuffer) {
 
     private val model = Interpreter(modelData)
 
-    //TODO: Increment in training!
-    private var examplesSeen: Long = 0L //Since last getWeights //getWeights resets to 0
+    //TODO: Increment in training! //Or not needed?????
+    //private var examplesSeen: Long = 0L //Since last getWeights //getWeights resets to 0
 
     constructor(assetManager: AssetManager, modelFilename: String) :
             this(loadModelFile(assetManager, modelFilename))
+
     companion object {
 
         private const val TAG = "ModelClassTag"
 
         private const val TRAIN_SIGNATURE = "atrain" //beautiful hacky fix TODO: Inform tensorflow
+        private const val TEST_SIGNATURE = "test"
         private const val INFER_SIGNATURE = "infer"
         private const val SAVE_SIGNATURE = "save"
         private const val RESTORE_SIGNATURE = "restore"
@@ -39,6 +42,9 @@ class Model(modelData: MappedByteBuffer) {
         private const val INFER_LOGITS_OUTPUT_PARAMETER_NAME = "logits"
 
         private const val TRAIN_LOSS_OUTPUT_PARAMETER_NAME = "loss"
+
+        private const val TEST_LOSS_OUTPUT_PARAMETER_NAME = "loss"
+        private const val TEST_ACCURACY_OUTPUT_PARAMETER_NAME = "accuracy"
 
         private const val NUM_CLASSES = 10
         private const val NUM_LAYERS = 5
@@ -87,43 +93,6 @@ class Model(modelData: MappedByteBuffer) {
             )
         }
 
-        /*
-        fun flattenWeightBuffer(weights: List<FloatBuffer>): FloatBuffer {
-            val dataBuffer = directAllocateNativeFloatBuffer(MODEL_PARAMETERS)
-            for (wb in weights)
-                dataBuffer.put(wb)
-
-            dataBuffer.rewind()
-            return dataBuffer //I think this'll work :)
-        }
-
-        fun reformWeightBuffer(flattenedWeights: FloatBuffer): List<FloatBuffer> {
-            val weights = newWeightBuffer()
-
-            var offset = 0
-
-            if (flattenedWeights.hasArray()) { //May never be true due to it being a view
-                for (w in weights) {
-                    w.put(
-                        flattenedWeights.array(),
-                        offset + flattenedWeights.arrayOffset(),
-                        w.capacity()
-                    )
-                    offset += w.capacity()
-                }
-            } else {
-                for (w in weights) {
-                    for(i in 0 until w.capacity()) {
-                        w.put(i, flattenedWeights.get())
-                    }
-                }
-            }
-            return weights
-        }
-
-         */
-
-
         private fun setWeightReference(
             weights: Array<FloatBuffer>,
             map: MutableMap<String, Any>
@@ -133,6 +102,17 @@ class Model(modelData: MappedByteBuffer) {
                 //since we know float buffer must have even size we don't
                 // need to check for out of range
                 map["layer_${(i / 2) + 1}_bias"] = weights[i + 1]
+            }
+        }
+
+        //Why did i make this??? I don't think its needed, Where the heck has today gone :O,
+        // I Was on such a roll what happened today???
+        private fun getWeightsFromReference(map: MutableMap<String, Any>): Array<FloatBuffer> {
+            return Array<FloatBuffer>(NUM_WEIGHT_LAYERS) {
+                if (it % 2 == 0)
+                    map["layer_${(it / 2) + 1}_kernel"] as FloatBuffer
+                else
+                    map["layer_${(it / 2) + 1}_bias"] as FloatBuffer
             }
         }
 
@@ -169,21 +149,32 @@ class Model(modelData: MappedByteBuffer) {
         }
     }
 
-    fun getWeights(): FederatedWeights<FloatBuffer> {
-        val inputs: MutableMap<String, Any> = HashMap()
-        inputs["unused"] = ""
+    fun getWeights(): Array<FloatBuffer> {//FederatedWeights<FloatBuffer> {
+        val inputs: Map<String, Any> = mapOf("unused" to "")
 
         val outputs: MutableMap<String, Any> = HashMap()
-        val weights: Array<FloatBuffer> = newWeightBuffer() //TODO: Fix change
+        val weights: Array<FloatBuffer> = newWeightBuffer()
 
-        setWeightReference(weights, outputs) //TODO: Fix Change
+        setWeightReference(weights, outputs)
 
         model.runSignature(inputs, outputs, GET_WEIGHTS_SIGNATURE)
 
-        val fedWeights = FederatedWeights(weights, examplesSeen)
-        examplesSeen = 0
+        //val fedWeights = FederatedWeights(weights, examplesSeen)
+        //examplesSeen = 0
 
-        return fedWeights
+        return weights //fedWeights
+    }
+
+
+    fun save(fileRoot: File, checkpointPath: String) {
+        save(File(fileRoot, checkpointPath))
+    }
+
+    fun save(checkpointFile: File) {
+        val inputs: MutableMap<String, Any> = HashMap()
+        inputs[SAVE_AND_RESTORE_PARAMETER_NAME] = checkpointFile.absolutePath
+        //TODO: Try mapOf
+        model.runSignature(inputs, HashMap(), SAVE_SIGNATURE)
     }
 
     fun restore(fileRoot: File, checkpointPath: String) {
@@ -196,6 +187,31 @@ class Model(modelData: MappedByteBuffer) {
         //TODO: Try mapOf
         //val outputs: Map<String, Any> = HashMap()
         model.runSignature(inputs, HashMap(), RESTORE_SIGNATURE)
+    }
+
+    //Single batch training
+    fun train(dataBatch: DataBatch<FloatBuffer, LongBuffer>, loss: FloatBuffer) {
+
+        //Log.v(TAG, "Single Batch Training Starting")
+
+        //while (datasetIterator.hasNext()) {
+        val inputs: Map<String, Any> = mapOf(
+            MODEL_INPUT_PARAMETER_NAME to dataBatch.x,
+            MODEL_LABEL_PARAMETER_NAME to dataBatch.y
+        )
+
+        val outputs: Map<String, Any> = mapOf(TRAIN_LOSS_OUTPUT_PARAMETER_NAME to loss)
+
+        //X is 1 for some reason TODO: use get index
+        model.resizeInput(1, intArrayOf(dataBatch.batchSize, 32, 32, 3), true)
+        model.resizeInput(0, intArrayOf(dataBatch.batchSize), true)
+        model.resetVariableTensors()
+
+        model.runSignature(inputs, outputs, TRAIN_SIGNATURE)
+
+        //loss.rewind() //Don't think i need!
+
+        //Log.v(TAG, "Single Batch Training Complete")
     }
 
     //Unused Me thinks
@@ -252,34 +268,24 @@ class Model(modelData: MappedByteBuffer) {
 
         // Run training for a few steps.
         val losses = FloatArray(numberOfEpochs)
+        val loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
 
         for (epoch in 0 until numberOfEpochs) {
             for (batchIndex in 0 until numberOfBatches) {
-                val inputs: MutableMap<String, Any> = HashMap()
-                inputs[MODEL_INPUT_PARAMETER_NAME] = trainInputBatches[batchIndex]
-                inputs[MODEL_LABEL_PARAMETER_NAME] = trainLabelBatches[batchIndex]
+                val dataBatch = DataBatch(
+                    trainInputBatches[batchIndex],
+                    trainLabelBatches[batchIndex],
+                    numberOfBatches
+                )
 
-                val outputs: MutableMap<String, Any> = HashMap()
-
-                val loss = FloatBuffer.allocate(1)
-                outputs[TRAIN_LOSS_OUTPUT_PARAMETER_NAME] = loss
-
-                //TODO: un-hardcode
-                model.resizeInput(1, intArrayOf(100, 32, 32, 3), true)
-                //model.resizeInput(1, intArrayOf(100), true)
-                model.resizeInput(0, intArrayOf(100))
-                model.resetVariableTensors()
-
-                model.runSignature(inputs, outputs, TRAIN_SIGNATURE)
-
-                //record final loss
-                if (batchIndex == numberOfBatches - 1)
-                    losses[epoch] = loss[0]
+                train(dataBatch, loss)
+                loss.rewind()
             }
+            losses[epoch] = loss[0]
+
             if ((epoch + 1) % 10 == 0) {
                 Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
             }
-
         }
         return losses
     }
@@ -291,35 +297,20 @@ class Model(modelData: MappedByteBuffer) {
 
         // Run training for a few steps.
         val losses = FloatArray(numberOfEpochs)
+        val loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
+
 
         Log.v(TAG, "Training Starting")
         for (epoch in 0 until numberOfEpochs) {
             datasetIterator.reset()
-            val loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
-
             while (datasetIterator.hasNext()) {
-                val inputs: MutableMap<String, Any> = HashMap()
-                val batch = datasetIterator.next()
-                inputs[MODEL_INPUT_PARAMETER_NAME] = batch.inputBatch
-                inputs[MODEL_LABEL_PARAMETER_NAME] = batch.labelBatch
-
-                val outputs: MutableMap<String, Any> = HashMap()
-
-                outputs[TRAIN_LOSS_OUTPUT_PARAMETER_NAME] = loss
-
-                //X is 1 for some reason TODO: use get index
-                model.resizeInput(1, intArrayOf(batch.batchSize, 32, 32, 3), true)
-                model.resizeInput(0, intArrayOf(batch.batchSize), true)
-                model.resetVariableTensors()
-
-                model.runSignature(inputs, outputs, TRAIN_SIGNATURE)
+                train(datasetIterator.next(), loss)
                 loss.rewind()
             }
+
             //record final loss
             losses[epoch] = loss[0]
-
             Log.d(TAG, "Epoch complete")
-
 
             if ((epoch + 1) % 10 == 0) {
                 Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${losses[epoch]}")
@@ -328,6 +319,42 @@ class Model(modelData: MappedByteBuffer) {
         }
         return losses
     }
+
+    //////////////////////////////////////////
+    //Single batch testing
+    /*
+    fun test(
+        dataBatch: DataBatch<FloatBuffer, LongBuffer>,
+        loss: FloatBuffer,
+        accuracy: FloatBuffer
+    ) {
+
+        val inputs: Map<String, Any> = mapOf(
+            MODEL_INPUT_PARAMETER_NAME to dataBatch.x,
+            MODEL_LABEL_PARAMETER_NAME to dataBatch.y
+        )
+
+        val outputs: Map<String, Any> = mapOf(
+            TEST_LOSS_OUTPUT_PARAMETER_NAME to loss,
+            TEST_ACCURACY_OUTPUT_PARAMETER_NAME to accuracy
+        )
+
+        //TODO: Will this work with tensorflow's .....isssue So It don't work!!!!!!!! Naughty tf!!
+        //X is 1 for some reason TODO: use get index
+        model.resizeInput(1, intArrayOf(dataBatch.batchSize, 32, 32, 3), true)
+        model.resizeInput(0, intArrayOf(dataBatch.batchSize), true)
+        model.resetVariableTensors()
+
+        model.runSignature(inputs, outputs, TEST_SIGNATURE)
+
+        //loss.rewind() //Don't think i need!
+
+        //Log.v(TAG, "Single Batch Training Complete")
+    }
+
+     */
+    //////////////////////////////////////////
+
 
     fun infer(
         assetManager: AssetManager, imagePath: String,
@@ -362,19 +389,10 @@ class Model(modelData: MappedByteBuffer) {
         return outputs
     }
 
-    fun save(fileRoot: File, checkpointPath: String) {
-        save(File(fileRoot, checkpointPath))
-    }
 
-    fun save(checkpointFile: File) {
-        val inputs: MutableMap<String, Any> = HashMap()
-        inputs[SAVE_AND_RESTORE_PARAMETER_NAME] = checkpointFile.absolutePath
-        //TODO: Try mapOf
-        model.runSignature(inputs, HashMap(), SAVE_SIGNATURE)
-    }
+    fun trainInputNames(): Array<String> = model.getSignatureInputs(TRAIN_SIGNATURE)
 
+    fun getSignatureInputs(signatureKey: String): Array<String> =
+        model.getSignatureInputs(signatureKey)
 
-    fun trainInputNames(): Array<String> {
-        return model.getSignatureInputs(TRAIN_SIGNATURE)
-    }
 }

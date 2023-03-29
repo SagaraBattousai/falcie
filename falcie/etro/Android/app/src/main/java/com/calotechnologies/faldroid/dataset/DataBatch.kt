@@ -5,3 +5,9 @@ data class DataBatch<InputBuffer, LabelBuffer>(
     val labelBatch: LabelBuffer,
     val batchSize: Int
 )
+{
+    //Alis'
+    val x: InputBuffer get() = inputBatch
+    val y: LabelBuffer get() = labelBatch
+    val length: Int get() = batchSize
+}

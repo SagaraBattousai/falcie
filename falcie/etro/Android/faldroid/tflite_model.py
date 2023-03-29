@@ -43,6 +43,8 @@ class Model(tf.Module):
             loss=tf.keras.losses.SparseCategoricalCrossentropy(
                     from_logits=True))
 
+        self.test_accuracy = None
+
 
     @tf.function(input_signature=[
         tf.TensorSpec([None, IMG_SIZE, IMG_SIZE, IMG_CHANNELS], tf.float32),
@@ -60,9 +62,28 @@ class Model(tf.Module):
 
     @tf.function(input_signature=[
         tf.TensorSpec([None, IMG_SIZE, IMG_SIZE, IMG_CHANNELS], tf.float32),
+        tf.TensorSpec([None], tf.int64)
+    ])
+    def test(self, x, y):
+        if self.test_accuracy is None:
+            self.test_accuracy = tf.keras.metrics.Accuracy()
+        else:
+            self.test_accuracy.reset_state()
+
+        logits = self.model(x, training=False)
+        loss = self.model.loss(y_true=y, y_pred=logits)
+        prediction = tf.math.argmax(logits, axis=1, output_type=tf.int64)
+
+        self.test_accuracy(prediction, y)
+        
+        return {"loss": loss, "accuracy": self.test_accuracy.result() }
+
+
+    @tf.function(input_signature=[
+        tf.TensorSpec([None, IMG_SIZE, IMG_SIZE, IMG_CHANNELS], tf.float32),
     ])
     def infer(self, x):
-        logits = self.model(x)
+        logits = self.model(x, training=False)
         probabilities = tf.nn.softmax(logits, axis=-1)
         return { "output": probabilities,
                  "logits": logits
@@ -208,6 +229,8 @@ def preTrainAndSave(saved_model_dir: str = None, num_epochs: int = 100):
             signatures={
                     'atrain': #Hacky but awesome fix
                         model.train.get_concrete_function(),
+                    'test':
+                        model.test.get_concrete_function(),
                     'infer':
                         model.infer.get_concrete_function(),
                     'save':
@@ -240,7 +263,7 @@ if __name__ == '__main__':
     #   f"{SAVED_MODEL_DIR_FORMAT.format{num_epochs}/cifar10.ckpt")
     # print(model.model.weights[0][0][0][0])
     
-    num_epochs=100
+    num_epochs=1
     
     preTrainAndSave(SAVED_MODEL_DIR_FORMAT.format(num_epochs), num_epochs)
     convert_dir_to_tflite(SAVED_MODEL_DIR_FORMAT.format(num_epochs))

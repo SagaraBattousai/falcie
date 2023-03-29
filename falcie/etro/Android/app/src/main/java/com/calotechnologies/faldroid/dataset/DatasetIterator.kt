@@ -5,4 +5,6 @@ interface DatasetIterator<InputBuffer, LabelBuffer> :
 
     fun reset(): DatasetIterator<InputBuffer, LabelBuffer>
 
+    val length: Int
+
 }

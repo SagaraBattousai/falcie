@@ -2,10 +2,10 @@ package com.calotechnologies.faldroid.dataset.cifar10
 
 import android.content.res.AssetManager
 import android.util.Log
-import android.util.NoSuchPropertyException
 import com.calotechnologies.faldroid.dataset.*
 import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
 import com.calotechnologies.faldroid.utils.directAllocateNativeLongBuffer
+import com.calotechnologies.faldroid.utils.Math
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -18,9 +18,6 @@ private val trainingDatasetFilenames = arrayOf(
     "data_batch_3.rgb", "data_batch_4.rgb", "data_batch_5.rgb"
 )
 private const val testDatasetFilename = "test_batch.rgb"
-private const val TRAINING_DATA_COUNT: Int = 50000
-private const val TEST_DATA_COUNT: Int = 10000
-private const val TOTAL_DATA_COUNT: Int = TRAINING_DATA_COUNT + TEST_DATA_COUNT //60000
 
 private const val INPUT_SIZE: Int = (32 * 32 * 3)
 private const val LABEL_SIZE: Int = 1
@@ -33,6 +30,11 @@ private const val TEST_FILE_COUNT: Int = 1
 class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuffer, LongBuffer> {
     companion object {
         private const val TAG = "Cifar10DatasetTAG:"
+
+        const val TRAINING_DATA_COUNT: Int = 50000
+        const val TEST_DATA_COUNT: Int = 10000
+        const val TOTAL_DATA_COUNT: Int = TRAINING_DATA_COUNT + TEST_DATA_COUNT //60000
+
         const val BATCH_SIZE: Int = 10000
         private const val BATCH_FILE_SIZE: Int = DATA_SIZE * BATCH_SIZE
     }
@@ -63,7 +65,7 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
 
         val rawData = ByteArray(DATA_SIZE)
         //var inputStream = FileInputStream(assetManager.openFd(filename).fileDescriptor)
-        var inputStream = assetManager.open(filename) // Apparently the file is being compressed
+        val inputStream = assetManager.open(filename) // Apparently the file is being compressed
         inputStream.skip((dataIndex * DATA_SIZE).toLong())
 
         val readBytes = inputStream.read(rawData, 0, DATA_SIZE)
@@ -93,144 +95,80 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
 
         return Datapoint(pixels, label)
     }
+    override fun iterator(): Cifar10DataBatchIterator =
+        Cifar10DataBatchIterator(assetManager, dataPercent, batchSize, normalize)
 
-    //Pre BatchSize must be a multiple of 50,000 AKA Training Data Size
-    fun getTrainingData(
-        assetManager: AssetManager,
-        batchSize: Int = this.batchSize,
-        normalize: Boolean = this.normalize
-    ): BatchedDataset<FloatBuffer, LongBuffer> {
-
-        /* Load Raw Data into memory */
-
-        //Is this a ridiculous way to do this? I guess its inefficient but is it bad?
-        val rawTrainingData = ByteArray(BATCH_FILE_SIZE)// * TRAINING_FILE_COUNT)
-        var currRead = 0
-        var currInputStream: InputStream
-
-        //for (fname in trainingDatasetFilenames) {
-        //TODO TMP
-        val fname = trainingDatasetFilenames[0]
-        //currInputStream = FileInputStream(assetManager.openFd(fname).fileDescriptor)
-        currInputStream = assetManager.open(fname)
-        val readBytes = currInputStream.read(rawTrainingData, currRead, BATCH_FILE_SIZE)
-        currInputStream.close()
-        Log.d(
-            TAG,
-            "readBytes: $readBytes MUST equal $BATCH_FILE_SIZE! ${readBytes == BATCH_FILE_SIZE}"
-        )
-        currRead += readBytes
-        currInputStream.close()
-        //}
-
-        /*
-        val numberOfBatches =
-            if ((TRAINING_DATA_COUNT % batchSize) == 0)
-                TRAINING_DATA_COUNT / batchSize
-            else (TRAINING_DATA_COUNT / batchSize) + 1
-         */
-
-        //val numberOfBatches: Int = TRAINING_DATA_COUNT / batchSize
-        //TODO: UNDO
-        val numberOfBatches: Int = BATCH_SIZE / batchSize
-
-        val trainInputBatches: MutableList<FloatBuffer> = ArrayList(numberOfBatches)
-        val trainLabelBatches: MutableList<LongBuffer> = ArrayList(numberOfBatches);
-
-        var rawDataOffset: Int = 0
-
-        val nativeByteOrder = ByteOrder.nativeOrder()
-
-        for (i in 0 until numberOfBatches) {
-            // Prepare training batches.
-
-            //FloatBuffer.allocate(batchSize * INPUT_SIZE)
-            val trainImages: FloatBuffer = ByteBuffer
-                .allocateDirect(batchSize * INPUT_SIZE * Float.SIZE_BYTES)
-                .order(nativeByteOrder)
-                .asFloatBuffer()
-
-            //LongBuffer.allocate(batchSize)
-            val trainLabels: LongBuffer = ByteBuffer
-                .allocateDirect(batchSize * Long.SIZE_BYTES)
-                .order(nativeByteOrder)
-                .asLongBuffer()
-
-            var it: Int = 0
-            while (it < batchSize) {
-                trainLabels.put(rawTrainingData[rawDataOffset].toLong())
-                ++rawDataOffset
-                for (j in rawDataOffset until INPUT_SIZE + rawDataOffset) {
-                    if (normalize)
-                        trainImages.put(rawTrainingData[j].toFloat() / 255.0f)
-                    else
-                        trainImages.put(rawTrainingData[j].toFloat())
-                }
-                rawDataOffset += INPUT_SIZE
-                ++it
-            }
-            trainImages.rewind()
-            trainLabels.rewind()
-
-            trainInputBatches.add(trainImages)
-            trainLabelBatches.add(trainLabels)
-
-        }
-        return BatchedDataset(trainInputBatches, trainLabelBatches, batchSize)
-    }
-
-    //unused I think
-    fun dataBatchIterator(
-        batchSize: Int,
-        data_percent: Float,
-        normalize: Boolean
-    ): Cifar10DataBatchIterator =
-        Cifar10DataBatchIterator(assetManager, data_percent, normalize).batch(batchSize)
-
-    override fun datasetIterator(): Cifar10DataBatchIterator =
-        Cifar10DataBatchIterator(assetManager, dataPercent, normalize).batch(batchSize)
-
+    //TODO: Make cleaner interface messy af but today has been painfully unproductive
+    //E.G. Could make batchSize lateinit etc but ... this is hard
     //Could make outer but meh
     class Cifar10DataBatchIterator(
         private val assetManager: AssetManager,
-        val dataPercent: Float = 1.0f,
+        dataPercent: Float = 1.0f,
+        initialBatchSize: Int = BATCH_SIZE,
         val normalize: Boolean = false
-    ) :
-        DatasetIterator<FloatBuffer, LongBuffer> {
+    ) : DatasetIterator<FloatBuffer, LongBuffer> {
 
         var hasStarted = false
             private set
 
-        private var batchSize: Int = BATCH_SIZE
+        var batchSize: Int = initialBatchSize
+            private set
 
         //AKA number of images
-        private val totalData: Int = (TRAINING_DATA_COUNT * dataPercent).toInt()
+        override val length: Int = (TRAINING_DATA_COUNT * dataPercent).toInt()
         //^^ Note this adds complexity of final batch as size will be smaller
 
         //VV Actually may not need, I really am tired and hungry!!
         // VV Will need changing in batch fun
-        //private val numberOfBatches: Int = if ((totalData % batch) == 0)
-        //    (totalData / batch) else (totalData / batch) + 1
+        var numberOfBatches: Int = recalculateNumberOfBatches()
+            private set
 
+        var batchSplits: IntArray = recalculateBatchSplits()
+            private set
+
+        private var currentBatchIndex: Int = 0
         private var amountRead: Int = 0
         private var wholeFilesRead: Int = 0
         private var readBuffer = ByteArray(BATCH_FILE_SIZE) //AKA cache!
         private var bufferOffset: Int = 0
 
+        //cant call get or set because of jvm interop
+        private fun recalculateNumberOfBatches(): Int = Math.ceilDiv(length, batchSize)
+
+        //cant call get or set because of jvm interop
+        private fun recalculateBatchSplits(): IntArray {
+            val splits = IntArray(numberOfBatches) { batchSize }
+
+            val remainingSplit = length % batchSize
+            if (remainingSplit != 0)
+                splits[numberOfBatches - 1] = remainingSplit
+
+            return splits
+        }
 
         fun batch(batchSize: Int): Cifar10DataBatchIterator {
-            if (!hasStarted)
+            if (!hasStarted) {
                 this.batchSize = batchSize
+                numberOfBatches = recalculateNumberOfBatches()
+                batchSplits = recalculateBatchSplits()
+            } else {
+                Log.w(
+                    TAG,
+                    "Iterator has started, if you wish to change the batch size call reset" +
+                            " first and then recall this function \"batch($batchSize)\""
+                )
+            }
             return this
         }
 
-        override fun hasNext(): Boolean = amountRead < totalData
+        override fun hasNext(): Boolean = amountRead < length
 
         override fun reset(): Cifar10DataBatchIterator {
             hasStarted = false
             amountRead = 0
             wholeFilesRead = 0
             bufferOffset = 0
+            currentBatchIndex = 0
 
             return this
         }
@@ -250,11 +188,12 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
 
             hasStarted = true
 
+            val currentBatchSize = batchSplits[currentBatchIndex]
 
-            val trainBatch = directAllocateNativeFloatBuffer(batchSize * INPUT_SIZE)
-            val labelBatch = directAllocateNativeLongBuffer(batchSize * LABEL_SIZE)
+            val trainBatch = directAllocateNativeFloatBuffer(currentBatchSize * INPUT_SIZE)
+            val labelBatch = directAllocateNativeLongBuffer(currentBatchSize * LABEL_SIZE)
 
-            for (i in 0 until batchSize) {
+            for (i in 0 until currentBatchSize) {
 
                 if (bufferOffset == 0)
                     readNextChunk()
@@ -279,9 +218,12 @@ class Cifar10Dataset(private val assetManager: AssetManager) : Dataset<FloatBuff
                     //readNextChunk()
                 }
             }
+
             trainBatch.rewind()
             labelBatch.rewind()
-            return DataBatch(trainBatch, labelBatch, batchSize)
+
+            ++currentBatchIndex
+            return DataBatch(trainBatch, labelBatch, currentBatchSize)
         }
     }
 

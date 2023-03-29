@@ -231,6 +231,7 @@ def train_federated_model(
         for i, (x, y) in enumerate(ds_train_batch):
 
             # Federated Parts
+            # Not garunteed if uneven splits right?
             if i >= batch_splits[model_index]:
                 model_index += 1
 
@@ -271,6 +272,7 @@ def train_federated_model(
             for i, (model, _) in enumerate(models):
                 for weight in model.get_weights():
                     network_updates[i].add_weight(falpy.Weights(weight))
+                    ##Should this be in the inner loop?
                     network_updates[i].set_examples_seen(model_examples_seen[i])
 
             for i in range(len(network_updates)):

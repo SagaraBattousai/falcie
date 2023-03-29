@@ -25,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.calotechnologies.faldroid.blockchain.Blockchain
-import com.calotechnologies.faldroid.buffer.FloatDataBuffer
 //import com.calotechnologies.faldroid.blockchain.Blockchain
 import com.calotechnologies.faldroid.dataset.cifar10.Cifar10Classes
 import com.calotechnologies.faldroid.dataset.cifar10.Cifar10Dataset
@@ -33,9 +32,6 @@ import com.calotechnologies.faldroid.model.Model
 import com.calotechnologies.faldroid.ui.theme.FaldroidTheme
 import com.calotechnologies.faldroid.utils.bitmapFromFloatBuffer
 import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
-import com.calotechnologies.faldroid.utils.loadModelFile
-import org.tensorflow.lite.Interpreter
-import java.io.File
 import java.nio.FloatBuffer
 
 class MainActivity : ComponentActivity() {
@@ -50,21 +46,85 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /*
-        val model = Model(assets, "cifar10.tflite")
-        //val model100 = Model(assets, "cifar10_100.tflite")
+        val model = Model(assets, "cifar10_1.tflite")
+        model.restore(filesDir, EPOCH_150_SAVE_FILE)
 
         val dataset = Cifar10Dataset(assets)
         dataset.dataPercent = 0.25f
         dataset.batchSize = 100
         dataset.normalize = true
 
-        //val (img, label) = dataset.getTrainingData(assets, 20, true)
+        //Havent got time to do this properly so lets just see if this code runs
+
+        val batch = dataset.iterator().batch(10).next()
+
+        val loss = directAllocateNativeFloatBuffer(1)
+        val accuracy = directAllocateNativeFloatBuffer(1)
+
+        model.test(batch, loss, accuracy)
+
+        /*
+        //val model = Model(assets, "cifar10.tflite")
+        //val model100 = Model(assets, "cifar10_100.tflite")
+        val numModels = 2
+        val models = Array<Model>(numModels) { Model(assets, "cifar10.tflite") }
+        val examplesSeen = LongArray(numModels)
+
+        val dataset = Cifar10Dataset(assets)
+        dataset.dataPercent = 0.25f
+        dataset.batchSize = 100
+        dataset.normalize = true
+
+        val numEpochs: Int = 50 //(safest max) it seems
+        val epochBlockchainSubmission = 10
+        val blockchain = Blockchain()
+
+        val datasetIterator = dataset.iterator()
+
+        val batchSplits = IntArray(numModels) {(it + 1) * datasetIterator.length / numModels}
+        var currModel: Model
+        val loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
+
+        for(epoch in 0 until numEpochs) {
+            var modelIndex = 0
+            datasetIterator.reset()
+            var datapointIndex = 0
+            while (datasetIterator.hasNext()) {
+                val dataBatch = datasetIterator.next()
+
+                //Not guaranteed if uneven batch splits
+                if (datapointIndex >= batchSplits[modelIndex])
+                    ++modelIndex
+
+                currModel = models[modelIndex]
+                examplesSeen[modelIndex] += dataBatch.length.toLong()
+
+                currModel.train(dataBatch, loss)
+
+
+                loss.rewind()
+                ++datapointIndex
+            }
+            if (epoch % epochBlockchainSubmission == 0 && epoch != 0)
+            {
+                Log.v(TAG, "Generating Federated Weights with blockchain")
+                Log.v(TAG, "Loss at epoch: ${epoch + 1} is ${loss[0]}")
+                val allWeights = Array<Array<FloatBuffer>>(numModels) {
+                    models[it].getWeights()
+                }
+
+                val federatedWeights = blockchain.federate(allWeights, examplesSeen)
+
+                Model.setFederatedWeights(models, federatedWeights, filesDir)
+            }
+        }
+        */
 
         val (testImg, testLabel) = dataset.getDatapoint(assets, 50037, true)
         val (showTestImg, _) = dataset.getDatapoint(assets, 50037, false)
 
-        val probs1: FloatBuffer = model.infer(testImg)["output"] as FloatBuffer
+        /*
+        val probs1: FloatBuffer = models[0].infer(testImg)["output"] as FloatBuffer
         testImg.rewind() // needed? TODO:test
         var ps1: String = ""
         for (x in 0 until 10)
@@ -78,80 +138,41 @@ class MainActivity : ComponentActivity() {
         //model.train(dataset.datasetIterator(), 50)
         //model.save(filesDir, fname)
 
-        //Why does this one VV work and that one ^^ not
-        //model.train(img, label, 10000 / 100, 100)
+        */
 
-        val probs2: FloatBuffer = model.infer(testImg)["output"] as FloatBuffer
+        val outputs: Map<String, Any> = model.infer(testImg)
+        val probs2: FloatBuffer = outputs["output"] as FloatBuffer
+        val logits: FloatBuffer = outputs["logits"] as FloatBuffer
         testImg.rewind()
+
         var ps2: String = ""
         for (x in 0 until 10)
             ps2 += "${probs2[x]}\n"
+
+        var lg2: String = ""
+        for(x in 0 until 10)
+            lg2 += "${logits[x]}\n"
+
         val p2Guess = Cifar10Classes.mapProbabilityToClass(probs2)
         val p2Actual = Cifar10Classes.labelToClass(testLabel[0])
 
         val bitmap = bitmapFromFloatBuffer(showTestImg, 32, 32)
-        */
-
-        val blockchain = Blockchain()
-        val weights = arrayOf(
-            arrayOf(directAllocateNativeFloatBuffer(2), directAllocateNativeFloatBuffer(1)),
-            arrayOf(directAllocateNativeFloatBuffer(2), directAllocateNativeFloatBuffer(1))
-        )
-
-        //Also testing if required to rewind  :)
-        weights[0][0].put(1.0f)
-        weights[0][0].put(2.0f)
-
-        //weights[0][0].rewind()
-
-        weights[0][1].put(3.0f)
-        //weights[0][1].rewind()
-
-        weights[1][0].put(4.0f)
-        weights[1][0].put(5.0f)
-
-        //weights[1][0].rewind()
-
-        weights[1][1].put(6.0f)
-        //weights[1][1].rewind()
-
-
-
-
-        val federatedWeights = arrayOf(
-            directAllocateNativeFloatBuffer(2), directAllocateNativeFloatBuffer(1)
-        )
-
-        //val out =
-        blockchain.federate(weights, longArrayOf(8L, 8L), federatedWeights)
-
-        Log.d(TAG, "pause here")
 
         setContent {
             FaldroidTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
 
-                    //Image(bitmap = bitmap.asImageBitmap(), contentDescription = null)
+                    Image(bitmap = bitmap.asImageBitmap(), contentDescription = null)
 
                     Conversation(
                         listOf(
-                            Message("weights[0][0].0", "${weights[0][0].get(0)}"),
-                            Message("weights[0][0].1", "${weights[0][0].get(1)}"),
-                            Message("weights[0][1].0", "${weights[0][1].get(0)}"),
-
-                            Message("weights[1][0].0", "${weights[1][0].get(0)}"),
-                            Message("weights[1][0].1", "${weights[1][0].get(1)}"),
-                            Message("weights[1][1].0", "${weights[1][1].get(0)}"),
-
-                            Message("federatedWeights[0].0", "${federatedWeights[0].get(0)}"),
-                            Message("federatedWeights[0].1", "${federatedWeights[0].get(1)}"),
-                            Message("federatedWeights[1].0", "${federatedWeights[1].get(0)}")
                             //Message("$p1Guess == $p1Actual", ps1),
-                            //Message("$p2Guess == $p2Actual", ps2)
+                            Message("$p2Guess == $p2Actual", ps2),
+                            Message("probabilities", ps2),
+                            Message("logits", lg2),
+                            Message("$loss", "$accuracy")
                         )
                     )
-
-
                 }
             }
         }
