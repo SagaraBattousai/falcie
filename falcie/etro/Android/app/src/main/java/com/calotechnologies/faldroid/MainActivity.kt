@@ -55,13 +55,13 @@ class MainActivity : ComponentActivity() {
         dataset.normalize = true
 
         //Havent got time to do this properly so lets just see if this code runs
-
-        val batch = dataset.iterator().batch(10).next()
+        val (_, test) = dataset.iterator()
+        val test_batch = test.batch(10000).next()
 
         val loss = directAllocateNativeFloatBuffer(1)
         val accuracy = directAllocateNativeFloatBuffer(1)
 
-        model.test(batch, loss, accuracy)
+        model.test(test_batch, loss, accuracy)
 
         /*
         //val model = Model(assets, "cifar10.tflite")
@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
                             Message("$p2Guess == $p2Actual", ps2),
                             Message("probabilities", ps2),
                             Message("logits", lg2),
-                            Message("$loss", "$accuracy")
+                            Message("${loss[0]}", "${accuracy[0]}")
                         )
                     )
                 }

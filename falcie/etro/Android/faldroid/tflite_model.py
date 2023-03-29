@@ -60,9 +60,14 @@ class Model(tf.Module):
         result = {"loss": loss}
         return result
 
+    #NOTE: Due to an error with tf lite we must cheat here and set batchsize
+    # @tf.function(input_signature=[
+    #     tf.TensorSpec([None, IMG_SIZE, IMG_SIZE, IMG_CHANNELS], tf.float32),
+    #     tf.TensorSpec([None], tf.int64)
+    # ])
     @tf.function(input_signature=[
-        tf.TensorSpec([None, IMG_SIZE, IMG_SIZE, IMG_CHANNELS], tf.float32),
-        tf.TensorSpec([None], tf.int64)
+        tf.TensorSpec([10000, IMG_SIZE, IMG_SIZE, IMG_CHANNELS], tf.float32),
+        tf.TensorSpec([10000], tf.int64)
     ])
     def test(self, x, y):
         if self.test_accuracy is None:

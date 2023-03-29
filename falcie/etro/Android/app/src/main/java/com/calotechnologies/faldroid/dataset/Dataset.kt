@@ -1,10 +1,13 @@
 package com.calotechnologies.faldroid.dataset
 
-//TODO: maybe change lists to arrays for interop sake
-interface Dataset<InputBuffer, LabelBuffer> : Iterable<DataBatch<InputBuffer, LabelBuffer>> {
+import com.calotechnologies.faldroid.dataset.iterator.DatasetIterator
 
-    //Couldn't give it a different name and have normal iterator = this (under sep name)
-    // JVM interop misunderstanding (although worked before so must have something to do with test?
-    override fun iterator(): DatasetIterator<InputBuffer, LabelBuffer>
+typealias TrainingTestPair<InputBuffer, LabelBuffer> =
+        Pair<DatasetIterator<InputBuffer, LabelBuffer>, DatasetIterator<InputBuffer, LabelBuffer>>
+
+//TODO: maybe change lists to arrays for interop sake
+interface Dataset<InputBuffer, LabelBuffer> {
+
+    fun iterator(): TrainingTestPair<InputBuffer, LabelBuffer>
 
 }

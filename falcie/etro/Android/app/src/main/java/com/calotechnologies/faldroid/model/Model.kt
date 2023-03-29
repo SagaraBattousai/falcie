@@ -3,7 +3,7 @@ package com.calotechnologies.faldroid.model
 import android.content.res.AssetManager
 import android.util.Log
 import com.calotechnologies.faldroid.dataset.DataBatch
-import com.calotechnologies.faldroid.dataset.DatasetIterator
+import com.calotechnologies.faldroid.dataset.iterator.DatasetIterator
 import com.calotechnologies.faldroid.utils.*
 import org.tensorflow.lite.Interpreter
 import java.io.File
@@ -322,7 +322,6 @@ class Model(modelData: MappedByteBuffer) {
 
     //////////////////////////////////////////
     //Single batch testing
-    /*
     fun test(
         dataBatch: DataBatch<FloatBuffer, LongBuffer>,
         loss: FloatBuffer,
@@ -351,8 +350,6 @@ class Model(modelData: MappedByteBuffer) {
 
         //Log.v(TAG, "Single Batch Training Complete")
     }
-
-     */
     //////////////////////////////////////////
 
 
