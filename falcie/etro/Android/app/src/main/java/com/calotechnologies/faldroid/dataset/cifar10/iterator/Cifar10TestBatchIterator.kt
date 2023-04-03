@@ -1,7 +1,6 @@
 package com.calotechnologies.faldroid.dataset.cifar10.iterator
 
 import android.content.res.AssetManager
-import android.util.Log
 import com.calotechnologies.faldroid.dataset.DataBatch
 import com.calotechnologies.faldroid.dataset.cifar10.Cifar10Dataset
 import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
@@ -14,16 +13,13 @@ import java.nio.LongBuffer
 //TODO: Make cleaner interface messy af but today has been painfully unproductive
 //E.G. Could make batchSize lateinit etc but ... this is hard
 class Cifar10TestBatchIterator (
-    private val assetManager: AssetManager,
+    assetManager: AssetManager,
     dataPercent: Float = 1.0f,
     initialBatchSize: Int = Cifar10Dataset.BATCH_SIZE,
     normalize: Boolean = false
-) : Cifar10DataBatchIterator(initialBatchSize, normalize) {
+) : Cifar10DataBatchIterator((Cifar10Dataset.TRAINING_DATA_COUNT * dataPercent).toInt(), initialBatchSize, normalize) {
 
     companion object { const val TAG = "CIFAR10_TEST_BATCH_ITERATOR_TAG:" }
-
-    //AKA number of images
-    override val length: Int = (Cifar10Dataset.TRAINING_DATA_COUNT * dataPercent).toInt()
 
     private var batchIndex: Int = 0
     private var amountRead: Int = 0

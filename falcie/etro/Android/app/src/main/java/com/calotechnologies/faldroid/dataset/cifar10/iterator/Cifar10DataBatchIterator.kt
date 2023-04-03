@@ -11,6 +11,7 @@ import java.nio.LongBuffer
 abstract class Cifar10DataBatchIterator(
     //private val assetManager: AssetManager,
     //dataPercent: Float = 1.0f,
+    override val length: Int, //AKA number of images
     initialBatchSize: Int = Cifar10Dataset.BATCH_SIZE,
     val normalize: Boolean = false
 ) : DatasetIterator<FloatBuffer, LongBuffer> {

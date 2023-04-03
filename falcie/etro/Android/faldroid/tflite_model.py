@@ -1,16 +1,7 @@
-# import os
-# os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
-# sys.path.insert(
-    # 0, "c:\\users\\james\\falcie\\build\\etro\\python\\RelWithDebInfo"
-# )
-# import falpy
-
+import argparse
 import numpy as np
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import matplotlib.pyplot as plt
-import PIL.Image
 
 IMG_SIZE = 32
 
@@ -222,7 +213,11 @@ def preTraining(model,
             print(f"Finished {i + 1} epochs")
             print(f"\tloss: {losses[i]:.3f}")
 
-def preTrainAndSave(saved_model_dir: str = None, num_epochs: int = 100):
+def preTrainAndSave(num_epochs: int = 100,
+                    batch_size: int = 100,
+                    train_percent: float = 0.25,
+                    saved_model_dir: str = None):
+
     if saved_model_dir is None:
         saved_model_dir = SAVED_MODEL_DIR_FORMAT.format(num_epochs)
     
@@ -261,21 +256,38 @@ def convert_dir_to_tflite(saved_model_dir):
         f.write(tflite_model)
 
 if __name__ == '__main__':
-    
-    # model = Model()
-    # num_epochs = 100
-    # model.restore(
-    #   f"{SAVED_MODEL_DIR_FORMAT.format{num_epochs}/cifar10.ckpt")
-    # print(model.model.weights[0][0][0][0])
-    
-    num_epochs=1
-    
-    preTrainAndSave(SAVED_MODEL_DIR_FORMAT.format(num_epochs), num_epochs)
-    convert_dir_to_tflite(SAVED_MODEL_DIR_FORMAT.format(num_epochs))
 
-    # model = Model()
-    # model.restore(f"{SAVED_MODEL_DIR}/25_cifar10.ckpt")
+    DEFAULT_NUMBER_OF_EPOCHS: int = 100
+    DEFAULT_BATCH_SIZE: int = 100
+    DEFAULT_TRAIN_PERCENT: float = 1.0
 
-    # x = model.infer(np.array(PIL.Image.open("1.png")).reshape(1, 32, 32, 3))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--epochs",
+            help="The number of epochs to train for",
+            type=int, default=DEFAULT_NUMBER_OF_EPOCHS)
+    
+    parser.add_argument("-b", "--batch",
+            help="The batch size for training data",
+            type=int, default=DEFAULT_BATCH_SIZE)
 
-    # print(x)
+    parser.add_argument("-tp", "--train_percent",
+            help="The percentage of the training data to use",
+            type=float, default=DEFAULT_TRAIN_PERCENT)
+
+    parser.add_argument("-o", "--output",
+            help="The directory in which to save the trained model",
+            type=int)
+
+    args = parser.parse_args()
+
+    if args.output is None:
+        args.output = SAVED_MODEL_DIR_FORMAT.format(args.epochs)
+
+    args.train_percent = min(max(0.0, args.train_percent), 1.0) 
+
+    preTrainAndSave(num_epochs = args.epochs,
+                    batch_size = args.batch,
+                    train_percent = args.train_percent,
+                    saved_model_dir = args.output)
+
+    convert_dir_to_tflite(args.output)

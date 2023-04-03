@@ -2,6 +2,7 @@ package com.calotechnologies.faldroid.model
 
 import android.content.res.AssetManager
 import android.util.Log
+import com.calotechnologies.faldroid.blockchain.Blockchain
 import com.calotechnologies.faldroid.dataset.DataBatch
 import com.calotechnologies.faldroid.dataset.iterator.DatasetIterator
 import com.calotechnologies.faldroid.utils.*
@@ -145,6 +146,58 @@ class Model(modelData: MappedByteBuffer) {
 
             for (m in models) {
                 m.restore(federatedWeightsFile)
+            }
+        }
+
+        fun federatedTrain(filesDir: File, models: Array<Model>, datasetIterator: DatasetIterator<FloatBuffer, LongBuffer>, blockchain: Blockchain, epochBlockchainSubmission: Int, numEpochs: Int = 50) {
+            val numModels = models.size
+
+            val examplesSeen = LongArray(numModels)
+            val batchSplits = IntArray(numModels) {(it + 1) * datasetIterator.length / numModels}
+
+            var currModel: Model
+
+            val loss: FloatBuffer = directAllocateNativeFloatBuffer(1)
+            var modelIndex: Int
+            var datapointIndex: Int
+
+            for(epoch in 0 until numEpochs) {
+                modelIndex = 0
+                datapointIndex = 0
+                datasetIterator.reset()
+
+                while (datasetIterator.hasNext()) {
+                    val dataBatch = datasetIterator.next()
+
+                    //Not guaranteed if uneven batch splits
+                    if (datapointIndex >= batchSplits[modelIndex])
+                        ++modelIndex
+
+                    currModel = models[modelIndex]
+                    examplesSeen[modelIndex] += dataBatch.length.toLong()
+
+                    currModel.train(dataBatch, loss)
+                    loss.rewind()
+                    ++datapointIndex
+                }
+
+                if ((epoch + 1) % epochBlockchainSubmission == 0)
+                {
+                    Log.v(TAG, "Generating Federated Weights with blockchain")
+                    Log.v(TAG, "Loss at epoch: ${epoch + 1} is ${loss[0]}")
+
+                    val allWeights = Array<Array<FloatBuffer>>(numModels) {
+                        models[it].getWeights()
+                    }
+                    val federatedWeights = blockchain.federate(allWeights, examplesSeen)
+                    setFederatedWeights(models, federatedWeights, filesDir)
+                }
+
+                Log.d(TAG, "Epoch complete")
+
+                if ((epoch + 1) % 10 == 0) {
+                    Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${loss[0]}")
+                }
             }
         }
     }

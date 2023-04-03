@@ -18,12 +18,9 @@ class Cifar10TrainingBatchIterator (
     dataPercent: Float = 1.0f,
     initialBatchSize: Int = Cifar10Dataset.BATCH_SIZE,
     normalize: Boolean = false
-) : Cifar10DataBatchIterator(initialBatchSize, normalize) {
+) : Cifar10DataBatchIterator((Cifar10Dataset.TRAINING_DATA_COUNT * dataPercent).toInt(), initialBatchSize, normalize) {
 
     companion object { const val TAG = "CIFAR10_TRAINING_BATCH_ITERATOR_TAG:" }
-
-    //AKA number of images
-    override val length: Int = (Cifar10Dataset.TRAINING_DATA_COUNT * dataPercent).toInt()
 
     private var currentBatchIndex: Int = 0
     private var amountRead: Int = 0
