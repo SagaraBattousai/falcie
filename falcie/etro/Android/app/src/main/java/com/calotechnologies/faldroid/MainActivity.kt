@@ -131,10 +131,15 @@ class MainActivity : ComponentActivity() {
 
          */
 
+        /*
+        private const val EPOCH_1_50_SAVE_FILE = "onDeviceTrained50Epochs.ckpt"
+        private const val EPOCH_1_100_SAVE_FILE = "onDeviceTrained50x2Epochs.ckpt"
+        private const val EPOCH_1_150_SAVE_FILE = "onDeviceTrained50x3Epochs.ckpt"
+         */
 
-        val(loss, accuracy) = evaluate(Model(assets, MODEL_1), dataset, FEDERATED_8_EPOCH_50_150_SAVE_FILE)
+        val(loss, accuracy) = evaluate(Model(assets, MODEL_100), dataset, EPOCH_100_150_SAVE_FILE)
 
-        Log.i(TAG, "50 & 8 & $loss & ${accuracy * 100}")
+        Log.i(TAG, "100 & 150 & $loss & ${accuracy * 100}")
 
         val (showTestImg, _) = dataset.getDatapoint(assets, 50037, false)
         val bitmap = bitmapFromFloatBuffer(showTestImg, 32, 32)
