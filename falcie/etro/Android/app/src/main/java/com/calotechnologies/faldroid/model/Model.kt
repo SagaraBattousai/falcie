@@ -149,7 +149,12 @@ class Model(modelData: MappedByteBuffer) {
             }
         }
 
-        fun federatedTrain(filesDir: File, models: Array<Model>, datasetIterator: DatasetIterator<FloatBuffer, LongBuffer>, blockchain: Blockchain, epochBlockchainSubmission: Int, numEpochs: Int = 50) {
+        fun federatedTrain(filesDir: File, models: Array<Model>,
+                           datasetIterator: DatasetIterator<FloatBuffer, LongBuffer>,
+                           blockchain: Blockchain,
+                           epochBlockchainSubmission: Int,
+                           numEpochs: Int = 50,
+                           timeit: Boolean = false) {
             val numModels = models.size
 
             val examplesSeen = LongArray(numModels)
@@ -161,10 +166,18 @@ class Model(modelData: MappedByteBuffer) {
             var modelIndex: Int
             var datapointIndex: Int
 
+            //if (timeit) {
+            var startTime: Long = 0L // For some reason kotlin cant see this in the if's
+            var federatedStartTime: Long = 0L // For some reason kotlin cant see this in the if's
+
             for(epoch in 0 until numEpochs) {
                 modelIndex = 0
                 datapointIndex = 0
                 datasetIterator.reset()
+
+                if (timeit) {
+                    startTime = System.currentTimeMillis()
+                }
 
                 while (datasetIterator.hasNext()) {
                     val dataBatch = datasetIterator.next()
@@ -186,17 +199,33 @@ class Model(modelData: MappedByteBuffer) {
                     Log.v(TAG, "Generating Federated Weights with blockchain")
                     Log.v(TAG, "Loss at epoch: ${epoch + 1} is ${loss[0]}")
 
+                    if (timeit) {
+                        federatedStartTime = System.currentTimeMillis()
+                    }
+
                     val allWeights = Array<Array<FloatBuffer>>(numModels) {
                         models[it].getWeights()
                     }
+
                     val federatedWeights = blockchain.federate(allWeights, examplesSeen)
                     setFederatedWeights(models, federatedWeights, filesDir)
+
+                    if (timeit) {
+                        val federatedEndTime = System.currentTimeMillis()
+                        Log.d(TAG, "Federated step for epoch ${epoch + 1} took ${federatedEndTime - federatedStartTime}")
+                    }
+
                 }
 
                 Log.d(TAG, "Epoch complete")
 
                 if ((epoch + 1) % 10 == 0) {
                     Log.v(TAG, "Finished ${epoch + 1} epochs, current loss: ${loss[0]}")
+                }
+
+                if (timeit) {
+                    val endTime = System.currentTimeMillis()
+                    Log.d(TAG, "Epoch ${epoch + 1} took ${endTime - startTime}")
                 }
             }
         }

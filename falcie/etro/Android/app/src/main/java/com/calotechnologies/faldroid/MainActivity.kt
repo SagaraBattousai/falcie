@@ -39,6 +39,7 @@ import com.calotechnologies.faldroid.utils.directAllocateNativeFloatBuffer
 import java.io.File
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
+import kotlin.system.measureTimeMillis
 
 //enum class
 
@@ -117,19 +118,17 @@ class MainActivity : ComponentActivity() {
 
 
         //val(loss, accuracy) = run(dataset, MODEL_1, EPOCH_1_100_SAVE_FILE, EPOCH_1_150_SAVE_FILE, 50, false)
-        /*
-        runFederated(
+        val (loss, accuracy) = runFederated(
             dataset,
             2,
             MODEL_1,
-            //FEDERATED_EPOCH_25_100_SAVE_FILE,
-            //FEDERATED_EPOCH_25_150_SAVE_FILE,
+            null,
+            FEDERATED_EPOCH_25_50_SAVE_FILE,
             25,
             50,
-            false
+            false,
+            timeit = true
         )
-
-         */
 
         /*
         private const val EPOCH_1_50_SAVE_FILE = "onDeviceTrained50Epochs.ckpt"
@@ -137,7 +136,7 @@ class MainActivity : ComponentActivity() {
         private const val EPOCH_1_150_SAVE_FILE = "onDeviceTrained50x3Epochs.ckpt"
          */
 
-        val(loss, accuracy) = evaluate(Model(assets, MODEL_100), dataset, EPOCH_100_150_SAVE_FILE)
+        //val(loss, accuracy) = evaluate(Model(assets, MODEL_1), dataset, EPOCH_100_150_SAVE_FILE)
 
         Log.i(TAG, "100 & 150 & $loss & ${accuracy * 100}")
 
@@ -196,7 +195,8 @@ class MainActivity : ComponentActivity() {
         saveFilename: String,
         blockUpdateEpochs: Int,
         trainingEpochs: Int = 50,
-        evaluate: Boolean = false
+        evaluate: Boolean = false,
+        timeit: Boolean = false
     ): Pair<Float, Float> {
 
         val models = Array<Model>(numberOfModels) { Model(assets, modelFilename) }
@@ -209,15 +209,29 @@ class MainActivity : ComponentActivity() {
 
         Log.d(TAG, "Training Started")
 
-        Model.federatedTrain(
-            filesDir,
-            models,
-            train_ds,
-            blockchain,
-            blockUpdateEpochs,
-            trainingEpochs
-        )
-
+        if (timeit) {
+            val timeInMillis = measureTimeMillis {
+                Model.federatedTrain(
+                    filesDir,
+                    models,
+                    train_ds,
+                    blockchain,
+                    blockUpdateEpochs,
+                    trainingEpochs,
+                    timeit
+                )
+            }
+            Log.d(TAG, "Time taken was $timeInMillis ms")
+        } else {
+            Model.federatedTrain(
+                filesDir,
+                models,
+                train_ds,
+                blockchain,
+                blockUpdateEpochs,
+                trainingEpochs
+            )
+        }
         models[0].save(filesDir, saveFilename)
 
         Log.d(TAG, "Training Finished")
