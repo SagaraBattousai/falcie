@@ -15,6 +15,8 @@ add_subdirectory(etro)
 
 add_subdirectory(orphan)
 
+add_subdirectory(thoth)
+
 #Added outside etro as doesnot use etro but is a binding
 add_subdirectory(etro/Android/faldroid)
 

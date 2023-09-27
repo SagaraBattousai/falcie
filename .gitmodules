@@ -1,3 +1,6 @@
 [submodule "falcie/orphan"]
 	path = falcie/orphan
 	url = git@github.com:SagaraBattousai/orphan.git
+[submodule "falcie/thoth"]
+	path = falcie/thoth
+	url = git@github.com:SagaraBattousai/thoth.git
