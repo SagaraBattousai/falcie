@@ -132,7 +132,6 @@ namespace cactuar
 	template< class ...Args >
 	void Block::AddLocalUpdate(Args&&... args)
 	{
-		//TODO: Is move safe? not forward? Looks like it isnt safe :)
 		this->local_updates.emplace_back(std::forward<Args>(args)...);
 
 		//TODO: For now, probably init block with network stucture (and possibly builder)

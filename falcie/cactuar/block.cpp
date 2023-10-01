@@ -123,8 +123,10 @@ namespace cactuar
 
 		this->global_update.examples_seen =
 			std::accumulate(
-				this->local_updates.begin(), this->local_updates.end(), (std::int64_t)0,
-				[](std::int64_t acc, const NetworkStructureUpdate& elem) {return std::move(acc) + elem.examples_seen; } //why move: Indeed
+				this->local_updates.begin(), this->local_updates.end(), (int)0,
+                    [](int acc, const NetworkStructureUpdate& elem) {
+                      return acc + elem.examples_seen;
+                    }
 		);
 
 		//TODO: RedoALL

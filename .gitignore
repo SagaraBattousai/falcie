@@ -1,5 +1,6 @@
 # CMAKE Build dirs
 build/
+build_32/
 unix_build/
 
 # Vim Ignore

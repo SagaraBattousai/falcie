@@ -1,68 +1,44 @@
 
-#include <cstdint>
-#include <cstddef>
-#include <iostream>
-
-#include <vector>
-#include <utility>
-
-#include <cactuar/cactuar-transaction.h>
-#include <cactuar/cactuar-user_account.h>
-#include <cactuar/cactuar-contract_account.h>
-#include <cactuar/cactuar-blockheader.h>
 #include <cactuar/cactuar-block.h>
 #include <cactuar/cactuar-blockchain.h>
+#include <cactuar/cactuar-blockheader.h>
+#include <cactuar/cactuar-contract_account.h>
+#include <cactuar/cactuar-transaction.h>
+#include <cactuar/cactuar-user_account.h>
 
-int main(void)
-{
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+#include <utility>
+#include <vector>
 
-	using cactuar::Block;
-	using cactuar::Blockchain;
-	using cactuar::Transaction;
-	using cactuar::UserAccount;
-	using cactuar::ContractAccount;
-	using cactuar::NetworkStructureUpdate;
+int main(void) {
+  using cactuar::Block;
+  using cactuar::Blockchain;
+  using cactuar::ContractAccount;
+  using cactuar::NetworkStructureUpdate;
+  using cactuar::Transaction;
+  using cactuar::UserAccount;
 
-	Block::Builder block_builder = Block::Builder().WithVersion(0x02);
+  Block::Builder block_builder = Block::Builder().WithVersion(0x02);
 
-	Blockchain bc();
+  Blockchain bc{};
 
-	Block block = block_builder.Build();
+  Block block = block_builder.Build();
 
+  block.AddLocalUpdate(
+      std::vector<thoth::Matrix<float>>(1, thoth::Matrix<float>{{3, 3}, 5.0}),
+      25);
+  block.AddLocalUpdate(
+      std::vector<thoth::Matrix<float>>(1, thoth::Matrix<float>{{3, 3}, 7.0}),
+      10);
 
+  block.Mine(std::vector<std::byte>{std::byte{1}, std::byte{2}, std::byte{3}});
 
+  const NetworkStructureUpdate& gn = block.GetGlobalUpdate();
 
+  std::cout << gn.delta_weights[0] << std::endl
+            << gn.examples_seen << std::endl;
 
-	/*
-	std::vector<std::byte> user_addr = std::vector<std::byte>{ std::byte{0}, std::byte{1}, std::byte{2} };
-
-	std::vector < std::byte> contract_addr = std::vector<std::byte>{ std::byte{9}, std::byte{8}, std::byte{7} };
-
-	UserAccount acc{ user_addr };
-
-	auto x = [](const FederatedTransaction& trans) -> FederatedTransaction
-	{
-		return FederatedTransaction{ trans.GetReceiver(), trans.GetSender(), trans.GetValue() * 2 };
-	};
-
-	ContractAccount con{ contract_addr, x };
-
-	FederatedTransaction *ut = new FederatedTransaction{ user_addr, contract_addr, 7 };
-
-	block.AddTransaction(ut);
-
-	bc.Add(std::move(block));
-
-	Federatedblock b2 = block_builder.Build();
-
-	con.ExecuteContract(b2, *ut);
-
-	bc.Add(std::move(b2));
-	*/
-
-	//std::cout << "Header = " << cactuar::Blockheader::Genisis() << std::endl;
-
-
-
-	return 0;
+  return 0;
 }

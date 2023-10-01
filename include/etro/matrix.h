@@ -3,14 +3,14 @@
 
 #ifdef __cplusplus
 #include <cstdint>
-#include <anima/anima-matrix.h>
+#include <thoth/matrix.h>
 #else
 #include <stdint.h>
 #endif
 
 //Typedefs for C vs CPP
 #ifdef __cplusplus
-typedef anima::Matrix<float> matrix_t;
+typedef thoth::Matrix<float> matrix_t;
 #else
 typedef struct matrix matrix_t;
 #endif

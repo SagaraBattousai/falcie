@@ -1,7 +1,6 @@
 
 #include <vector>
 
-#include <anima/anima-matrix.h>
 #include <cactuar/cactuar-network_structure_update.h>
 
 //export
