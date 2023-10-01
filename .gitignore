@@ -19,6 +19,11 @@ docs/sphinx/_static/css/_*
 falcie/etro/python/*/~/*
 falcie/etro/python/*/tmp/*
 
+#<- external project
+falcie/etro/python/edi
+#<- good information that no longer needs tracking
+legacy/ 
+
 
 
 ############################################################

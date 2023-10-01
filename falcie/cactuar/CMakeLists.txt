@@ -18,28 +18,25 @@ set(cpp_sources
   )
 
 set(cactuar_module
-  "${CACTUAR_MODULE_ROOT}/cactuar-account.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-block.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-chain.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-blockchain.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-blockheader.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-contract_account.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-endianness.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-network_update.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-network_structure_update.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-network_flat_update.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-rlp.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-target.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-transaction.h"
-  "${CACTUAR_MODULE_ROOT}/cactuar-user_account.h"
+  "${CACTUAR_MODULE_ROOT}/account.h"
+  "${CACTUAR_MODULE_ROOT}/block.h"
+  "${CACTUAR_MODULE_ROOT}/chain.h"
+  "${CACTUAR_MODULE_ROOT}/blockchain.h"
+  "${CACTUAR_MODULE_ROOT}/blockheader.h"
+  "${CACTUAR_MODULE_ROOT}/contract_account.h"
+  "${CACTUAR_MODULE_ROOT}/endianness.h"
+  "${CACTUAR_MODULE_ROOT}/network_update.h"
+  "${CACTUAR_MODULE_ROOT}/network_structure_update.h"
+  "${CACTUAR_MODULE_ROOT}/network_flat_update.h"
+  "${CACTUAR_MODULE_ROOT}/rlp.h"
+  "${CACTUAR_MODULE_ROOT}/target.h"
+  "${CACTUAR_MODULE_ROOT}/transaction.h"
+  "${CACTUAR_MODULE_ROOT}/user_account.h"
   )
 
 add_library(cactuar SHARED ${cactuar_module} ${cpp_sources})
 
 target_link_libraries(cactuar PUBLIC orphan thoth)
-# target_include_directories(cactuar PUBLIC 
-#   "${PROJECT_SOURCE_DIR}/falcie/orphan/include"
-#   ${MODULE_ROOT})
 
 target_sources(cactuar PUBLIC
   FILE_SET headers

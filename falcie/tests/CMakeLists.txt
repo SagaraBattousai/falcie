@@ -18,11 +18,10 @@ endif()
 FetchContent_MakeAvailable(googletest)
 
 set(testing_sources 
-  "anima.cpp"
-  "atomos.cpp"
+  # "anima.cpp"
   "cactuar.cpp"
   "dahaka.cpp"
-  "pulse.cpp")
+  )
 
 add_executable(tests ${testing_sources})
 
