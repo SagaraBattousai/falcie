@@ -4,3 +4,6 @@
 [submodule "falcie/thoth"]
 	path = falcie/thoth
 	url = git@github.com:SagaraBattousai/thoth.git
+[submodule "falcie/faldroid"]
+	path = falcie/faldroid
+	url = git@github.com:sagaraBattousai/faldroid.git
