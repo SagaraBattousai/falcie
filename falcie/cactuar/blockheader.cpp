@@ -1,8 +1,8 @@
 #include <utility>
 
-#include <cactuar/cactuar-blockheader.h>
-#include <cactuar/cactuar-block.h>
-#include <cactuar/cactuar-endianness.h>
+#include <cactuar/blockheader.h>
+#include <cactuar/block.h>
+#include <cactuar/endianness.h>
 
 
 namespace cactuar

@@ -16,12 +16,12 @@
 #include <utility>
 #include <ostream>
 
-#include <orphan/orphan-keccak.h>
+#include <thoth/keccak.h>
 
-#include <cactuar/cactuar-blockheader.h>
-#include <cactuar/cactuar-network_structure_update.h>
-#include <cactuar/cactuar-target.h>
-#include <cactuar/cactuar-transaction.h>
+#include <cactuar/blockheader.h>
+#include <cactuar/network_structure_update.h>
+#include <cactuar/target.h>
+#include <cactuar/transaction.h>
 
 
 //export 
@@ -39,22 +39,22 @@ namespace cactuar
 
 		// When hash is changed change here too
 		constexpr static int hash_size = 32;
-		virtual inline orphan::hash_output Hash() const
+		virtual inline thoth::hash_output Hash() const
 		{
-			return orphan::Keccak256(header.get()->State());
+			return thoth::Keccak256(header.get()->State());
 		};
 
-		virtual inline const orphan::hash_output& PrevHash() const
+		virtual inline const thoth::hash_output& PrevHash() const
 		{
 			return this->header.get()->prev_hash;
 		};
 
-		virtual inline const bool CompareWithTarget(const orphan::hash_output& hash) const
+		virtual inline const bool CompareWithTarget(const thoth::hash_output& hash) const
 		{
 			return hash < this->header.get()->target;
 		}
 
-		virtual void Mine(orphan::hash_output&& prev_hash);
+		virtual void Mine(thoth::hash_output&& prev_hash);
 
 		virtual void ExecuteTransactions();
 

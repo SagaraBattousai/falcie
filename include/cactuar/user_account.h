@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <cactuar/cactuar-account.h>
+#include <cactuar/account.h>
 
 namespace cactuar
 {

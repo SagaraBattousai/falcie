@@ -6,4 +6,4 @@
 #include <vector>
 #include <algorithm>
 
-#include <cactuar/cactuar-target.h>
+#include <cactuar/target.h>

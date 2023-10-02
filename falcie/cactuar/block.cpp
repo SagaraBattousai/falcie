@@ -7,8 +7,8 @@
 #include <numeric>
 #include <execution>
 
-#include <cactuar/cactuar-block.h>
-#include <cactuar/cactuar-target.h>
+#include <cactuar/block.h>
+#include <cactuar/target.h>
 
 
 //export
@@ -46,7 +46,7 @@ namespace cactuar
 		return Block(Blockheader::Genisis(version));
 	}
 
-	void Block::Mine(orphan::hash_output&& prev_hash)
+	void Block::Mine(thoth::hash_output&& prev_hash)
 	{
 		this->header->prev_hash = std::move(prev_hash);
 		this->header->timestamp = Blockheader::GenerateTimestamp();
@@ -54,7 +54,7 @@ namespace cactuar
 		//TODO: add error for invalid cactaur values
 		std::vector<std::byte> difficulty_array = this->header->target.Expand();
 
-		orphan::hash_output currHash = this->Hash();
+		thoth::hash_output currHash = this->Hash();
 
 		while (currHash > difficulty_array)
 		{

@@ -1,7 +1,7 @@
 
 #include <vector>
 
-#include <cactuar/cactuar-network_structure_update.h>
+#include <cactuar/network_structure_update.h>
 
 //export
 namespace cactuar

@@ -1,10 +1,11 @@
 
-#include <cactuar/cactuar-block.h>
-#include <cactuar/cactuar-blockchain.h>
-#include <cactuar/cactuar-blockheader.h>
-#include <cactuar/cactuar-contract_account.h>
-#include <cactuar/cactuar-transaction.h>
-#include <cactuar/cactuar-user_account.h>
+#include <cactuar/block.h>
+#include <cactuar/blockchain.h>
+#include <cactuar/blockheader.h>
+#include <cactuar/network_structure_update.h>
+#include <cactuar/contract_account.h>
+#include <cactuar/transaction.h>
+#include <cactuar/user_account.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -27,10 +28,10 @@ int main(void) {
   Block block = block_builder.Build();
 
   block.AddLocalUpdate(
-      std::vector<thoth::Matrix<float>>(1, thoth::Matrix<float>{{3, 3}, 5.0}),
+      std::vector<thoth::NdArray<float>>(1, thoth::NdArray<float>{{3, 3}, 5.0}),
       25);
   block.AddLocalUpdate(
-      std::vector<thoth::Matrix<float>>(1, thoth::Matrix<float>{{3, 3}, 7.0}),
+      std::vector<thoth::NdArray<float>>(1, thoth::NdArray<float>{{3, 3}, 7.0}),
       10);
 
   block.Mine(std::vector<std::byte>{std::byte{1}, std::byte{2}, std::byte{3}});

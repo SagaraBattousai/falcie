@@ -2,8 +2,8 @@
 #include <vector>
 #include <cstddef>
 
-#include <cactuar/cactuar-user_account.h>
-#include <cactuar/cactuar-transaction.h>
+#include <cactuar/user_account.h>
+#include <cactuar/transaction.h>
 
 namespace cactuar
 {

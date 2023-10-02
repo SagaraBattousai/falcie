@@ -36,7 +36,7 @@ set(cactuar_module
 
 add_library(cactuar SHARED ${cactuar_module} ${cpp_sources})
 
-target_link_libraries(cactuar PUBLIC orphan thoth)
+target_link_libraries(cactuar PUBLIC crypto ndarray)
 
 target_sources(cactuar PUBLIC
   FILE_SET headers

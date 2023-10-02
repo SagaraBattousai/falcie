@@ -1,0 +1,3 @@
+[submodule "falcie/thoth"]
+	path = falcie/thoth
+	url = git@github.com:sagaraBattousai/thoth.git

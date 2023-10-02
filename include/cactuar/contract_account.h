@@ -6,11 +6,10 @@
 #include <memory>
 #include <functional>
 
-#include <cactuar/cactuar-account.h>
-//#include <pulse/dahaka/dahaka-blockchain.h>
+#include <cactuar/account.h>
 
-#include <cactuar/cactuar-block.h>
-#include <cactuar/cactuar-transaction.h>
+#include <cactuar/block.h>
+#include <cactuar/transaction.h>
 
 namespace cactuar
 {

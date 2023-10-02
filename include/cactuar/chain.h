@@ -243,6 +243,8 @@ Chain<T, UnrolledElems>::ChainIterator::operator++() {
         nextAddr = this->lastVisitedNode;
         this->dir = CurrentNodeDirection::Forward;  //< Change Node Direction
         break;
+      default: //Studid as can never happen but msvc is giving me C4701
+        nextAddr = 0;
     }
     this->lastVisitedNode = reinterpret_cast<std::uintptr_t>(this->node);
     this->node = reinterpret_cast<Node*>(nextAddr);

@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-#include <cactuar/cactuar-block.h>
+#include <cactuar/block.h>
 
 namespace cactuar
 {

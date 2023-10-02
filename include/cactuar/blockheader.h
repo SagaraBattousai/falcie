@@ -12,8 +12,8 @@
 #include <utility>
 #include <ostream>
 
-#include <cactuar/cactuar-endianness.h>
-#include <cactuar/cactuar-target.h>
+#include <cactuar/endianness.h>
+#include <cactuar/target.h>
 
 namespace cactuar
 {

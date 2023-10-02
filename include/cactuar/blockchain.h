@@ -9,9 +9,8 @@
 #include <concepts>
 #include <utility>
 
-#include <dahaka/dahaka-chain.h>
-
-#include <cactuar/cactuar-block.h>
+#include <cactuar/chain.h>
+#include <cactuar/block.h>
 
 namespace cactuar
 {
@@ -21,7 +20,7 @@ namespace cactuar
 	public:
 		static constexpr int ChainUnrolledLength = 32; // 64
 
-		using chain_t = dahaka::Chain<Block, ChainUnrolledLength>;
+		using chain_t = Chain<Block, ChainUnrolledLength>;
 
 		Blockchain();
 

@@ -1,5 +1,5 @@
 
-#include <cactuar/cactuar-blockchain.h>
+#include <cactuar/blockchain.h>
 
 namespace cactuar
 {

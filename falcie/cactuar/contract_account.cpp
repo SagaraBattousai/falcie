@@ -1,7 +1,7 @@
 
 
-#include <cactuar/cactuar-contract_account.h>
-#include <cactuar/cactuar-transaction.h>
+#include <cactuar/contract_account.h>
+#include <cactuar/transaction.h>
 
 namespace cactuar
 {

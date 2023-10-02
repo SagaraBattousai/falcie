@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(falcie
-        VERSION 0.0.2
+        VERSION 0.0.3
         DESCRIPTION ""
         LANGUAGES C CXX)
 
@@ -15,37 +15,37 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   )
 
+# include(ExternalProject)
 include(SystemCheck)
 include(LibUtils)
-# include(ModuleUtils)
-include(PythonUtils)
+include(PythonUtils) # May move to etro
 
 set_system_check_vars()
 
 if (MSVC)
-  #Although no working currently for module based dll's it could still
-  #Work for the C wrapper, aka etro. TODO: Let's see!
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-  # warning level 4 and all warnings as errors
-  #Give Wall a try and see if the ones that are turned off are okay
-  add_compile_options(/W4) # /WX)
+  add_compile_options(/W4 /WX /permissive /wd4100)
 else()
   # lots of warnings and all warnings as errors
-  add_compile_options(-Wall -Wextra -pedantic -Wno-comment) # -Werror)
+  add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-comment -Wno-unknown-pragmas)
 endif()
 
-set(BUILD_DOCS ON CACHE BOOL "Whether or not to build documentation.")
-set(BUILD_TESTS ON CACHE BOOL "Whether or not to build tests.")
+set(FALCIE_BUILD_DOCS OFF CACHE BOOL "Whether or not to build documentation.")
+set(FALCIE_BUILD_TESTS OFF CACHE BOOL "Whether or not to build tests.")
 
-# set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/modules")
 set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(falcie)
 
-if(BUILD_DOCS)
+if(FALCIE_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
+if(FALCIE_BUILD_DOCS)
   add_subdirectory(docs)
   #Do I need to add pulse's dependancies as well or is that transitive!?
-  #TODO: # add_dependencies(Doxygen pulse) #lindzei #etro
+  # add_dependencies(Doxygen <Target_dependancies>)
 endif()
 
 

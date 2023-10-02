@@ -1,5 +1,5 @@
 
-#include <cactuar/cactuar-transaction.h>
+#include <cactuar/transaction.h>
 
 namespace cactuar
 {
