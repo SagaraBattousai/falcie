@@ -23,10 +23,8 @@ include(PythonUtils) # May move to etro
 set_system_check_vars()
 
 if (MSVC)
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-  add_compile_options(/W4 /WX /permissive /wd4100)
+  add_compile_options(/W4 /WX /permissive /wd4100 /wd4251)
 else()
-  # lots of warnings and all warnings as errors
   add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-comment -Wno-unknown-pragmas)
 endif()
 

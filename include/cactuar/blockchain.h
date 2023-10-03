@@ -9,13 +9,14 @@
 #include <concepts>
 #include <utility>
 
+#include <_falcie_config.h>
 #include <cactuar/chain.h>
 #include <cactuar/block.h>
 
 namespace cactuar
 {
 	
-	class Blockchain
+	class FALCIE_EXPORT Blockchain
 	{
 	public:
 		static constexpr int ChainUnrolledLength = 32; // 64
@@ -24,7 +25,7 @@ namespace cactuar
 
 		Blockchain();
 
-		void Add(Block&& elem);
+		void Add(Block&& block);
 
 		bool Validate();
 

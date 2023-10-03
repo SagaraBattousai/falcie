@@ -22,13 +22,14 @@ class Chain {
 
  private:
   struct Node {
-    std::uintptr_t link;
-    std::array<T, UnrolledElems> elements;
-    int elementCount;
-
     Node();
     explicit Node(std::uintptr_t link);
     Node(std::uintptr_t link, int elementCount);
+
+    //Order does matter and must be after the constructor!
+    std::uintptr_t link;
+    std::array<T, UnrolledElems> elements;
+    int elementCount;
   };
 
   Node* addNewNode();

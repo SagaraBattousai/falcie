@@ -51,7 +51,7 @@ namespace cactuar
 	#endif
 
 	/** Wrapper around std::uint32_t to act as a target for blockchain hash */
-	class Target
+	class FALCIE_EXPORT Target
 	{
 	public:
 

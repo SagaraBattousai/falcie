@@ -12,12 +12,14 @@
 #include <utility>
 #include <ostream>
 
+#include <_falcie_config.h>
+
 #include <cactuar/endianness.h>
 #include <cactuar/target.h>
 
 namespace cactuar
 {
-	class Blockheader;
+	class FALCIE_EXPORT Blockheader;
 
 	std::ostream& operator<<(std::ostream& os, const Blockheader& header);
 

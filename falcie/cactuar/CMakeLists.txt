@@ -36,6 +36,8 @@ set(cactuar_module
 
 add_library(cactuar SHARED ${cactuar_module} ${cpp_sources})
 
+target_compile_definitions(cactuar PRIVATE FALCIE_BUILD_DLL)
+
 target_link_libraries(cactuar PUBLIC crypto ndarray)
 
 target_sources(cactuar PUBLIC

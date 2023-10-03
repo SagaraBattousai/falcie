@@ -16,13 +16,13 @@ namespace cactuar
 {
 	//TODO: Hacky fix as array deletes its default constructor if I dont have a constructor!
 	//This is a bit of a problem as it leave member variables uninitalised
-	Block::Block()
-	{
+	//Block::Block()
+	//{
 
-	}
+	//}
 
 	//TODO: Decide, Probably could leave default constructors....
-	Block::Block(std::uint32_t version, cactuar::Target target)
+	Block::Block(std::uint32_t version, Target target)
 		: Block(Blockheader{
 			version,
 			-1,
