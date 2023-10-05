@@ -43,7 +43,7 @@ class FALCIE_EXPORT Block {
     return this->header.get()->prev_hash;
   };
 
-  virtual inline const bool CompareWithTarget(
+  virtual inline bool CompareWithTarget(
       const thoth::hash_output& hash) const {
     return hash < this->header.get()->target;
   }

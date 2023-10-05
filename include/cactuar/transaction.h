@@ -20,6 +20,8 @@ namespace cactuar
 		
 		Transaction(Transaction&&);
 
+		virtual ~Transaction() = default;
+
 		virtual Address GetSender() const;
 		virtual Address GetReceiver() const;
 		virtual std::int64_t GetValue() const;

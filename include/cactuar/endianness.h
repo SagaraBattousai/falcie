@@ -21,8 +21,8 @@ namespace cactuar
 	namespace
 	{
 		constexpr int endianTest = 0xABCDEF37;
-		constexpr int littleEndianValue = 0x37;
-		constexpr int bigEndianValue = 0xAB;
+		constexpr char littleEndianValue = (char)0x37;
+    constexpr char bigEndianValue = -43;  // 171//(char)0xAB;
 
 	}
 

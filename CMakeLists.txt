@@ -25,7 +25,7 @@ set_system_check_vars()
 if (MSVC)
   add_compile_options(/W4 /WX /permissive /wd4100 /wd4251)
 else()
-  add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-comment -Wno-unknown-pragmas)
+  add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter)
 endif()
 
 set(FALCIE_BUILD_DOCS OFF CACHE BOOL "Whether or not to build documentation.")
