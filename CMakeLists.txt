@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(falcie
-        VERSION 0.0.3
-        DESCRIPTION ""
-        LANGUAGES C CXX)
+  VERSION 0.0.3
+  DESCRIPTION ""
+  LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
@@ -28,8 +28,11 @@ else()
   add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter)
 endif()
 
-set(FALCIE_BUILD_DOCS OFF CACHE BOOL "Whether or not to build documentation.")
-set(FALCIE_BUILD_TESTS OFF CACHE BOOL "Whether or not to build tests.")
+option(FALCIE_BUILD_DOCS "Whether or not to build documentation.")
+option(FALCIE_BUILD_TESTS "Whether or not to build tests.")
+
+option(GENERATE_PYTHON_BINDINGS "Whether or not to add the python bindings target (falpy).")
+option(GENERATE_TENSORFLOWLITE_BINDINGS "Whether or not to add the tensorflow lite bindings target (valhalla).")
 
 set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
@@ -59,33 +62,33 @@ include(GNUInstallDirs)
 
 set(IN_BUILD_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
 
-set(INSTALL_IN_BUILD OFF CACHE BOOL 
+option(INSTALL_IN_BUILD
   "If set, the CMAKE_INSTALL_PREFIX will be set to the build directory\
   (unless CMAKE_INSTALL_PREFIX has been set by the user).\nIn this case\
   CMAKE_INSTALL_PREFIX = ${IN_BUILD_INSTALL_PREFIX}")
 
-if(INSTALL_IN_BUILD AND NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX 
-    "${IN_BUILD_INSTALL_PREFIX}"
-    CACHE PATH "..." FORCE)
-endif()
+  if(INSTALL_IN_BUILD AND NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX 
+      "${IN_BUILD_INSTALL_PREFIX}"
+      CACHE PATH "..." FORCE)
+  endif()
 
-#TODO: setup installing.....
+  #TODO: setup installing.....
 
-# install(TARGETS pulse
-#   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-#   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  # install(TARGETS pulse
+  #   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  #   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  #   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-# install(TARGETS cactuar
-#   FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  # install(TARGETS cactuar
+  #   FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-#if(BUILD_DOCS)
-#  #Use trailing slashes to avoid adding subdirectories
-#  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/sphinx/"
-#    DESTINATION ${CMAKE_INSTALL_DOCDIR})
+  #if(BUILD_DOCS)
+  #  #Use trailing slashes to avoid adding subdirectories
+  #  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/sphinx/"
+  #    DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
-#  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/man/"
-#    DESTINATION ${CMAKE_INSTALL_MANDIR})
-#endif()
+  #  install(DIRECTORY "${CMAKE_SOURCE_DIR}/docs/build/man/"
+  #    DESTINATION ${CMAKE_INSTALL_MANDIR})
+  #endif()
 

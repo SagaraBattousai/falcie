@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools", "cemake"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "falpy"
+version = "0.0.1"
+description = "Python binding for Falcie (A Federated Learning Framework)"
+# readme = "README.rst"
+requires-python = ">=3.11"
+# license = {file = "LICENSE"}
+authors = [
+    {name = "James Calo", email = "jamesafcalo@gmail.com"},
+]
+classifiers = [
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+  "numpy",
+  #Remember tensorflow is not required but falpy is compatible with it!
+]
+
+[tool.setuptools.packages.find]
+include = ["falpy"]
+
+# [tool.setuptools.package-data]
+# falpy = ["CMakeLists.txt"]
+
+[tool.setuptools.cmdclass]
+build_ext = "cemake.cemake_build_ext.CeMakeBuildExt"
+
+# editable_mode=true
+
+
+[tool.black]
+preview = true

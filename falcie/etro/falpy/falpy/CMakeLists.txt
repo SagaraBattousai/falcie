@@ -1,7 +1,7 @@
 find_package(Python3 COMPONENTS Development.Module NumPy) # Could add quiet
 
 if (Python3_FOUND)
-  set(FALPY_MODULE_ROOT "${ETRO_MODULE_ROOT}/python/falpy")
+  set(FALPY_MODULE_ROOT "${MODULE_ROOT}/etro/python/falpy")
   
   set(sources 
     "falpy.c" 
@@ -22,14 +22,13 @@ if (Python3_FOUND)
     )
   
   add_library(falpy SHARED ${sources})
-  set_target_properties(falpy PROPERTIES FOLDER ${ETRO_FOLDER_NAME})
   
   as_python_extension(falpy)
   
   target_sources(falpy PRIVATE
     FILE_SET headers
     TYPE HEADERS
-    BASE_DIRS "${ETRO_MODULE_ROOT}/python"
+    BASE_DIRS "${MODULE_ROOT}/etro/python"
     FILES ${falpy_module} 
     )
   
