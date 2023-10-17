@@ -3,26 +3,31 @@
 
 #include <_falcie_config.h>
 
-#include <functional>
 #include <memory>
 
 namespace valhalla {
 
+// Forward declare PImpl
+class ModelFunctionImpl;
+
 class FALCIE_EXPORT ModelFunction {
  public:
-  // Constructors and Destructors must be defined in cpp when ModelImpl is
-  // complete
-  FederatedModel(const char *filename);
-  // Can't use default int or pass to ^^ constructor as this one is slightly
-  // less efficient due to not initing interpreter in constructor init.
-  FederatedModel(const char *filename, int num_threads);
-  ~FederatedModel();
+  // Destructor must be defined in cpp when ModelImpl is complete
+  ~ModelFunction();
 
   // tflite::SignatureRunner *GetSignatureRunner();
+  ModelFunction(std::unique_ptr<ModelFunctionImpl>&& func);
 
  private:
-  class ModelFunctionImpl;
-  std::unique_ptr<ModelImpl> model_;
+   //Will this stop clients being able to have extra power
+   //since if Model was the friend they could.....?
+  //friend class ModelImpl;
+
+  // Constructors must be defined in cpp when ModelImpl is complete
+  //ModelFunction(std::unique_ptr<ModelFunctionImpl>&& func);
+
+
+  std::unique_ptr<ModelFunctionImpl> func_;
 };
 
 }  // namespace valhalla

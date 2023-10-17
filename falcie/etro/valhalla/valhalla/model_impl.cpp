@@ -1,35 +1,36 @@
 
 #include <valhalla/internal/model_impl.h>
+#include <valhalla/internal/model_function_impl.h>
 
 namespace valhalla {
 
 ModelImpl::ModelImpl(const char *filename)
     : model_(TfLiteModel_ptr(TfLiteModelCreateFromFile(filename),
-                             tfLiteModelDeleter )), //& TfLiteModelDelete)),
+                             &TfLiteModelDelete)),
       options_(TfLiteOptions_ptr(TfLiteInterpreterOptionsCreate(),
-          tfLiteOptionsDeleter )),//& TfLiteInterpreterOptionsDelete)),
+                                 &TfLiteInterpreterOptionsDelete)),
       interpreter_(TfLiteInterpreter_ptr(
           TfLiteInterpreterCreate(model_.get(), options_.get()),
-          tfLiteInterpreterDeleter )) {} //& TfLiteInterpreterDelete)) {}
+          &TfLiteInterpreterDelete)) {}
 
 ModelImpl::ModelImpl(const char *filename, int num_threads)
     : model_(TfLiteModel_ptr(TfLiteModelCreateFromFile(filename),
-                             tfLiteModelDeleter )),//& TfLiteModelDelete)),
+                             &TfLiteModelDelete)),
       options_(TfLiteOptions_ptr(TfLiteInterpreterOptionsCreate(),
-          tfLiteOptionsDeleter )),//& TfLiteInterpreterOptionsDelete)),
-      interpreter_(nullptr,
-                   tfLiteInterpreterDeleter) {// & TfLiteInterpreterDelete) {
-
+                                 &TfLiteInterpreterOptionsDelete)),
+      interpreter_(nullptr, &TfLiteInterpreterDelete) {
   TfLiteInterpreterOptionsSetNumThreads(options_.get(), num_threads);
   interpreter_.reset(TfLiteInterpreterCreate(model_.get(), options_.get()));
 }
 
-/*
-std::unique_ptr<TfLiteSignatureRunner, decltype(tfLiteSignatureRunnerDelete)>
-FederatedModel::ModelImpl::GetSignatureRunner(const char *signature_key) {
-  return std::unique_ptr<TfLiteSignatureRunner,
-                         decltype(tfLiteSignatureRunnerDelete)>(TfLiteInterpreterGetSignatureRunner(this->interpreter_.get(),
-signature_key);
+
+std::unique_ptr<ModelFunction> ModelImpl::GetSignatureRunner(
+  const char* signature_name)
+{
+  return std::make_unique<ModelFunction>(std::make_unique<ModelFunctionImpl>(ModelFunctionImpl(*this, signature_name))
+  );
 }
-*/
+
+
+
 }  // namespace valhalla

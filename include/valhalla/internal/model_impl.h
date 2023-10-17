@@ -9,27 +9,9 @@
 
 #include <memory>
 
+#include <valhalla/model_function.h>
+
 namespace valhalla {
-
-
-namespace {
-auto tfLiteModelDeleter = [](TfLiteModel *model) { TfLiteModelDelete(model); };
-
-auto tfLiteOptionsDeleter = [](TfLiteInterpreterOptions *options) {
-TfLiteInterpreterOptionsDelete(options);
-};
-
-auto tfLiteInterpreterDeleter = [](TfLiteInterpreter *interpreter) {
-TfLiteInterpreterDelete(interpreter);
-};
-
-// TODO: Do I actually need to wrap with a lambda?
-auto tfLiteSignatureRunnerDeleter = [](TfLiteSignatureRunner *runner) {
-  TfLiteSignatureRunnerDelete(runner);
-};
-
-}  // namespace
-
 
 class FALCIE_LOCAL ModelImpl {
  public:
@@ -39,25 +21,25 @@ class FALCIE_LOCAL ModelImpl {
   // less efficient due to not initing interpreter in constructor init.
   ModelImpl(const char *filename, int num_threads);
 
-  // std::unique_ptr<TfLiteSignatureRunner,
-  // decltype(tfLiteSignatureRunnerDelete)> GetSignatureRunner(const char
-  // *signature_key);
+  // TODO: Check if Signatures can be re run and if so keep a shared ptr list of
+  // them!
+  //  Or possibly unique if they are only called from here!
+  //
+  //  std::unique_ptr<TfLiteSignatureRunner,
+  //  decltype(tfLiteSignatureRunnerDelete)> GetSignatureRunner(const char
+  //  *signature_key);
+  std::unique_ptr<ModelFunction> GetSignatureRunner(const char *signature_name);
 
- private:
-  // decltype(tfLiteModelDeleter)>;
+  // private:
   using TfLiteModel_ptr =
-      std::unique_ptr<TfLiteModel, decltype(tfLiteModelDeleter)>;
-  //decltype(&TfLiteModelDelete) > ;
+      std::unique_ptr<TfLiteModel, decltype(&TfLiteModelDelete)>;
 
   using TfLiteOptions_ptr =
-      std::unique_ptr<TfLiteInterpreterOptions, decltype(tfLiteOptionsDeleter)>;
-  //decltype(&TfLiteInterpreterOptionsDelete) > ;
-  // decltype(tfLiteOptionsDeleter)>;
+      std::unique_ptr<TfLiteInterpreterOptions,
+                      decltype(&TfLiteInterpreterOptionsDelete)>;
 
-  // decltype(tfLiteInterpreterDeleter)>;
   using TfLiteInterpreter_ptr =
-      std::unique_ptr<TfLiteInterpreter, decltype(tfLiteInterpreterDeleter)>;
-  //decltype(&TfLiteInterpreterDelete) > ;
+      std::unique_ptr<TfLiteInterpreter, decltype(&TfLiteInterpreterDelete)>;
 
   TfLiteModel_ptr model_;
   TfLiteOptions_ptr options_;

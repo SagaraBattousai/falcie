@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include <valhalla/model_function.h>
+
 namespace valhalla {
 
 // Forward declare PImpl
@@ -22,6 +24,9 @@ class FALCIE_EXPORT Model {
   virtual ~Model();
 
   //Eventually we will have other virtual functions :)
+
+  //for now use unique_tpr but probably change to shared
+  virtual std::unique_ptr<ModelFunction> GetSignatureRunner(const char *signature_name);
 
  private:
   std::unique_ptr<ModelImpl> model_;

@@ -15,4 +15,9 @@ Model::Model(const char *filename, int num_threads)
 
 Model::~Model() = default;
 
+std::unique_ptr<ModelFunction> Model::GetSignatureRunner(
+    const char *signature_name) {
+  return model_->GetSignatureRunner(signature_name);
+}
+
 }  // namespace valhalla
