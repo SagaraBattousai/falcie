@@ -1,6 +1,5 @@
 
 #include <valhalla/internal/model_impl.h>
-#include <valhalla/internal/model_function_impl.h>
 
 namespace valhalla {
 
@@ -23,14 +22,12 @@ ModelImpl::ModelImpl(const char *filename, int num_threads)
   interpreter_.reset(TfLiteInterpreterCreate(model_.get(), options_.get()));
 }
 
+ModelImpl::~ModelImpl() = default;
 
-std::unique_ptr<ModelFunction> ModelImpl::GetSignatureRunner(
-  const char* signature_name)
-{
-  return std::make_unique<ModelFunction>(std::make_unique<ModelFunctionImpl>(ModelFunctionImpl(*this, signature_name))
-  );
+std::unique_ptr<ModelFunctionImpl> ModelImpl::GetSignatureRunner(
+    const char *signature_name) {
+  return std::make_unique<ModelFunctionImpl>(
+      ModelFunctionImpl(interpreter_.get(), signature_name));
 }
-
-
 
 }  // namespace valhalla

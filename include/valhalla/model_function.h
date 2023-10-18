@@ -12,21 +12,21 @@ class ModelFunctionImpl;
 
 class FALCIE_EXPORT ModelFunction {
  public:
-  // Destructor must be defined in cpp when ModelImpl is complete
-  ~ModelFunction();
-
-  // tflite::SignatureRunner *GetSignatureRunner();
+  // From https://abseil.io/tips/134 : In many cases, marking a constructor
+  // private is over-engineering. In those cases, the best solution is to mark
+  // your constructors public and document their proper use.
+  //
+  //Constructor should only really be called from Model
+  // aided by the fact ModelFunctionImpl is not exported
   ModelFunction(std::unique_ptr<ModelFunctionImpl>&& func);
 
+  ~ModelFunction();
+
+  int GetInputCount() const;
+
+  const char* GetInputName(std::int32_t input_index) const;
+
  private:
-   //Will this stop clients being able to have extra power
-   //since if Model was the friend they could.....?
-  //friend class ModelImpl;
-
-  // Constructors must be defined in cpp when ModelImpl is complete
-  //ModelFunction(std::unique_ptr<ModelFunctionImpl>&& func);
-
-
   std::unique_ptr<ModelFunctionImpl> func_;
 };
 

@@ -9,28 +9,26 @@
 
 #include <memory>
 
-#include <valhalla/model_function.h>
+#include <valhalla/internal/model_function_impl.h>
+
 
 namespace valhalla {
 
 class FALCIE_LOCAL ModelImpl {
  public:
-  ModelImpl(const char *filename);
+  // ctors have same issues as model
 
-  // Can't use default int or pass to ^^ constructor as this one is slightly
-  // less efficient due to not initing interpreter in constructor init.
+  ModelImpl(const char *filename);
   ModelImpl(const char *filename, int num_threads);
 
-  // TODO: Check if Signatures can be re run and if so keep a shared ptr list of
-  // them!
-  //  Or possibly unique if they are only called from here!
-  //
-  //  std::unique_ptr<TfLiteSignatureRunner,
-  //  decltype(tfLiteSignatureRunnerDelete)> GetSignatureRunner(const char
-  //  *signature_key);
-  std::unique_ptr<ModelFunction> GetSignatureRunner(const char *signature_name);
+  ~ModelImpl();
 
-  // private:
+  // TODO: Check if Signatures can be re run and if so keep a shared ptr list of
+  // them! Or possibly unique if they are only called from here!
+  std::unique_ptr<ModelFunctionImpl> GetSignatureRunner(
+      const char *signature_name);
+
+ private:
   using TfLiteModel_ptr =
       std::unique_ptr<TfLiteModel, decltype(&TfLiteModelDelete)>;
 

@@ -4,11 +4,10 @@
 
 namespace valhalla {
 
-ModelFunctionImpl::ModelFunctionImpl(const ModelImpl& model,
+ModelFunctionImpl::ModelFunctionImpl(TfLiteInterpreter* interpreter,
                                      const char* signature_name)
     : func_(TfLiteSignatureRunner_ptr(
-          TfLiteInterpreterGetSignatureRunner(model.interpreter_.get(),
-                                              signature_name),
+          TfLiteInterpreterGetSignatureRunner(interpreter, signature_name),
           &TfLiteSignatureRunnerDelete)) {}
 
 }  // namespace valhalla

@@ -9,6 +9,8 @@ int main() {
 
   auto sig = m.GetSignatureRunner("patch");
 
+  std::cout << "Input count: " << sig->GetInputCount()
+            << ": name: " << sig->GetInputName(0) << std::endl;
 
   return 0;
 }

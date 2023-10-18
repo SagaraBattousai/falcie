@@ -1,5 +1,6 @@
 
 #include <valhalla/model.h>
+#include <valhalla/model_function.h>
 
 // Must be included before constructor and destructor so that ModelImpl is a
 // defined type
@@ -15,9 +16,8 @@ Model::Model(const char *filename, int num_threads)
 
 Model::~Model() = default;
 
-std::unique_ptr<ModelFunction> Model::GetSignatureRunner(
-    const char *signature_name) {
-  return model_->GetSignatureRunner(signature_name);
+std::unique_ptr<ModelFunction> Model::GetSignatureRunner(const char *signature_name) {
+  return std::make_unique<ModelFunction>(model_->GetSignatureRunner(signature_name));
 }
 
 }  // namespace valhalla
