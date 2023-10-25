@@ -1,6 +1,6 @@
 #ifndef __VALHALLA_FEDERATED_MODEL_H__
 #define __VALHALLA_FEDERATED_MODEL_H__
-
+/*
 #include <_falcie_config.h>
 
 #include <memory>
@@ -24,5 +24,5 @@ class FederatedModel : public Model {
 };
 
 }  // namespace valhalla
-
+*/
 #endif

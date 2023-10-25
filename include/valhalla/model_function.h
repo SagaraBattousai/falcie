@@ -5,6 +5,9 @@
 
 #include <memory>
 
+#include <valhalla/status_flag.h>
+#include <valhalla/tensor.h>
+
 namespace valhalla {
 
 // Forward declare PImpl
@@ -24,7 +27,25 @@ class FALCIE_EXPORT ModelFunction {
 
   int GetInputCount() const;
 
-  const char* GetInputName(std::int32_t input_index) const;
+  // This const char may have been malloc'd: investigate
+  const char* GetInputName(int input_index) const;
+
+  StatusFlag ResizeInputTensor(const char* input_name, const int* input_dims,
+                        int input_dims_size);
+
+  StatusFlag AllocateTensors();
+
+  std::unique_ptr<Tensor> GetInputTensor(const char* input_name);
+
+  StatusFlag operator()();
+
+  int GetOutputCount();
+
+  const char* GetOutputName(int output_index);
+
+  //TODO: Const up??
+  //std::unique_ptr<const Tensor> GetOutputTensor(const char* output_name);
+  std::unique_ptr<Tensor> GetOutputTensor(const char* output_name);
 
  private:
   std::unique_ptr<ModelFunctionImpl> func_;

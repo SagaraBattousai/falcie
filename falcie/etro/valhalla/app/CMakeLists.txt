@@ -2,5 +2,6 @@
 add_executable(app_cpp_valhalla main.cpp)
 
 target_link_libraries(app_cpp_valhalla valhalla)
+target_compile_options(app_cpp_valhalla PRIVATE /wd4189 /wd4996)
 
-auto_copy_dlls_for_target(app_cpp_valhalla)
+copy_required_dlls(app_cpp_valhalla)

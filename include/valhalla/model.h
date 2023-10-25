@@ -11,20 +11,32 @@ namespace valhalla {
 // Forward declare PImpl
 class ModelImpl;
 
-class ModelFunction;
-
+// Actually, for now (since this class is just a wrapper) we shall remove
+// inheritance stuff
 class FALCIE_EXPORT Model {
  public:
   Model(const char *filename);
+  //Model(const char *filename);
   // Can't use default int or pass to ^^ constructor as this one (VV) is
   // slightly less efficient due to not initing interpreter in constructor init.
   Model(const char *filename, int num_threads);
+  Model(const void *model_data, int model_size, int num_threads);
 
-  virtual ~Model();
+  // virtual ~Model();
+  ~Model();
 
   // for now use unique_tpr but probably change to shared
-  virtual std::unique_ptr<ModelFunction> GetSignatureRunner(
-      const char *signature_name);
+  std::unique_ptr<ModelFunction> GetSignatureRunner(const char *signature_name);
+
+  /// Returns the number of signatures defined in the model.
+  int GetSignatureCount();
+
+  /// Returns the key of the Nth signature in the model, where N is specified as
+  /// `signature_index`.
+  ///
+  /// NOTE: The lifetime of the returned key is the same as (and depends on) the
+  /// lifetime of `interpreter`.
+  const char *GetSignatureKey(int signature_index);
 
  private:
   std::unique_ptr<ModelImpl> model_;
