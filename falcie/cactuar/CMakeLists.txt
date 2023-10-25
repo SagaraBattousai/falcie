@@ -48,3 +48,5 @@ target_sources(cactuar PUBLIC
   "${MODULE_ROOT}/_falcie_config.h"
   )
 
+target_compile_options(cactuar PRIVATE ${FALCIE_COMPILE_OPTIONS})
+

@@ -46,7 +46,7 @@ if (Python3_FOUND)
     target_compile_definitions(falpy PRIVATE 
       NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
   
-    auto_copy_dlls_for_target(falpy)
+    copy_required_dlls(falpy)
     # copy_openssl_runtime_lib_to_target(falpy crypto)
   
     # symlink_library_to_target(falpy pulse)
@@ -55,6 +55,8 @@ if (Python3_FOUND)
   endif()
 
 endif()
+
+target_compile_options(falpy PRIVATE ${FALCIE_COMPILE_OPTIONS})
 
 
 

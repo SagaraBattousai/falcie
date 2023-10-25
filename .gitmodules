@@ -1,3 +1,6 @@
 [submodule "falcie/thoth"]
 	path = falcie/thoth
 	url = git@github.com:sagaraBattousai/thoth.git
+[submodule "falcie/etro/valhalla/tensorflow"]
+	path = falcie/etro/valhalla/tensorflow_src
+	url = git@github.com:SagaraBattousai/tensorflow.git

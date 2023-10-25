@@ -35,6 +35,9 @@ target_link_libraries(etro PUBLIC cactuar)
 target_link_libraries(etro_c PUBLIC etro)
 target_link_libraries(etro_cpp PUBLIC etro)
 
+
+target_compile_options(etro PRIVATE ${FALCIE_COMPILE_OPTIONS})
+
 if(WIN32)
   copy_required_dlls(etro_c)
   copy_required_dlls(etro_cpp)
