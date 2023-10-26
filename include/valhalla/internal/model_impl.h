@@ -52,12 +52,12 @@ class FALCIE_LOCAL ModelImpl {
   using TfLiteInterpreter_ptr =
       std::unique_ptr<TfLiteInterpreter, decltype(&TfLiteInterpreterDelete)>;
 
-  /*using TfLiteDelegatePtr =
-      std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate *)>;*/
+  using TfLiteDelegatePtr =
+      std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate *)>;
 
   TfLiteModel_ptr model_;
   TfLiteOptions_ptr options_;
-  //TfLiteDelegatePtr flex_;
+  TfLiteDelegatePtr flex_;
   TfLiteInterpreter_ptr interpreter_;
 };
 

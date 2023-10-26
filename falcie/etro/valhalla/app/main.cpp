@@ -14,7 +14,7 @@
 int main() {
 
   //valhalla::Model m("data/trained_models/1epochs/model.tflite", 4);
-  auto file = fopen("data/trained_models/1epochs/model.tflite", "rb");
+  auto file = fopen("model.tflite", "rb");
   fseek(file, 0, SEEK_END);
   int flen = (int)ftell(file);
   std::cout << "File length: " << flen << std::endl;
@@ -24,8 +24,11 @@ int main() {
   valhalla::Model m(buffer, flen, 4);
 
   
-  std::unique_ptr<valhalla::ModelFunction> func = m.GetSignatureRunner("patch");
+  std::unique_ptr<valhalla::ModelFunction> func = m.GetSignatureRunner("preprocess_train");
   //("patch");
+  std::cout << "dims: " << func->GetInputCount() << std::endl;
+  return 777;
+
   int x[4] = {1, 48, 48, 3};
   func->ResizeInputTensor("images", &(x[0]), 4);
 

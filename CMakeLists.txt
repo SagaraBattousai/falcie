@@ -23,9 +23,9 @@ include(PythonUtils) # May move to etro
 set_system_check_vars()
 
 if (MSVC)
-  add_compile_options(/W4 /WX /permissive /wd4100 /wd4251)
+  set(FALCIE_COMPILE_OPTIONS "/W4 /permissive") #/WX /wd4100 /wd4251)
 else()
-  add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter)
+  set(FALCIE_COMPILE_OPTIONS "-Wall -Wextra -pedantic") # -Werror -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter)
 endif()
 
 option(FALCIE_BUILD_DOCS "Whether or not to build documentation.")

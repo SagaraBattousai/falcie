@@ -49,11 +49,9 @@ target_sources(valhalla PRIVATE
   FILES ${private_valhalla_module}
   )
 
-# target_link_libraries(valhalla PRIVATE tensorflowlite_c)
-target_link_libraries(valhalla PUBLIC tensorflowlite_c tensorflowlite_flex)
+target_link_libraries(valhalla PRIVATE tensorflowlite_c)
+# target_link_libraries(valhalla PUBLIC tensorflowlite_c tensorflowlite_flex)
 target_link_libraries(valhalla PUBLIC utility)
-target_compile_definitions(valhalla PRIVATE FALCIE_BUILD_DLL)
 
-if (MSVC)
-  target_compile_options(valhalla PRIVATE /wd5046)
-endif()
+target_compile_definitions(valhalla PRIVATE FALCIE_BUILD_DLL)
+target_compile_options(valhalla PRIVATE ${FALCIE_COMPILE_OPTIONS})

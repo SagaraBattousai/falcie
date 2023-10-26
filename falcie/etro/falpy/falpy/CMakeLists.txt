@@ -36,6 +36,8 @@ if (Python3_FOUND)
     ${Python3_INCLUDE_DIRS}
     ${Python3_NumPy_INCLUDE_DIRS}
     )
+
+  target_compile_options(falpy PRIVATE ${FALCIE_COMPILE_OPTIONS})
   
   target_link_libraries(falpy PUBLIC Python3::Module etro)
   target_link_libraries(falpy PRIVATE Python3::NumPy)
@@ -46,7 +48,7 @@ if (Python3_FOUND)
     target_compile_definitions(falpy PRIVATE 
       NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
   
-    auto_copy_dlls_for_target(falpy)
+    copy_required_dlls(falpy)
     # copy_openssl_runtime_lib_to_target(falpy crypto)
   
     # symlink_library_to_target(falpy pulse)

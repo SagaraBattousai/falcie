@@ -30,10 +30,15 @@ target_sources(etro PUBLIC
   FILES ${etro_module}
   )
 
+target_compile_options(etro PRIVATE ${FALCIE_COMPILE_OPTIONS})
+
 target_link_libraries(etro PUBLIC cactuar)
 
 target_link_libraries(etro_c PUBLIC etro)
+target_compile_options(etro_c PRIVATE ${FALCIE_COMPILE_OPTIONS})
+
 target_link_libraries(etro_cpp PUBLIC etro)
+target_compile_options(etro_cpp PRIVATE ${FALCIE_COMPILE_OPTIONS})
 
 if(WIN32)
   copy_required_dlls(etro_c)
