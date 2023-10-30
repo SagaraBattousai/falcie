@@ -35,7 +35,6 @@ option(FALCIE_BUILD_DOCS "Whether or not to build documentation.")
 option(FALCIE_BUILD_TESTS "Whether or not to build tests.")
 
 option(GENERATE_PYTHON_BINDINGS "Whether or not to add the python bindings target (falpy).")
-option(GENERATE_TENSORFLOWLITE_BINDINGS "Whether or not to add the tensorflow lite bindings target (valhalla).")
 
 set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 

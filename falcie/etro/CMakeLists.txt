@@ -10,8 +10,3 @@ if (GENERATE_PYTHON_BINDINGS)
 set_target_properties(falpy PROPERTIES FOLDER "${ETRO_FOLDER_NAME}")
 endif()
 
-if (GENERATE_TENSORFLOWLITE_BINDINGS)
-  add_subdirectory(valhalla)
-set_target_properties(valhalla PROPERTIES FOLDER "${ETRO_FOLDER_NAME}")
-endif()
-
