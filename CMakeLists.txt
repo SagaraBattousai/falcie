@@ -22,10 +22,13 @@ include(PythonUtils) # May move to etro
 
 set_system_check_vars()
 
+#Note: When using target_compile options all options need to be ; separated with NO spaces!!
+#(although I imagine cmake list commands may have done this automatically we got a lot of errors
+#using no spaces and then some warning with ; and space)
 if (MSVC)
-  set(FALCIE_COMPILE_OPTIONS "/W4 /permissive") #/WX /wd4100 /wd4251)
+  set(FALCIE_COMPILE_OPTIONS "/W4;/WX;/permissive-") # /wd4100 /wd4251)
 else()
-  set(FALCIE_COMPILE_OPTIONS "-Wall -Wextra -pedantic") # -Werror -Wno-comment -Wno-unknown-pragmas -Wno-unused-parameter)
+  set(FALCIE_COMPILE_OPTIONS "-Wall;-Wextra;-pedantic;-Werror;-Wno-comment;-Wno-unknown-pragmas") # -Wno-unused-parameter)
 endif()
 
 option(FALCIE_BUILD_DOCS "Whether or not to build documentation.")

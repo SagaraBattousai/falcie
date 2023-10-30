@@ -17,6 +17,7 @@ set(c_sources "")
 
 
 set(valhalla_module
+  "${VALHALLA_MODULE_ROOT}/abstract_model.h"
   "${VALHALLA_MODULE_ROOT}/federated_model.h"
   "${VALHALLA_MODULE_ROOT}/model.h"
   "${VALHALLA_MODULE_ROOT}/model_function.h"
@@ -31,7 +32,10 @@ set(private_valhalla_module
   "${VALHALLA_MODULE_ROOT}/internal/tensor_impl.h"
   )
 
-add_library(valhalla SHARED ${cpp_sources} ${c_sources})
+#Temparary for no to switch to static lib but since we are using a tonne of 
+#stl stuff may be smart to make the change permenant?
+# add_library(valhalla SHARED ${cpp_sources} ${c_sources})
+add_library(valhalla STATIC ${cpp_sources} ${c_sources})
 
 target_sources(valhalla PUBLIC
   FILE_SET HEADERS
@@ -54,4 +58,4 @@ target_link_libraries(valhalla PRIVATE tensorflowlite_c)
 target_link_libraries(valhalla PUBLIC utility)
 
 target_compile_definitions(valhalla PRIVATE FALCIE_BUILD_DLL)
-target_compile_options(valhalla PRIVATE ${FALCIE_COMPILE_OPTIONS})
+target_compile_options(valhalla PRIVATE "${FALCIE_COMPILE_OPTIONS}")

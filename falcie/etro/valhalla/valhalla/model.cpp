@@ -27,7 +27,7 @@ const char* Model::GetSignatureKey(int signature_index) {
 }
 
 std::unique_ptr<ModelFunction> Model::GetSignatureRunner(const char *signature_name) {
-  return std::make_unique<ModelFunction>(model_->GetSignatureRunner(signature_name));
+  return make_unique<ModelFunction>(model_->GetSignatureRunner(signature_name));
 }
 
 

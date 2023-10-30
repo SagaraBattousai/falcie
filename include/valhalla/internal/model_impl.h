@@ -21,6 +21,7 @@ class FALCIE_LOCAL ModelImpl {
 
   ModelImpl(const char *filename);
   ModelImpl(const char *filename, int num_threads);
+  ModelImpl(const void *model_data, int model_size);
   ModelImpl(const void *model_data, int model_size, int num_threads);
 
   ~ModelImpl();
@@ -38,8 +39,7 @@ class FALCIE_LOCAL ModelImpl {
 
   // TODO: Check if Signatures can be re run and if so keep a shared ptr list of
   // them! Or possibly unique if they are only called from here!
-  std::unique_ptr<ModelFunctionImpl> GetSignatureRunner(
-      const char *signature_name);
+  std::unique_ptr<ModelFunctionImpl> GetSignatureRunner(const char *signature_name);
 
  private:
   using TfLiteModel_ptr =
@@ -52,12 +52,8 @@ class FALCIE_LOCAL ModelImpl {
   using TfLiteInterpreter_ptr =
       std::unique_ptr<TfLiteInterpreter, decltype(&TfLiteInterpreterDelete)>;
 
-  using TfLiteDelegatePtr =
-      std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate *)>;
-
   TfLiteModel_ptr model_;
   TfLiteOptions_ptr options_;
-  TfLiteDelegatePtr flex_;
   TfLiteInterpreter_ptr interpreter_;
 };
 

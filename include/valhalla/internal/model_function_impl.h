@@ -6,16 +6,16 @@
 
 #include <_falcie_config.h>
 #include <tensorflow/lite/c/c_api.h>
-#include <valhalla/status_flag.h>
 #include <valhalla/internal/tensor_impl.h>
+#include <valhalla/status_flag.h>
 
 #include <cstdint>
 #include <memory>
 
 namespace valhalla {
-auto ValhallaTfLiteSignatureRunnerDeleter = [](TfLiteSignatureRunner* sr) {
-  TfLiteSignatureRunnerDelete(sr);
-};
+
+constexpr auto ValhallaTfLiteSignatureRunnerDeleter =
+    [](TfLiteSignatureRunner* sr) { TfLiteSignatureRunnerDelete(sr); };
 
 class FALCIE_LOCAL ModelFunctionImpl {
  public:
@@ -26,7 +26,6 @@ class FALCIE_LOCAL ModelFunctionImpl {
   // Constructor should only really be called from ModelImpl
   // aided by the fact neither class is exported
   ModelFunctionImpl(TfLiteInterpreter* interpreter, const char* signature_name);
-
 
   int GetInputCount() const {
     return (int)TfLiteSignatureRunnerGetInputCount(func_.get());
@@ -59,7 +58,7 @@ class FALCIE_LOCAL ModelFunctionImpl {
   /// returns.
 
   StatusFlag ResizeInputTensor(const char* input_name, const int* input_dims,
-                        int input_dims_size) {
+                               int input_dims_size) {
     return FromTfLiteStatus(TfLiteSignatureRunnerResizeInputTensor(
         func_.get(), input_name, input_dims, (std::int32_t)input_dims_size));
   }
@@ -78,11 +77,11 @@ class FALCIE_LOCAL ModelFunctionImpl {
   ///
   /// NOTE: The lifetime of the returned tensor is the same as (and depends on)
   /// the lifetime of `signature_runner`.
-  //std::unique_ptr<TensorImpl> GetInputTensor(const char* input_name) {
-  //  return std::make_unique<TensorImpl>(  // TensorImpl::TfLiteTensor_ptr(
-  //      TfLiteSignatureRunnerGetInputTensor(func_.get(), input_name));  //,
-  //  //));  // ValhallaTfLiteTensorDeleter));
-  //}
+  // std::unique_ptr<TensorImpl> GetInputTensor(const char* input_name) {
+  //   return std::make_unique<TensorImpl>(  // TensorImpl::TfLiteTensor_ptr(
+  //       TfLiteSignatureRunnerGetInputTensor(func_.get(), input_name));  //,
+  //   //));  // ValhallaTfLiteTensorDeleter));
+  // }
 
   std::unique_ptr<TensorImpl> GetInputTensor(const char* input_name) {
     return std::make_unique<TensorImpl>(
@@ -96,7 +95,9 @@ class FALCIE_LOCAL ModelFunctionImpl {
   /// the input tensors. After successfully calling this function, the values
   /// for the output tensors will be set.
 
-  StatusFlag operator()() { return FromTfLiteStatus(TfLiteSignatureRunnerInvoke(func_.get())); }
+  StatusFlag operator()() {
+    return FromTfLiteStatus(TfLiteSignatureRunnerInvoke(func_.get()));
+  }
 
   /// Returns the number of output tensors associated with the signature.
   int GetOutputCount() {

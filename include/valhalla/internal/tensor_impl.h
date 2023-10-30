@@ -29,7 +29,7 @@ namespace valhalla {
 // Debug the heck outta this if theres a problem else just get on with your PhD
 // you have 7 months left!!!
 
-auto ValhallaTfLiteTensorDeleter = [](TfLiteTensor* tensor) {
+constexpr auto ValhallaTfLiteTensorDeleter = [](TfLiteTensor* tensor) {
 #ifndef TF_LITE_STATIC_MEMORY
   TfLiteTensorFree(tensor);
 #else

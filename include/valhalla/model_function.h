@@ -13,7 +13,7 @@ namespace valhalla {
 // Forward declare PImpl
 class ModelFunctionImpl;
 
-class FALCIE_EXPORT ModelFunction {
+class ModelFunction {
  public:
   // From https://abseil.io/tips/134 : In many cases, marking a constructor
   // private is over-engineering. In those cases, the best solution is to mark
@@ -30,7 +30,8 @@ class FALCIE_EXPORT ModelFunction {
   // This const char may have been malloc'd: investigate
   const char* GetInputName(int input_index) const;
 
-  StatusFlag ResizeInputTensor(const char* input_name, const int* input_dims,
+  StatusFlag ResizeInputTensor(const char* input_name,
+                                            const int* input_dims,
                         int input_dims_size);
 
   StatusFlag AllocateTensors();

@@ -12,7 +12,7 @@ namespace valhalla {
 // Forward declare PImpl
 class TensorImpl;
 
-class FALCIE_EXPORT Tensor {
+class Tensor {
  public:
   // From https://abseil.io/tips/134 : In many cases, marking a constructor
   // private is over-engineering. In those cases, the best solution is to mark
@@ -62,7 +62,8 @@ class FALCIE_EXPORT Tensor {
 
   /// Copies from the provided input buffer into the tensor's buffer.
   /// REQUIRES: input_data_size == TfLiteTensorByteSize(tensor)
-  StatusFlag CopyFromBuffer(const void* input_data, int input_data_size);
+  StatusFlag CopyFromBuffer(const void* input_data,
+                                         int input_data_size);
 
   /// Copies to the provided output buffer from the tensor's buffer.
   /// REQUIRES: output_data_size == TfLiteTensorByteSize(tensor)
