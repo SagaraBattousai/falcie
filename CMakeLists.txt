@@ -18,7 +18,7 @@ set(CMAKE_MODULE_PATH
 # include(ExternalProject)
 include(SystemCheck)
 include(LibUtils)
-include(PythonUtils) # May move to etro
+# include(PythonUtils) # May move to etro
 
 set_system_check_vars()
 
@@ -34,7 +34,7 @@ endif()
 option(FALCIE_BUILD_DOCS "Whether or not to build documentation.")
 option(FALCIE_BUILD_TESTS "Whether or not to build tests.")
 
-option(GENERATE_PYTHON_BINDINGS "Whether or not to add the python bindings target (falpy).")
+# option(GENERATE_PYTHON_BINDINGS "Whether or not to add the python bindings target (falpy).")
 
 set(MODULE_ROOT "${PROJECT_SOURCE_DIR}/include")
 
