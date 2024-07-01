@@ -3,7 +3,7 @@
 #define __CACTUAR_NETWORK_STRUCTURE_UPDATE__
 
 #include <cactuar/network_update.h>
-#include <thoth/ndarray.h>
+#include <thoth/ndarray/ndarray.h>
 
 #include <vector>
 

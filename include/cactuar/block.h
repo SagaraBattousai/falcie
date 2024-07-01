@@ -12,7 +12,7 @@
 #include <cactuar/network_structure_update.h>
 #include <cactuar/target.h>
 #include <cactuar/transaction.h>
-#include <thoth/keccak.h>
+#include <thoth/crypto/keccak.h>
 
 #include <cstddef>
 #include <cstdint>

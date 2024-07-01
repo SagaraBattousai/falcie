@@ -3,14 +3,14 @@
 
 #ifdef __cplusplus
 #include <cstdint>
-#include <thoth/matrix.h>
+#include <thoth/ndarray/ndarray.h>
 #else
 #include <stdint.h>
 #endif
 
 //Typedefs for C vs CPP
 #ifdef __cplusplus
-typedef thoth::Matrix<float> matrix_t;
+typedef thoth::NdArray<float> matrix_t;
 #else
 typedef struct matrix matrix_t;
 #endif

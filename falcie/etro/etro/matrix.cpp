@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <anima/anima-matrix.h>
 #include <etro/matrix.h>
 
 //Cpp functions to call from C using typedef
@@ -18,7 +17,7 @@ matrix_t* new_matrix(float *data, int64_t nd, intptr_t const *dims)
 
 	anima::Dimensions dimensions{ {dims, dims + nd} };
 
-	return new anima::Matrix<float>({ data, (std::size_t) total_element_count }, dimensions);
+	return new matrix_t({ data, (std::size_t) total_element_count }, dimensions);
 }
 
 const char* matrix_as_string(matrix_t *matrix, size_t *str_size)

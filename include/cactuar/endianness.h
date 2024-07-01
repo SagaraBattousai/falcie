@@ -26,12 +26,12 @@ namespace cactuar
 
 	}
 
-	CONSTEXPR_FUNC inline bool SystemIsLittleEndian()
+	constexpr inline bool SystemIsLittleEndian()
 	{
 		return (*(const char*)&endianTest) == littleEndianValue;
 	}
 
-	CONSTEXPR_FUNC inline bool SystemIsBigEndian()
+	constexpr inline bool SystemIsBigEndian()
 	{
 		return (*(const char*)&endianTest) == bigEndianValue;
 	}
